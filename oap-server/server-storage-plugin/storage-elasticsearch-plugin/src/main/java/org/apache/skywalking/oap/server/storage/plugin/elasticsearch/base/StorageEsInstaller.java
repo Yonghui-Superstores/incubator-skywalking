@@ -48,7 +48,11 @@ public class StorageEsInstaller extends ModelInstaller {
     @Override protected boolean isExists(Client client, Model tableDefine) throws StorageException {
         ElasticSearchClient esClient = (ElasticSearchClient)client;
         try {
-            return esClient.isExistsIndex(tableDefine.getName());
+            if (tableDefine.isTimeSeries()) {
+                return esClient.isExistsTemplate(tableDefine.getName());
+            } else {
+                return esClient.isExistsIndex(tableDefine.getName());
+            }
         } catch (IOException e) {
             throw new StorageException(e.getMessage());
         }
@@ -62,11 +66,17 @@ public class StorageEsInstaller extends ModelInstaller {
         ElasticSearchClient esClient = (ElasticSearchClient)client;
 
         try {
-            if (!esClient.deleteIndex(tableDefine.getName())) {
-                throw new StorageException(tableDefine.getName() + " index delete failure.");
+            if (tableDefine.isTimeSeries()) {
+                if (!esClient.deleteTemplate(tableDefine.getName())) {
+                    throw new StorageException(tableDefine.getName() + " template delete failure.");
+                }
+            } else {
+                if (!esClient.deleteIndex(tableDefine.getName())) {
+                    throw new StorageException(tableDefine.getName() + " index delete failure.");
+                }
             }
         } catch (IOException e) {
-            throw new StorageException(tableDefine.getName() + " index delete failure.");
+            throw new StorageException(tableDefine.getName() + " index or template delete failure.");
         }
     }
 
@@ -78,8 +88,13 @@ public class StorageEsInstaller extends ModelInstaller {
         logger.info("index {}'s columnTypeEsMapping builder str: {}", esClient.formatIndexName(tableDefine.getName()), mapping.toString());
 
         boolean isAcknowledged;
+
         try {
-            isAcknowledged = esClient.createIndex(tableDefine.getName(), settings, mapping);
+            if (tableDefine.isTimeSeries()) {
+                isAcknowledged = esClient.createTemplate(tableDefine.getName(), settings, mapping);
+            } else {
+                isAcknowledged = esClient.createIndex(tableDefine.getName(), settings, mapping);
+            }
         } catch (IOException e) {
             throw new StorageException(e.getMessage());
         }
@@ -128,7 +143,7 @@ public class StorageEsInstaller extends ModelInstaller {
             }
         }
 
-        logger.debug("create elasticsearch index: {}", mapping.toString());
+        logger.debug("elasticsearch index mapping: {}", mapping.toString());
 
         return mapping;
     }

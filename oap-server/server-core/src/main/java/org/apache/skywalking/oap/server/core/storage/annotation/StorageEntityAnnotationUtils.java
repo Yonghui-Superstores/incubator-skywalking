@@ -35,15 +35,6 @@ public class StorageEntityAnnotationUtils {
         }
     }
 
-    public static boolean getDeleteHistory(Class aClass) {
-        if (aClass.isAnnotationPresent(StorageEntity.class)) {
-            StorageEntity annotation = (StorageEntity)aClass.getAnnotation(StorageEntity.class);
-            return annotation.deleteHistory();
-        } else {
-            throw new UnexpectedException("Fail to get delete history tag from class " + aClass.getSimpleName());
-        }
-    }
-
     public static Class<? extends StorageBuilder> getBuilder(Class aClass) {
         if (aClass.isAnnotationPresent(StorageEntity.class)) {
             StorageEntity annotation = (StorageEntity)aClass.getAnnotation(StorageEntity.class);

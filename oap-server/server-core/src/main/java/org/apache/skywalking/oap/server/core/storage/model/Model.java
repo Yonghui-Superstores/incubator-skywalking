@@ -31,17 +31,19 @@ public class Model {
     private final boolean deleteHistory;
     private final List<ModelColumn> columns;
     private final int sourceScopeId;
+    private final boolean timeSeries;
 
     public Model(String name, List<ModelColumn> columns, boolean isIndicator, boolean deleteHistory,
-        int sourceScopeId) {
+        int sourceScopeId, boolean timeSeries) {
         this.name = name;
         this.columns = columns;
         this.isIndicator = isIndicator;
         this.deleteHistory = deleteHistory;
         this.sourceScopeId = sourceScopeId;
+        this.timeSeries = timeSeries;
     }
 
     public Model copy(String name) {
-        return new Model(name, columns, isIndicator, deleteHistory, sourceScopeId);
+        return new Model(name, columns, isIndicator, deleteHistory, sourceScopeId, timeSeries);
     }
 }

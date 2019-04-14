@@ -33,7 +33,7 @@ import org.apache.skywalking.oap.server.library.util.CollectionUtils;
  * @author peng-yongsheng
  */
 @RecordType
-@StorageEntity(name = SegmentRecord.INDEX_NAME, builder = SegmentRecord.Builder.class, sourceScopeId = DefaultScopeDefine.SEGMENT)
+@StorageEntity(name = SegmentRecord.INDEX_NAME, builder = SegmentRecord.Builder.class, sourceScopeId = DefaultScopeDefine.SEGMENT, timeSeries = true)
 public class SegmentRecord extends Record {
 
     public static final String INDEX_NAME = "segment";

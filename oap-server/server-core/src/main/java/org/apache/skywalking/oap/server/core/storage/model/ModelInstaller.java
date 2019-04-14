@@ -69,6 +69,7 @@ public abstract class ModelInstaller {
                         logger.info("table: {} does not exist. OAP is running in 'no-init' mode, waiting... retry 3s later.", model.getName());
                         Thread.sleep(3000L);
                     } catch (InterruptedException e) {
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }
@@ -87,7 +88,7 @@ public abstract class ModelInstaller {
         }
     }
 
-    public final void overrideColumnName(String columnName, String newName) {
+    protected final void overrideColumnName(String columnName, String newName) {
         IModelOverride modelOverride = moduleManager.find(CoreModule.NAME).provider().getService(IModelOverride.class);
         modelOverride.overrideColumnName(columnName, newName);
     }

@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 import lombok.Getter;
+import org.apache.skywalking.oap.server.core.UnexpectedException;
 import org.apache.skywalking.oap.server.core.analysis.indicator.annotation.IndicatorAnnotationUtils;
 import org.apache.skywalking.oap.server.core.annotation.AnnotationListener;
 import org.apache.skywalking.oap.server.core.source.DefaultScopeDefine;
@@ -48,16 +49,20 @@ public class StorageAnnotationListener implements AnnotationListener, IModelGett
     @Override public void notify(Class aClass) {
         logger.info("The owner class of storage annotation, class name: {}", aClass.getName());
 
-        String modelName = StorageEntityAnnotationUtils.getModelName(aClass);
-        boolean deleteHistory = StorageEntityAnnotationUtils.getDeleteHistory(aClass);
-        int sourceScopeId = StorageEntityAnnotationUtils.getSourceScope(aClass);
-        // Check this scope id is valid.
-        DefaultScopeDefine.nameOf(sourceScopeId);
-        List<ModelColumn> modelColumns = new LinkedList<>();
-        boolean isIndicator = IndicatorAnnotationUtils.isIndicator(aClass);
-        retrieval(aClass, modelName, modelColumns);
+        if (aClass.isAnnotationPresent(StorageEntity.class)) {
+            StorageEntity storage = (StorageEntity)aClass.getAnnotation(StorageEntity.class);
 
-        models.add(new Model(modelName, modelColumns, isIndicator, deleteHistory, sourceScopeId));
+            // Check this scope id is valid.
+            DefaultScopeDefine.nameOf(storage.sourceScopeId());
+
+            List<ModelColumn> modelColumns = new LinkedList<>();
+            retrieval(aClass, storage.name(), modelColumns);
+
+            boolean isIndicator = IndicatorAnnotationUtils.isIndicator(aClass);
+            models.add(new Model(storage.name(), modelColumns, isIndicator, storage.deleteHistory(), storage.sourceScopeId(), storage.timeSeries()));
+        } else {
+            throw new UnexpectedException("Fail to get delete history tag from class " + aClass.getSimpleName());
+        }
     }
 
     private void retrieval(Class clazz, String modelName, List<ModelColumn> modelColumns) {
@@ -82,15 +87,13 @@ public class StorageAnnotationListener implements AnnotationListener, IModelGett
     }
 
     @Override public void overrideColumnName(String columnName, String newName) {
-        models.forEach(model -> {
-            model.getColumns().forEach(column -> {
-                ColumnName existColumnName = column.getColumnName();
-                String name = existColumnName.getName();
-                if (name.equals(columnName)) {
-                    existColumnName.setStorageName(newName);
-                    logger.debug("Model {} column {} has been override. The new column name is {}.", model.getName(), name, newName);
-                }
-            });
-        });
+        models.forEach(model -> model.getColumns().forEach(column -> {
+            ColumnName existColumnName = column.getColumnName();
+            String name = existColumnName.getName();
+            if (name.equals(columnName)) {
+                existColumnName.setStorageName(newName);
+                logger.debug("Model {} column {} has been override. The new column name is {}.", model.getName(), name, newName);
+            }
+        }));
     }
 }

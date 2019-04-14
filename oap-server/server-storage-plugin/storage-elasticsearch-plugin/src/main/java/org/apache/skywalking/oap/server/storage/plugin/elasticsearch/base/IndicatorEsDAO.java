@@ -19,15 +19,13 @@
 package org.apache.skywalking.oap.server.storage.plugin.elasticsearch.base;
 
 import java.io.IOException;
-import java.util.Map;
 import org.apache.skywalking.oap.server.core.analysis.indicator.Indicator;
 import org.apache.skywalking.oap.server.core.storage.*;
-import org.apache.skywalking.oap.server.core.storage.type.StorageDataType;
 import org.apache.skywalking.oap.server.library.client.elasticsearch.ElasticSearchClient;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.*;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.slf4j.*;
 
 /**
@@ -54,34 +52,12 @@ public class IndicatorEsDAO extends EsDAO implements IIndicatorDAO<IndexRequest,
     }
 
     @Override public IndexRequest prepareBatchInsert(String modelName, Indicator indicator) throws IOException {
-        Map<String, Object> objectMap = storageBuilder.data2Map(indicator);
-
-        XContentBuilder builder = XContentFactory.jsonBuilder().startObject();
-        for (String key : objectMap.keySet()) {
-            Object value = objectMap.get(key);
-            if (value instanceof StorageDataType) {
-                builder.field(key, ((StorageDataType)value).toStorageData());
-            } else {
-                builder.field(key, value);
-            }
-        }
-        builder.endObject();
+        XContentBuilder builder = map2builder(storageBuilder.data2Map(indicator));
         return getClient().prepareInsert(modelName, indicator.id(), builder);
     }
 
     @Override public UpdateRequest prepareBatchUpdate(String modelName, Indicator indicator) throws IOException {
-        Map<String, Object> objectMap = storageBuilder.data2Map(indicator);
-
-        XContentBuilder builder = XContentFactory.jsonBuilder().startObject();
-        for (String key : objectMap.keySet()) {
-            Object value = objectMap.get(key);
-            if (value instanceof StorageDataType) {
-                builder.field(key, ((StorageDataType)value).toStorageData());
-            } else {
-                builder.field(key, value);
-            }
-        }
-        builder.endObject();
+        XContentBuilder builder = map2builder(storageBuilder.data2Map(indicator));
         return getClient().prepareUpdate(modelName, indicator.id(), builder);
     }
 }

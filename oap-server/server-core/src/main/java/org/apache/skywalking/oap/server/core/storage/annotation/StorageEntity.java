@@ -37,4 +37,6 @@ public @interface StorageEntity {
     int sourceScopeId();
 
     boolean deleteHistory() default true;
+
+    boolean timeSeries() default false;
 }

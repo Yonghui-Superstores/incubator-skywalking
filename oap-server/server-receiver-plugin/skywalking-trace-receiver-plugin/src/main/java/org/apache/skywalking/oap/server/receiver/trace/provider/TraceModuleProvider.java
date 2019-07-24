@@ -19,6 +19,7 @@
 package org.apache.skywalking.oap.server.receiver.trace.provider;
 
 import java.io.IOException;
+import org.apache.skywalking.oap.server.configuration.api.*;
 import org.apache.skywalking.oap.server.core.CoreModule;
 import org.apache.skywalking.oap.server.core.server.*;
 import org.apache.skywalking.oap.server.library.module.*;
@@ -42,6 +43,7 @@ public class TraceModuleProvider extends ModuleProvider {
     private final TraceServiceModuleConfig moduleConfig;
     private SegmentParse.Producer segmentProducer;
     private SegmentParseV2.Producer segmentProducerV2;
+    private DBLatencyThresholdsAndWatcher thresholds;
 
     public TraceModuleProvider() {
         this.moduleConfig = new TraceServiceModuleConfig();
@@ -60,43 +62,43 @@ public class TraceModuleProvider extends ModuleProvider {
     }
 
     @Override public void prepare() throws ServiceNotProvidedException {
-        moduleConfig.setDbLatencyThresholds(new DBLatencyThresholds(moduleConfig.getSlowDBAccessThreshold()));
+        thresholds = new DBLatencyThresholdsAndWatcher(moduleConfig.getSlowDBAccessThreshold(), this);
 
-        SegmentParserListenerManager listenerManager = new SegmentParserListenerManager();
-        listenerManager.add(new MultiScopesSpanListener.Factory());
-        listenerManager.add(new ServiceMappingSpanListener.Factory());
-        listenerManager.add(new SegmentSpanListener.Factory(moduleConfig.getSampleRate()));
+        moduleConfig.setDbLatencyThresholdsAndWatcher(thresholds);
 
-        segmentProducer = new SegmentParse.Producer(getManager(), listenerManager, moduleConfig);
-
-        listenerManager = new SegmentParserListenerManager();
-        listenerManager.add(new MultiScopesSpanListener.Factory());
-        listenerManager.add(new ServiceMappingSpanListener.Factory());
-        listenerManager.add(new SegmentSpanListener.Factory(moduleConfig.getSampleRate()));
-
-        segmentProducerV2 = new SegmentParseV2.Producer(getManager(), listenerManager, moduleConfig);
+        segmentProducer = new SegmentParse.Producer(getManager(), listenerManager(), moduleConfig);
+        segmentProducerV2 = new SegmentParseV2.Producer(getManager(), listenerManager(), moduleConfig);
 
         this.registerServiceImplementation(ISegmentParserService.class, new SegmentParserServiceImpl(segmentProducerV2));
     }
 
+    public SegmentParserListenerManager listenerManager() {
+        SegmentParserListenerManager listenerManager = new SegmentParserListenerManager();
+        if (moduleConfig.isTraceAnalysis()) {
+            listenerManager.add(new MultiScopesSpanListener.Factory());
+            listenerManager.add(new ServiceMappingSpanListener.Factory());
+        }
+        listenerManager.add(new SegmentSpanListener.Factory(moduleConfig.getSampleRate()));
+
+        return listenerManager;
+    }
+
     @Override public void start() throws ModuleStartException {
+        DynamicConfigurationService dynamicConfigurationService = getManager().find(ConfigurationModule.NAME).provider().getService(DynamicConfigurationService.class);
         GRPCHandlerRegister grpcHandlerRegister = getManager().find(SharingServerModule.NAME).provider().getService(GRPCHandlerRegister.class);
         JettyHandlerRegister jettyHandlerRegister = getManager().find(SharingServerModule.NAME).provider().getService(JettyHandlerRegister.class);
         try {
+            dynamicConfigurationService.registerConfigChangeWatcher(thresholds);
 
             grpcHandlerRegister.addHandler(new TraceSegmentServiceHandler(segmentProducer));
             grpcHandlerRegister.addHandler(new TraceSegmentReportServiceHandler(segmentProducerV2, getManager()));
             jettyHandlerRegister.addHandler(new TraceSegmentServletHandler(segmentProducer));
 
-            SegmentStandardizationWorker standardizationWorker = new SegmentStandardizationWorker(getManager(), segmentProducer,
-                moduleConfig.getBufferPath() + "v5", moduleConfig.getBufferOffsetMaxFileSize(), moduleConfig.getBufferDataMaxFileSize(), moduleConfig.isBufferFileCleanWhenRestart(),
-                false);
+            SegmentStandardizationWorker standardizationWorker = new SegmentStandardizationWorker(getManager(), segmentProducer, moduleConfig.getBufferPath() + "v5", moduleConfig.getBufferOffsetMaxFileSize(), moduleConfig.getBufferDataMaxFileSize(), moduleConfig.isBufferFileCleanWhenRestart(), false);
             segmentProducer.setStandardizationWorker(standardizationWorker);
 
-            SegmentStandardizationWorker standardizationWorker2 = new SegmentStandardizationWorker(getManager(), segmentProducer,
-                moduleConfig.getBufferPath(), moduleConfig.getBufferOffsetMaxFileSize(), moduleConfig.getBufferDataMaxFileSize(), moduleConfig.isBufferFileCleanWhenRestart(),
-                true);
-            segmentProducerV2.setStandardizationWorker(standardizationWorker2);
+            SegmentStandardizationWorker standardizationWorkerV2 = new SegmentStandardizationWorker(getManager(), segmentProducerV2, moduleConfig.getBufferPath(), moduleConfig.getBufferOffsetMaxFileSize(), moduleConfig.getBufferDataMaxFileSize(), moduleConfig.isBufferFileCleanWhenRestart(), true);
+            segmentProducerV2.setStandardizationWorker(standardizationWorkerV2);
         } catch (IOException e) {
             throw new ModuleStartException(e.getMessage(), e);
         }
@@ -107,6 +109,6 @@ public class TraceModuleProvider extends ModuleProvider {
     }
 
     @Override public String[] requiredModules() {
-        return new String[] {TelemetryModule.NAME, CoreModule.NAME, SharingServerModule.NAME};
+        return new String[] {TelemetryModule.NAME, CoreModule.NAME, SharingServerModule.NAME, ConfigurationModule.NAME};
     }
 }

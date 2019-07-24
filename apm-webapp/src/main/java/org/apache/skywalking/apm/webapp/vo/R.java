@@ -10,13 +10,13 @@ public class R {
 
     private int code;
     private String message;
-    private Object data;
+    private Object projects;
     private String env;
 
-    public R(int code, String message, Object data, String env) {
+    public R(int code, String message, Object projects, String env) {
         this.code = code;
         this.message = message;
-        this.data = data;
+        this.projects = projects;
         this.env = env;
     }
 }

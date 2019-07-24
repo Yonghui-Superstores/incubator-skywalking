@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.session.StandardSessionFacade;
+import org.apache.skywalking.apm.webapp.compont.SSOConfiguration;
 import org.apache.skywalking.apm.webapp.service.SSOservice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,24 +42,24 @@ public class SSOCallBackController {
 
     @Autowired
     SSOservice ssOservice;
+    @Autowired
+    SSOConfiguration ssoConfiguration;
 
     @GetMapping(value = "callback")
-    public String getCode(@RequestParam String code, HttpServletRequest request, String env,
+    public void getCode(@RequestParam String code, HttpServletRequest request, String env,
         HttpServletResponse response) {
         //return code;
         StandardSessionFacade session = (StandardSessionFacade)request.getSession(true);
-        //    boolean aNew = session.isNew();
-     //   session.invalidate();
         session.setMaxInactiveInterval(1800);
         String userId = ssOservice.getUserId(code, env);
         session.setAttribute("userId", userId);
         session.setAttribute("env", env);
         try {
 
-            request.getRequestDispatcher("/#/monitor/dashboard").forward(request, response);
+            response.sendRedirect(ssoConfiguration.getRedicturl());
         } catch (Exception e) {
             logger.error("", e);
         }
-        return "test";
+
     }
 }

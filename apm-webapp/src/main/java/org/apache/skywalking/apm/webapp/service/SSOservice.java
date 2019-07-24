@@ -45,7 +45,7 @@ public class SSOservice {
         java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
         String encode = "Basic " + encoder.encodeToString(("skywalking" + ":" + "secret").getBytes(StandardCharsets.UTF_8));
         // 根据code获取token信息
-        TokenInfo tokenInfo = ssoFeignClient.getToken(code, "http://10.67.53.46:8080/sso/callback?env=" + env, "authorization_code", encode).getBody();
+        TokenInfo tokenInfo = ssoFeignClient.getToken(code, "http://localhost:8080/sso/callback?env=" + env, "authorization_code", encode).getBody();
         // 根据token拿到user
         Object user = ssoFeignClient.getUser(tokenInfo.getToken_type() + " " + tokenInfo.getAccess_token()).getBody();
         Gson gson = new Gson();

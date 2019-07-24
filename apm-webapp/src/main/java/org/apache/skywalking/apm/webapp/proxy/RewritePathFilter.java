@@ -20,13 +20,11 @@ package org.apache.skywalking.apm.webapp.proxy;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.skywalking.apm.webapp.controller.ProjectsController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.skywalking.apm.webapp.compont.SSOConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -40,8 +38,9 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 @Component
 @ConfigurationProperties(prefix = "collector")
 public class RewritePathFilter extends ZuulFilter {
-    private Logger logger = LoggerFactory.getLogger(RewritePathFilter.class);
 
+    @Autowired
+    SSOConfiguration ssoConfiguration;
 
     private static final String REQUEST_URI = "requestURI";
 
@@ -69,8 +68,8 @@ public class RewritePathFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
-        RequestContext ctx = RequestContext.getCurrentContext();
-        return ctx.containsKey(REQUEST_URI);
+
+        return true;
     }
 
     @Override
@@ -80,16 +79,13 @@ public class RewritePathFilter extends ZuulFilter {
         HttpServletResponse response = ctx.getResponse();
 
         HttpSession session = request.getSession(false);
-        if (session == null || !session.isNew()) {
-            try {
-                response.sendRedirect("http://api.devitwork.yonghui.cn/oauth/oauth/authorize?response_type=code&client_id=skywalking&redirect_uri=http://10.67.53.46:8080/sso/callback");
-            } catch (IOException e) {
-                logger.error("", e);
-            }
+        if (session == null) {
+            response.setHeader("url", ssoConfiguration.getSsologin());
+            response.setHeader("invalid", "true");
+
+            ctx.set(REQUEST_URI, path);
+
         }
-        String name = session.getAttribute("projectName").toString();
-        ctx.set(REQUEST_URI, path);
-        ctx.set("projectName", name);
         return null;
     }
 }

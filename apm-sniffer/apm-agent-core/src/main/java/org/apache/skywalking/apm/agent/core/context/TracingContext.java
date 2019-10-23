@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.conf.Config;
+import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractTracingSpan;
 import org.apache.skywalking.apm.agent.core.context.trace.EntrySpan;
@@ -324,6 +325,11 @@ public class TracingContext implements AbstractTracerContext {
      */
     @Override
     public AbstractSpan createExitSpan(final String operationName, final String remotePeer) {
+        if (isLimitMechanismWorking()) {
+            NoopExitSpan span = new NoopExitSpan(remotePeer);
+            return push(span);
+        }
+
         AbstractSpan exitSpan;
         AbstractSpan parentSpan = peek();
         if (parentSpan != null && parentSpan.isExit()) {
@@ -335,10 +341,6 @@ public class TracingContext implements AbstractTracerContext {
                     new PossibleFound.FoundAndObtain() {
                         @Override
                         public Object doProcess(final int peerId) {
-                            if (isLimitMechanismWorking()) {
-                                return new NoopExitSpan(peerId);
-                            }
-
                             return DictionaryManager.findEndpointSection()
                                 .findOnly(segment.getServiceId(), operationName)
                                 .doInCondition(
@@ -358,10 +360,6 @@ public class TracingContext implements AbstractTracerContext {
                     new PossibleFound.NotFoundAndObtain() {
                         @Override
                         public Object doProcess() {
-                            if (isLimitMechanismWorking()) {
-                                return new NoopExitSpan(remotePeer);
-                            }
-
                             return DictionaryManager.findEndpointSection()
                                 .findOnly(segment.getServiceId(), operationName)
                                 .doInCondition(
@@ -453,7 +451,7 @@ public class TracingContext implements AbstractTracerContext {
         try {
             if (activeSpanStack.isEmpty() && running && (!isRunningInAsyncMode || asyncSpanCounter.get() == 0)) {
                 TraceSegment finishedSegment = segment.finish(isLimitMechanismWorking());
-                /**
+                /*
                  * Recheck the segment if the segment contains only one span.
                  * Because in the runtime, can't sure this segment is part of distributed trace.
                  *
@@ -464,6 +462,16 @@ public class TracingContext implements AbstractTracerContext {
                         finishedSegment.setIgnore(true);
                     }
                 }
+
+                /*
+                 * Check that the segment is created after the agent (re-)registered to backend,
+                 * otherwise the segment may be created when the agent is still rebooting and should
+                 * be ignored
+                 */
+                if (segment.createTime() < RemoteDownstreamConfig.Agent.INSTANCE_REGISTERED_TIME) {
+                    finishedSegment.setIgnore(true);
+                }
+
                 TracingContext.ListenerManager.notifyFinish(finishedSegment);
 
                 running = false;

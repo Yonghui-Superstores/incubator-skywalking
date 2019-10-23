@@ -39,7 +39,7 @@
                 <include>application.yml</include>
                 <include>alarm-settings.yml</include>
                 <include>alarm-settings-sample.yml</include>
-                <include>datasource-settings.properties</include>
+                <include>gateways.yml</include>
             </includes>
         </fileSet>
         <fileSet>
@@ -47,7 +47,6 @@
             <includes>
                 <include>component-libraries.yml</include>
                 <include>official_analysis.oal</include>
-                <include>scope-meta.yml</include>
             </includes>
             <outputDirectory>/config</outputDirectory>
         </fileSet>

@@ -25,10 +25,11 @@ pipeline {
         ))
         timestamps()
         skipStagesAfterUnstable()
+        timeout(time: 5, unit: 'HOURS')
     }
 
     environment {
-        MAVEN_OPTS = '-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:-UseGCOverheadLimit -Xmx3g'
+        MAVEN_OPTS = '-Dmaven.repo.local=.m2/repository -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:-UseGCOverheadLimit -Xmx3g'
     }
 
     stages {
@@ -36,7 +37,7 @@ pipeline {
             parallel {
                 stage('JDK 1.8 on Linux') {
                     agent {
-                        label 'xenial'
+                        label 'skywalking || skywalking-se'
                     }
 
                     tools {
@@ -63,10 +64,15 @@ pipeline {
 
                         stage('Test & Report') {
                             steps {
-                                // separate lightweight checks that don't support parallel run
-                                sh './mvnw checkstyle:check apache-rat:check'
-                                sh './mvnw -Dcheckstyle.skip -Drat.skip -T2 -Dmaven.compile.fork -Dmaven.compiler.maxmem=3072 -P"agent,backend,ui,dist,CI-with-IT" org.jacoco:jacoco-maven-plugin:0.8.3:prepare-agent clean install org.jacoco:jacoco-maven-plugin:0.8.3:report coveralls:report'
-                                sh './mvnw -DskipTests -Dcheckstyle.skip -Drat.skip -T 2C javadoc:javadoc'
+                                sh './mvnw -P"agent,backend,ui,dist,CI-with-IT" -DrepoToken=${COVERALLS_REPO_TOKEN} -DpullRequest=${ghprbPullLink} clean cobertura:cobertura verify coveralls:report install'
+                                sh './mvnw javadoc:javadoc -Dmaven.test.skip=true'
+                            }
+                        }
+
+                        stage('Check Dependencies Licenses') {
+                            steps {
+                                sh 'tar -zxf dist/apache-skywalking-apm-bin.tar.gz -C dist'
+                                sh 'tools/dependencies/check-LICENSE.sh'
                             }
                         }
                     }

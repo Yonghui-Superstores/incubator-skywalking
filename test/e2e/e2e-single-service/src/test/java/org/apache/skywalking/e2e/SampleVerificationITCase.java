@@ -72,7 +72,6 @@ public class SampleVerificationITCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(SampleVerificationITCase.class);
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final int retryTimes = 5;
     private final int retryInterval = 30;
 
     private SimpleQueryClient queryClient;
@@ -93,14 +92,30 @@ public class SampleVerificationITCase {
     public void verify() throws Exception {
         final LocalDateTime minutesAgo = LocalDateTime.now(ZoneOffset.UTC);
 
-        final Map<String, String> user = new HashMap<>();
-        user.put("name", "SkyWalking");
-        final ResponseEntity<String> responseEntity = restTemplate.postForEntity(
-            instrumentedServiceUrl + "/e2e/users",
-            user,
-            String.class
-        );
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        while (true) {
+            try {
+                final Map<String, String> user = new HashMap<>();
+                user.put("name", "SkyWalking");
+                final ResponseEntity<String> responseEntity = restTemplate.postForEntity(
+                    instrumentedServiceUrl + "/e2e/users",
+                    user,
+                    String.class
+                );
+                LOGGER.info("responseEntity: {}", responseEntity);
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                final List<Trace> traces = queryClient.traces(
+                    new TracesQuery()
+                        .start(minutesAgo)
+                        .end(LocalDateTime.now())
+                        .orderByDuration()
+                );
+                if (!traces.isEmpty()) {
+                    break;
+                }
+                Thread.sleep(10000L);
+            } catch (Exception ignored) {
+            }
+        }
 
         doRetryableVerification(() -> {
             try {
@@ -136,6 +151,7 @@ public class SampleVerificationITCase {
                 .start(minutesAgo.minusDays(1))
                 .end(now)
         );
+        LOGGER.info("topoData: {}", topoData);
 
         InputStream expectedInputStream =
             new ClassPathResource("expected-data/org.apache.skywalking.e2e.SampleVerificationITCase.topo.yml").getInputStream();
@@ -152,6 +168,7 @@ public class SampleVerificationITCase {
                 .start(minutesAgo)
                 .end(now)
         );
+        LOGGER.info("services: {}", services);
 
         InputStream expectedInputStream =
             new ClassPathResource("expected-data/org.apache.skywalking.e2e.SampleVerificationITCase.services.yml").getInputStream();
@@ -174,7 +191,8 @@ public class SampleVerificationITCase {
         }
     }
 
-    private Instances verifyServiceInstances(LocalDateTime minutesAgo, LocalDateTime now, Service service) throws Exception {
+    private Instances verifyServiceInstances(LocalDateTime minutesAgo, LocalDateTime now,
+        Service service) throws Exception {
         InputStream expectedInputStream;
         Instances instances = queryClient.instances(
             new InstancesQuery()
@@ -182,6 +200,7 @@ public class SampleVerificationITCase {
                 .start(minutesAgo)
                 .end(now)
         );
+        LOGGER.info("instances: {}", instances);
         expectedInputStream =
             new ClassPathResource("expected-data/org.apache.skywalking.e2e.SampleVerificationITCase.instances.yml").getInputStream();
         final InstancesMatcher instancesMatcher = new Yaml().loadAs(expectedInputStream, InstancesMatcher.class);
@@ -189,10 +208,12 @@ public class SampleVerificationITCase {
         return instances;
     }
 
-    private Endpoints verifyServiceEndpoints(LocalDateTime minutesAgo, LocalDateTime now, Service service) throws Exception {
+    private Endpoints verifyServiceEndpoints(LocalDateTime minutesAgo, LocalDateTime now,
+        Service service) throws Exception {
         Endpoints instances = queryClient.endpoints(
             new EndpointQuery().serviceId(service.getKey())
         );
+        LOGGER.info("instances: {}", instances);
         InputStream expectedInputStream =
             new ClassPathResource("expected-data/org.apache.skywalking.e2e.SampleVerificationITCase.endpoints.yml").getInputStream();
         final EndpointsMatcher endpointsMatcher = new Yaml().loadAs(expectedInputStream, EndpointsMatcher.class);
@@ -204,18 +225,19 @@ public class SampleVerificationITCase {
         for (Instance instance : instances.getInstances()) {
             for (String metricsName : ALL_INSTANCE_METRICS) {
                 LOGGER.info("verifying service instance response time: {}", instance);
-                final Metrics instanceRespTime = queryClient.metrics(
+                final Metrics instanceMetrics = queryClient.metrics(
                     new MetricsQuery()
                         .stepByMinute()
                         .metricsName(metricsName)
                         .id(instance.getKey())
                 );
+                LOGGER.info("instanceMetrics: {}", instanceMetrics);
                 AtLeastOneOfMetricsMatcher instanceRespTimeMatcher = new AtLeastOneOfMetricsMatcher();
                 MetricsValueMatcher greaterThanZero = new MetricsValueMatcher();
                 greaterThanZero.setValue("gt 0");
                 instanceRespTimeMatcher.setValue(greaterThanZero);
-                instanceRespTimeMatcher.verify(instanceRespTime);
-                LOGGER.info("{}: {}", metricsName, instanceRespTime);
+                instanceRespTimeMatcher.verify(instanceMetrics);
+                LOGGER.info("{}: {}", metricsName, instanceMetrics);
             }
         }
     }
@@ -233,12 +255,13 @@ public class SampleVerificationITCase {
                         .metricsName(metricName)
                         .id(endpoint.getKey())
                 );
+                LOGGER.info("metrics: {}", metrics);
                 AtLeastOneOfMetricsMatcher instanceRespTimeMatcher = new AtLeastOneOfMetricsMatcher();
                 MetricsValueMatcher greaterThanZero = new MetricsValueMatcher();
                 greaterThanZero.setValue("gt 0");
                 instanceRespTimeMatcher.setValue(greaterThanZero);
                 instanceRespTimeMatcher.verify(metrics);
-                LOGGER.info("metrics: {}", metrics);
+                LOGGER.info("{}: {}", metricName, metrics);
             }
         }
     }
@@ -246,18 +269,19 @@ public class SampleVerificationITCase {
     private void verifyServiceMetrics(Service service) throws Exception {
         for (String metricName : ALL_SERVICE_METRICS) {
             LOGGER.info("verifying service {}, metrics: {}", service, metricName);
-            final Metrics instanceRespTime = queryClient.metrics(
+            final Metrics serviceMetrics = queryClient.metrics(
                 new MetricsQuery()
                     .stepByMinute()
                     .metricsName(metricName)
                     .id(service.getKey())
             );
+            LOGGER.info("serviceMetrics: {}", serviceMetrics);
             AtLeastOneOfMetricsMatcher instanceRespTimeMatcher = new AtLeastOneOfMetricsMatcher();
             MetricsValueMatcher greaterThanZero = new MetricsValueMatcher();
             greaterThanZero.setValue("gt 0");
             instanceRespTimeMatcher.setValue(greaterThanZero);
-            instanceRespTimeMatcher.verify(instanceRespTime);
-            LOGGER.info("instanceRespTime: {}", instanceRespTime);
+            instanceRespTimeMatcher.verify(serviceMetrics);
+            LOGGER.info("{}: {}", metricName, serviceMetrics);
         }
     }
 
@@ -270,6 +294,7 @@ public class SampleVerificationITCase {
                 .end(now)
                 .orderByDuration()
         );
+        LOGGER.info("traces: {}", traces);
 
         InputStream expectedInputStream =
             new ClassPathResource("expected-data/org.apache.skywalking.e2e.SampleVerificationITCase.traces.yml").getInputStream();
@@ -279,7 +304,7 @@ public class SampleVerificationITCase {
     }
 
     private void doRetryableVerification(Runnable runnable) throws InterruptedException {
-        for (int i = 0; i < retryTimes; i++) {
+        while (true) {
             try {
                 runnable.run();
                 break;

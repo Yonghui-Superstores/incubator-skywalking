@@ -33,9 +33,6 @@ public class SourceColumn {
     private String fieldSetter;
     private String fieldGetter;
 
-    public SourceColumn() {
-    }
-
     public SourceColumn(String fieldName, String columnName, Class<?> type, boolean isID) {
         this.fieldName = fieldName;
         this.columnName = columnName;
@@ -65,6 +62,7 @@ public class SourceColumn {
             case "String":
                 this.type = String.class;
                 typeName = "String";
+                break;
             default:
                 try {
                     this.type = Class.forName(typeName);

@@ -55,7 +55,6 @@ public class SSOCallBackController {
         session.setAttribute("userId", userId);
         session.setAttribute("env", env);
         try {
-
             response.sendRedirect(ssoConfiguration.getRedicturl());
         } catch (Exception e) {
             logger.error("", e);

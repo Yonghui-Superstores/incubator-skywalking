@@ -11,6 +11,24 @@ import org.springframework.stereotype.Component;
 public class SSOConfiguration {
     private String ssologin;
     private String redicturl;
+    private String registerurl;
+    private String clientId;
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getRegisterurl() {
+        return registerurl;
+    }
+
+    public void setRegisterurl(String registerurl) {
+        this.registerurl = registerurl;
+    }
 
     public String getRedicturl() {
         return redicturl;

@@ -13,10 +13,9 @@ public class R {
     private Object projects;
     private String env;
 
-    public R(int code, String message, Object projects, String env) {
+    public R(int code, String message, Object projects) {
         this.code = code;
         this.message = message;
         this.projects = projects;
-        this.env = env;
     }
 }

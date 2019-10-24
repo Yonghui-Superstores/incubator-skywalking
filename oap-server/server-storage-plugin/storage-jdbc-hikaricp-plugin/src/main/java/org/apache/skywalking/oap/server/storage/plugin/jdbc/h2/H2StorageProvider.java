@@ -75,6 +75,7 @@ public class H2StorageProvider extends ModuleProvider {
         lockDAO = new H2RegisterLockDAO(h2Client);
         this.registerServiceImplementation(IRegisterLockDAO.class, lockDAO);
 
+        this.registerServiceImplementation(IProjectInventoryCacheDAO.class, new H2ProjectInventoryCacheDAO());
         this.registerServiceImplementation(IServiceInventoryCacheDAO.class, new H2ServiceInventoryCacheDAO(h2Client));
         this.registerServiceImplementation(IServiceInstanceInventoryCacheDAO.class, new H2ServiceInstanceInventoryCacheDAO(h2Client));
         this.registerServiceImplementation(IEndpointInventoryCacheDAO.class, new H2EndpointInventoryCacheDAO(h2Client));

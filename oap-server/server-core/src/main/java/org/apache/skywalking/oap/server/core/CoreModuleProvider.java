@@ -141,6 +141,9 @@ public class CoreModuleProvider extends ModuleProvider {
         this.registerServiceImplementation(IModelGetter.class, storageModels);
         this.registerServiceImplementation(IModelOverride.class, storageModels);
 
+        this.registerServiceImplementation(ProjectInventoryCache.class, new ProjectInventoryCache(getManager()));
+        this.registerServiceImplementation(IProjectInventoryRegister.class, new ProjectInventoryRegister(getManager()));
+
         this.registerServiceImplementation(ServiceInventoryCache.class, new ServiceInventoryCache(getManager()));
         this.registerServiceImplementation(IServiceInventoryRegister.class, new ServiceInventoryRegister(getManager()));
 

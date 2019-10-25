@@ -48,6 +48,7 @@ public class ServiceInventory extends RegisterSource {
     public static final String INDEX_NAME = "service_inventory";
 
     public static final String NAME = "name";
+    public static final String PROJECT_ID = "project_id";
     public static final String IS_ADDRESS = "is_address";
     private static final String ADDRESS_ID = "address_id";
     public static final String NODE_TYPE = "node_type";
@@ -56,6 +57,7 @@ public class ServiceInventory extends RegisterSource {
     private static final Gson GSON = new Gson();
 
     @Setter @Getter @Column(columnName = NAME, matchQuery = true) private String name = Const.EMPTY_STRING;
+    @Setter @Getter @Column(columnName = PROJECT_ID) private int projectId;
     @Setter @Getter @Column(columnName = IS_ADDRESS) private int isAddress;
     @Setter @Getter @Column(columnName = ADDRESS_ID) private int addressId;
     @Setter(AccessLevel.PRIVATE) @Getter(AccessLevel.PRIVATE) @Column(columnName = NODE_TYPE) private int nodeType;
@@ -118,6 +120,7 @@ public class ServiceInventory extends RegisterSource {
     public ServiceInventory getClone() {
         ServiceInventory inventory = new ServiceInventory();
         inventory.setSequence(getSequence());
+        inventory.setProjectId(getProjectId());
         inventory.setRegisterTime(getRegisterTime());
         inventory.setHeartbeatTime(getHeartbeatTime());
         inventory.setName(name);
@@ -159,6 +162,7 @@ public class ServiceInventory extends RegisterSource {
         remoteBuilder.addDataIntegers(mappingServiceId);
         remoteBuilder.addDataIntegers(nodeType);
         remoteBuilder.addDataIntegers(resetServiceMapping ? 1 : 0);
+        remoteBuilder.addDataIntegers(projectId);
 
         remoteBuilder.addDataLongs(getRegisterTime());
         remoteBuilder.addDataLongs(getHeartbeatTime());
@@ -176,6 +180,7 @@ public class ServiceInventory extends RegisterSource {
         setMappingServiceId(remoteData.getDataIntegers(3));
         setNodeType(remoteData.getDataIntegers(4));
         setResetServiceMapping(remoteData.getDataIntegers(5) == 1);
+        setProjectId(remoteData.getDataIntegers(6));
 
         setRegisterTime(remoteData.getDataLongs(0));
         setHeartbeatTime(remoteData.getDataLongs(1));
@@ -218,6 +223,7 @@ public class ServiceInventory extends RegisterSource {
         @Override public ServiceInventory map2Data(Map<String, Object> dbMap) {
             ServiceInventory inventory = new ServiceInventory();
             inventory.setSequence(((Number)dbMap.get(SEQUENCE)).intValue());
+            inventory.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
             inventory.setIsAddress(((Number)dbMap.get(IS_ADDRESS)).intValue());
             inventory.setMappingServiceId(((Number)dbMap.get(MAPPING_SERVICE_ID)).intValue());
             inventory.setName((String)dbMap.get(NAME));
@@ -233,6 +239,7 @@ public class ServiceInventory extends RegisterSource {
         @Override public Map<String, Object> data2Map(ServiceInventory storageData) {
             Map<String, Object> map = new HashMap<>();
             map.put(SEQUENCE, storageData.getSequence());
+            map.put(PROJECT_ID, storageData.getProjectId());
             map.put(IS_ADDRESS, storageData.getIsAddress());
             map.put(MAPPING_SERVICE_ID, storageData.getMappingServiceId());
             map.put(NAME, storageData.getName());

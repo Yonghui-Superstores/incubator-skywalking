@@ -51,6 +51,7 @@ public class ServiceInstanceInventory extends RegisterSource {
 
     public static final String NAME = "name";
     public static final String INSTANCE_UUID = "instance_uuid";
+    public static final String PROJECT_ID = "project_id";
     public static final String SERVICE_ID = "service_id";
     private static final String IS_ADDRESS = "is_address";
     private static final String ADDRESS_ID = "address_id";
@@ -59,6 +60,7 @@ public class ServiceInstanceInventory extends RegisterSource {
 
     @Setter @Getter @Column(columnName = INSTANCE_UUID, matchQuery = true) private String instanceUUID = Const.EMPTY_STRING;
     @Setter @Getter @Column(columnName = NAME) private String name = Const.EMPTY_STRING;
+    @Setter @Getter @Column(columnName = PROJECT_ID) private int projectId;
     @Setter @Getter @Column(columnName = SERVICE_ID) private int serviceId;
     @Setter @Getter @Column(columnName = IS_ADDRESS) private int isAddress;
     @Setter @Getter @Column(columnName = ADDRESS_ID) private int addressId;
@@ -135,6 +137,7 @@ public class ServiceInstanceInventory extends RegisterSource {
         remoteBuilder.addDataIntegers(serviceId);
         remoteBuilder.addDataIntegers(isAddress);
         remoteBuilder.addDataIntegers(addressId);
+        remoteBuilder.addDataIntegers(projectId);
 
         remoteBuilder.addDataLongs(getRegisterTime());
         remoteBuilder.addDataLongs(getHeartbeatTime());
@@ -151,6 +154,7 @@ public class ServiceInstanceInventory extends RegisterSource {
         setServiceId(remoteData.getDataIntegers(1));
         setIsAddress(remoteData.getDataIntegers(2));
         setAddressId(remoteData.getDataIntegers(3));
+        setServiceId(remoteData.getDataIntegers(4));
 
         setRegisterTime(remoteData.getDataLongs(0));
         setHeartbeatTime(remoteData.getDataLongs(1));
@@ -170,6 +174,7 @@ public class ServiceInstanceInventory extends RegisterSource {
         @Override public ServiceInstanceInventory map2Data(Map<String, Object> dbMap) {
             ServiceInstanceInventory inventory = new ServiceInstanceInventory();
             inventory.setSequence(((Number)dbMap.get(SEQUENCE)).intValue());
+            inventory.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
             inventory.setServiceId(((Number)dbMap.get(SERVICE_ID)).intValue());
             inventory.setIsAddress(((Number)dbMap.get(IS_ADDRESS)).intValue());
             inventory.setAddressId(((Number)dbMap.get(ADDRESS_ID)).intValue());
@@ -187,6 +192,7 @@ public class ServiceInstanceInventory extends RegisterSource {
         @Override public Map<String, Object> data2Map(ServiceInstanceInventory storageData) {
             Map<String, Object> map = new HashMap<>();
             map.put(SEQUENCE, storageData.getSequence());
+            map.put(PROJECT_ID, storageData.getProjectId());
             map.put(SERVICE_ID, storageData.getServiceId());
             map.put(IS_ADDRESS, storageData.getIsAddress());
             map.put(ADDRESS_ID, storageData.getAddressId());

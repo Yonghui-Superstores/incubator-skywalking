@@ -43,10 +43,12 @@ public class EndpointInventory extends RegisterSource {
 
     public static final String INDEX_NAME = "endpoint_inventory";
 
+    public static final String PROJECT_ID = "project_id";
     public static final String SERVICE_ID = "service_id";
     public static final String NAME = "name";
     public static final String DETECT_POINT = "detect_point";
 
+    @Setter @Getter @Column(columnName = PROJECT_ID) private int projectId;
     @Setter @Getter @Column(columnName = SERVICE_ID) private int serviceId;
     @Setter @Getter @Column(columnName = NAME, matchQuery = true) private String name = Const.EMPTY_STRING;
     @Setter @Getter @Column(columnName = DETECT_POINT) private int detectPoint;
@@ -91,6 +93,7 @@ public class EndpointInventory extends RegisterSource {
         remoteBuilder.addDataIntegers(getSequence());
         remoteBuilder.addDataIntegers(serviceId);
         remoteBuilder.addDataIntegers(detectPoint);
+        remoteBuilder.addDataIntegers(projectId);
 
         remoteBuilder.addDataLongs(getRegisterTime());
         remoteBuilder.addDataLongs(getHeartbeatTime());
@@ -104,6 +107,7 @@ public class EndpointInventory extends RegisterSource {
         setSequence(remoteData.getDataIntegers(0));
         setServiceId(remoteData.getDataIntegers(1));
         setDetectPoint(remoteData.getDataIntegers(2));
+        setProjectId(remoteData.getDataIntegers(3));
 
         setRegisterTime(remoteData.getDataLongs(0));
         setHeartbeatTime(remoteData.getDataLongs(1));
@@ -122,6 +126,7 @@ public class EndpointInventory extends RegisterSource {
             EndpointInventory inventory = new EndpointInventory();
             inventory.setSequence(((Number)dbMap.get(SEQUENCE)).intValue());
             inventory.setServiceId(((Number)dbMap.get(SERVICE_ID)).intValue());
+            inventory.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
             inventory.setName((String)dbMap.get(NAME));
             inventory.setDetectPoint(((Number)dbMap.get(DETECT_POINT)).intValue());
             inventory.setRegisterTime(((Number)dbMap.get(REGISTER_TIME)).longValue());
@@ -134,6 +139,7 @@ public class EndpointInventory extends RegisterSource {
             Map<String, Object> map = new HashMap<>();
             map.put(SEQUENCE, storageData.getSequence());
             map.put(SERVICE_ID, storageData.getServiceId());
+            map.put(PROJECT_ID, storageData.getProjectId());
             map.put(NAME, storageData.getName());
             map.put(DETECT_POINT, storageData.getDetectPoint());
             map.put(REGISTER_TIME, storageData.getRegisterTime());

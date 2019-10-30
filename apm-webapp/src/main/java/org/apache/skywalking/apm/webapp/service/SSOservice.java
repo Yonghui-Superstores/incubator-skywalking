@@ -21,12 +21,14 @@ package org.apache.skywalking.apm.webapp.service;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
+
+import org.apache.skywalking.apm.webapp.compont.SSOConfiguration;
 import org.apache.skywalking.apm.webapp.sso.OpenPrdFeignClient;
-import org.apache.skywalking.apm.webapp.sso.OpenFeignClient;
 import org.apache.skywalking.apm.webapp.vo.TokenInfo;
 import org.apache.skywalking.apm.webapp.sso.SSOFeignClient;
 import org.springframework.http.ResponseEntity;
@@ -37,15 +39,35 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SSOservice {
-    @Resource SSOFeignClient ssoFeignClient;
-    @Resource OpenPrdFeignClient openPrdFeignClient;
-    @Resource OpenFeignClient openFeignClient;
+    @Resource
+    SSOFeignClient ssoFeignClient;
+    @Resource
+    OpenPrdFeignClient openPrdFeignClient;
+    @Resource
+    SSOConfiguration ssoConfiguration;
 
     public String getUserId(String code, String env) {
         java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
-        String encode = "Basic " + encoder.encodeToString(("skywalking" + ":" + "secret").getBytes(StandardCharsets.UTF_8));
+/*        String clientId;
+        switch (env) {
+            case "prd":
+                clientId = "pskywalking";
+                break;
+            case "uat":
+                clientId = "uskywalking";
+                break;
+            case "test":
+                clientId = "tskywalking";
+                break;
+            case "dev":
+                clientId = "dskywalking";
+                break;
+            default:
+                clientId = "lskywalking";
+        }*/
+        String encode = "Basic " + encoder.encodeToString((ssoConfiguration.getClientId() + ":" + "secret").getBytes(StandardCharsets.UTF_8));
         // 根据code获取token信息
-        TokenInfo tokenInfo = ssoFeignClient.getToken(code, "http://localhost:8080/sso/callback?env=" + env, "authorization_code", encode).getBody();
+        TokenInfo tokenInfo = ssoFeignClient.getToken(code, ssoConfiguration.getRegisterurl(), "authorization_code", encode).getBody();
         // 根据token拿到user
         Object user = ssoFeignClient.getUser(tokenInfo.getToken_type() + " " + tokenInfo.getAccess_token()).getBody();
         Gson gson = new Gson();
@@ -54,12 +76,15 @@ public class SSOservice {
         return userId;
     }
 
-    public List<String> getProjects(String userId, String env) {
+    public List<String> getProjects(String userId) {
         Gson gson = new Gson();
-        ResponseEntity<Object> responseEntity = null;
-        switch (env) {
+        ResponseEntity<Object> responseEntity = openPrdFeignClient.getProjects(userId);
+/*        switch (env) {
             case "prd":
                 responseEntity = openPrdFeignClient.getProjects(userId);
+                break;
+            case "uat":
+                responseEntity = openFeignClient.getKFProjects(userId);
                 break;
             case "test":
                 responseEntity = openFeignClient.getKFProjects(userId);
@@ -68,16 +93,18 @@ public class SSOservice {
                 responseEntity = openFeignClient.getDEVProjects(userId);
                 break;
             default:
-                return null;
-        }
+                responseEntity = openFeignClient.getDEVProjects(userId);
+    }*/
 
         Object body = responseEntity.getBody();
         JsonArray data = gson.toJsonTree(body).getAsJsonObject().getAsJsonArray("data");
         if (data == null) {
             return null;
         }
+
         List<String> projects = new ArrayList<>();
-        for (JsonElement element : data) {
+        for (
+                JsonElement element : data) {
             JsonElement code = element.getAsJsonObject().get("code");
             if (code != null) {
                 projects.add(code.getAsString());

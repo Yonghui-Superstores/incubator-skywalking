@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * @author Liu-XinYuan
  */
-@FeignClient(name = "sso", url = "http://api.devitwork.yonghui.cn")
+@FeignClient(name = "sso", url = "http://api.itwork.yonghui.cn")
 @Component
 public interface SSOFeignClient {
 

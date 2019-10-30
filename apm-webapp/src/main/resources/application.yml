@@ -16,7 +16,6 @@
 
 server:
   port: 8080
-
 zuul:
   ignoredServices: '*'
   routes:
@@ -31,7 +30,7 @@ collector:
   path: /graphql
   ribbon:
     # Point to all backend's restHost:restPort, split by ,
-    listOfServers: 127.0.0.1:12800
+    listOfServers: 10.251.112.5:12800
     ReadTimeout: 60000
     ConnectTimeout: 60000
 
@@ -40,7 +39,7 @@ spring:
     add-mappings: false
   mvc:
     throw-exception-if-no-handler-found: true
-      
+
 management:
   # Customizing the management endpoint paths
   context-path: /manage
@@ -51,5 +50,7 @@ security:
       password: admin
 
 sso:
-  ssologin: http://api.devitwork.yonghui.cn/oauth/oauth/authorize?response_type=code&client_id=skywalking&redirect_uri=http://localhost:8080/sso/callback?env=test
+  ssologin: http://api.itwork.yonghui.cn/oauth/oauth/authorize?response_type=code&client_id=lskywalking&redirect_uri=http://localhost:8080/sso/callback
   redicturl: /#/monitor/dashboard
+  registerurl: http://localhost:8080/sso/callback
+  clientId: lskywalking

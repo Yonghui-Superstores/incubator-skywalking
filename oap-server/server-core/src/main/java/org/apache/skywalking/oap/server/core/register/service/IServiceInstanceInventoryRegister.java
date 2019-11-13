@@ -25,6 +25,8 @@ import org.apache.skywalking.oap.server.library.module.Service;
  * @author peng-yongsheng
  */
 public interface IServiceInstanceInventoryRegister extends Service {
+    int getOrCreate(int projectId,int serviceId, String serviceInstanceName, String uuid, long registerTime,
+                    JsonObject properties);
 
     int getOrCreate(int serviceId, String serviceInstanceName, String uuid, long registerTime,
         JsonObject properties);

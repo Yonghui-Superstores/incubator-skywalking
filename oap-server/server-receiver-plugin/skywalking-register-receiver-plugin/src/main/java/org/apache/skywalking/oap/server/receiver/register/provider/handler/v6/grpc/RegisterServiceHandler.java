@@ -20,8 +20,10 @@ package org.apache.skywalking.oap.server.receiver.register.provider.handler.v6.g
 
 import com.google.gson.JsonObject;
 import io.grpc.stub.StreamObserver;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.skywalking.apm.network.common.Commands;
 import org.apache.skywalking.apm.network.common.KeyIntValuePair;
 import org.apache.skywalking.apm.network.common.KeyStringValuePair;
@@ -39,14 +41,12 @@ import org.apache.skywalking.apm.network.register.v2.Services;
 import org.apache.skywalking.apm.util.StringUtil;
 import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.CoreModule;
+import org.apache.skywalking.oap.server.core.cache.ProjectInventoryCache;
 import org.apache.skywalking.oap.server.core.cache.ServiceInstanceInventoryCache;
 import org.apache.skywalking.oap.server.core.cache.ServiceInventoryCache;
 import org.apache.skywalking.oap.server.core.register.ServiceInstanceInventory;
 import org.apache.skywalking.oap.server.core.register.ServiceInventory;
-import org.apache.skywalking.oap.server.core.register.service.IEndpointInventoryRegister;
-import org.apache.skywalking.oap.server.core.register.service.INetworkAddressInventoryRegister;
-import org.apache.skywalking.oap.server.core.register.service.IServiceInstanceInventoryRegister;
-import org.apache.skywalking.oap.server.core.register.service.IServiceInventoryRegister;
+import org.apache.skywalking.oap.server.core.register.service.*;
 import org.apache.skywalking.oap.server.core.source.DetectPoint;
 import org.apache.skywalking.oap.server.library.module.ModuleManager;
 import org.apache.skywalking.oap.server.library.server.grpc.GRPCHandler;
@@ -66,30 +66,48 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
 
     private static final Logger logger = LoggerFactory.getLogger(RegisterServiceHandler.class);
 
+    private final ProjectInventoryCache projectInventoryCache;
     private final ServiceInventoryCache serviceInventoryCache;
     private final ServiceInstanceInventoryCache serviceInstanceInventoryCache;
+    private final IProjectInventoryRegister projectInventoryRegister;
     private final IServiceInventoryRegister serviceInventoryRegister;
     private final IServiceInstanceInventoryRegister serviceInstanceInventoryRegister;
     private final IEndpointInventoryRegister inventoryService;
     private final INetworkAddressInventoryRegister networkAddressInventoryRegister;
 
+
     public RegisterServiceHandler(ModuleManager moduleManager) {
+        this.projectInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ProjectInventoryCache.class);
         this.serviceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInventoryCache.class);
         this.serviceInstanceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class);
+        this.projectInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IProjectInventoryRegister.class);
         this.serviceInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IServiceInventoryRegister.class);
         this.serviceInstanceInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IServiceInstanceInventoryRegister.class);
         this.inventoryService = moduleManager.find(CoreModule.NAME).provider().getService(IEndpointInventoryRegister.class);
         this.networkAddressInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(INetworkAddressInventoryRegister.class);
     }
 
-    @Override public void doServiceRegister(Services request, StreamObserver<ServiceRegisterMapping> responseObserver) {
+    @Override
+    public void doServiceRegister(Services request, StreamObserver<ServiceRegisterMapping> responseObserver) {
         ServiceRegisterMapping.Builder builder = ServiceRegisterMapping.newBuilder();
         request.getServicesList().forEach(service -> {
             String serviceName = service.getServiceName();
             if (logger.isDebugEnabled()) {
                 logger.debug("Register service, service code: {}", serviceName);
             }
-            int serviceId = serviceInventoryRegister.getOrCreate(serviceName, null);
+            int index = serviceName.indexOf("#");
+            int externalProjectId = Const.NONE;
+            String shortServiceName = serviceName;
+            if (index >= 0) {
+                externalProjectId = projectInventoryRegister.getOrCreate(serviceName.substring(0,index), null, null);
+                shortServiceName = serviceName.substring(index + 1);
+            }
+            int serviceId = Const.NONE;
+            if (externalProjectId != Const.NONE) {
+                serviceId = serviceInventoryRegister.getOrCreate(shortServiceName, null, externalProjectId);
+            }
+
+
 
             if (serviceId != Const.NONE) {
                 KeyIntValuePair value = KeyIntValuePair.newBuilder().setKey(serviceName).setValue(serviceId).build();
@@ -101,8 +119,9 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
         responseObserver.onCompleted();
     }
 
-    @Override public void doServiceInstanceRegister(ServiceInstances request,
-        StreamObserver<ServiceInstanceRegisterMapping> responseObserver) {
+    @Override
+    public void doServiceInstanceRegister(ServiceInstances request,
+                                          StreamObserver<ServiceInstanceRegisterMapping> responseObserver) {
 
         ServiceInstanceRegisterMapping.Builder builder = ServiceInstanceRegisterMapping.newBuilder();
 
@@ -143,8 +162,7 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
             if (instanceProperties.has(HOST_NAME)) {
                 instanceName += "@" + instanceProperties.get(HOST_NAME).getAsString();
             }
-
-            int serviceInstanceId = serviceInstanceInventoryRegister.getOrCreate(instance.getServiceId(), instanceName, instance.getInstanceUUID(), instance.getTime(), instanceProperties);
+            int serviceInstanceId = serviceInstanceInventoryRegister.getOrCreate(serviceInventory.getProjectId(),instance.getServiceId(), instanceName, instance.getInstanceUUID(), instance.getTime(), instanceProperties);
 
             if (serviceInstanceId != Const.NONE) {
                 logger.info("register service instance id={} [UUID:{}]", serviceInstanceId, instance.getInstanceUUID());
@@ -156,21 +174,23 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
         responseObserver.onCompleted();
     }
 
-    @Override public void doEndpointRegister(Endpoints request, StreamObserver<EndpointMapping> responseObserver) {
+    @Override
+    public void doEndpointRegister(Endpoints request, StreamObserver<EndpointMapping> responseObserver) {
         EndpointMapping.Builder builder = EndpointMapping.newBuilder();
 
         request.getEndpointsList().forEach(endpoint -> {
             int serviceId = endpoint.getServiceId();
+            ServiceInventory serviceInventory = serviceInventoryCache.get(serviceId);
             String endpointName = endpoint.getEndpointName();
 
-            int endpointId = inventoryService.getOrCreate(serviceId, endpointName, DetectPoint.fromNetworkProtocolDetectPoint(endpoint.getFrom()));
+            int endpointId = inventoryService.getOrCreate(serviceInventory.getProjectId(),serviceId, endpointName, DetectPoint.fromNetworkProtocolDetectPoint(endpoint.getFrom()));
 
             if (endpointId != Const.NONE) {
                 builder.addElements(EndpointMappingElement.newBuilder()
-                    .setServiceId(serviceId)
-                    .setEndpointName(endpointName)
-                    .setEndpointId(endpointId)
-                    .setFrom(endpoint.getFrom()));
+                        .setServiceId(serviceId)
+                        .setEndpointName(endpointName)
+                        .setEndpointId(endpointId)
+                        .setFrom(endpoint.getFrom()));
             }
         });
 
@@ -194,8 +214,9 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
         responseObserver.onCompleted();
     }
 
-    @Override public void doServiceAndNetworkAddressMappingRegister(ServiceAndNetworkAddressMappings request,
-        StreamObserver<Commands> responseObserver) {
+    @Override
+    public void doServiceAndNetworkAddressMappingRegister(ServiceAndNetworkAddressMappings request,
+                                                          StreamObserver<Commands> responseObserver) {
 
         request.getMappingsList().forEach(mapping -> {
             int serviceId = mapping.getServiceId();

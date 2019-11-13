@@ -45,7 +45,7 @@ public class ProjectInventoryCacheEsDAO extends EsDAO implements IProjectInvento
     }
 
     @Override public int getProjectId(String externalProjectId) {
-        String id = ServiceInventory.buildId(externalProjectId);
+        String id = ProjectInventory.buildId(externalProjectId);
         return get(id);
     }
 

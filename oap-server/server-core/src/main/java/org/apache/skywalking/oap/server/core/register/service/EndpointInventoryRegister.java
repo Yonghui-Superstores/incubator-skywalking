@@ -50,7 +50,12 @@ public class EndpointInventoryRegister implements IEndpointInventoryRegister {
         return cacheService;
     }
 
-    @Override public int getOrCreate(int serviceId, String endpointName, DetectPoint detectPoint) {
+    @Override
+    public int getOrCreate(int serviceId, String endpointName, DetectPoint detectPoint) {
+        return getOrCreate(Const.NONE,serviceId,endpointName,detectPoint);
+    }
+
+    @Override public int getOrCreate(int projectId, int serviceId, String endpointName, DetectPoint detectPoint) {
         int endpointId = getCacheService().getEndpointId(serviceId, endpointName, detectPoint.ordinal());
 
         if (endpointId == Const.NONE) {
@@ -58,6 +63,7 @@ public class EndpointInventoryRegister implements IEndpointInventoryRegister {
             endpointInventory.setServiceId(serviceId);
             endpointInventory.setName(endpointName);
             endpointInventory.setDetectPoint(detectPoint.ordinal());
+            endpointInventory.setProjectId(projectId);
 
             long now = System.currentTimeMillis();
             endpointInventory.setRegisterTime(now);

@@ -51,8 +51,13 @@ public class ServiceInstanceInventoryRegister implements IServiceInstanceInvento
         return serviceInstanceInventoryCache;
     }
 
-    @Override public int getOrCreate(int serviceId, String serviceInstanceName, String uuid, long registerTime,
-        JsonObject properties) {
+    @Override
+    public int getOrCreate(int serviceId, String serviceInstanceName, String uuid, long registerTime, JsonObject properties) {
+        return getOrCreate(Const.NONE,serviceId,serviceInstanceName,uuid,registerTime,properties);
+    }
+
+    @Override public int getOrCreate(int projectId, int serviceId, String serviceInstanceName, String uuid, long registerTime,
+                                     JsonObject properties) {
         if (logger.isDebugEnabled()) {
             logger.debug("Get or create service instance by service instance name, service id: {}, service instance name: {},uuid: {}, registerTime: {}", serviceId, serviceInstanceName, uuid, registerTime);
         }
@@ -71,6 +76,8 @@ public class ServiceInstanceInventoryRegister implements IServiceInstanceInvento
             serviceInstanceInventory.setHeartbeatTime(registerTime);
 
             serviceInstanceInventory.setProperties(properties);
+
+            serviceInstanceInventory.setProjectId(projectId);
 
             InventoryStreamProcessor.getInstance().in(serviceInstanceInventory);
         }

@@ -16,20 +16,17 @@
  *
  */
 
-package org.apache.skywalking.oap.server.core.register.service;
+package org.apache.skywalking.oap.server.core.query.entity;
 
-import org.apache.skywalking.oap.server.core.source.DetectPoint;
-import org.apache.skywalking.oap.server.library.module.Service;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author peng-yongsheng
  */
-public interface IEndpointInventoryRegister extends Service {
-    int getOrCreate(int projectId,int serviceId, String endpointName, DetectPoint detectPoint);
-
-    int getOrCreate(int serviceId, String endpointName, DetectPoint detectPoint);
-
-    int get(int serviceId, String endpointName, int detectPoint);
-
-    void heartbeat(int endpointId, long heartBeatTime);
+@Getter
+@Setter
+public class Service {
+    private int id;
+    private String name;
 }

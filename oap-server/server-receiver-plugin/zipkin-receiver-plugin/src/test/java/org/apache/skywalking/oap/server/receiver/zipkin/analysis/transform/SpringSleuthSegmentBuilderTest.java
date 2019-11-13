@@ -45,6 +45,11 @@ public class SpringSleuthSegmentBuilderTest implements SegmentListener {
     public void testTransform() throws Exception {
 
         IServiceInventoryRegister applicationIDService = new IServiceInventoryRegister() {
+            @Override
+            public int getOrCreate(String serviceName, JsonObject properties, int projectId) {
+                return 0;
+            }
+
             @Override public int getOrCreate(String serviceName, JsonObject properties) {
                 String key = "AppCode:" + serviceName;
                 if (applicationRegister.containsKey(key)) {
@@ -84,8 +89,13 @@ public class SpringSleuthSegmentBuilderTest implements SegmentListener {
         };
 
         IServiceInstanceInventoryRegister instanceIDService = new IServiceInstanceInventoryRegister() {
+            @Override
+            public int getOrCreate(int projectId, int serviceId, String serviceInstanceName, String uuid, long registerTime, JsonObject properties) {
+                return 0;
+            }
+
             @Override public int getOrCreate(int serviceId, String serviceInstanceName, String uuid, long registerTime,
-                JsonObject osInfo) {
+                                             JsonObject osInfo) {
                 String key = "AppCode:" + serviceId + ",UUID:" + uuid;
                 if (applicationInstRegister.containsKey(key)) {
                     return applicationInstRegister.get(key);

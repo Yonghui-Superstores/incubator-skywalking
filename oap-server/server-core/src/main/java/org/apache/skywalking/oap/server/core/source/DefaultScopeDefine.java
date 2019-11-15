@@ -68,10 +68,12 @@ public class DefaultScopeDefine {
     public static final int JAEGER_SPAN = 24;
     public static final int HTTP_ACCESS_LOG = 25;
     public static final int PROJECT_INVENTORY = 60;
+    public static final int PROJECT = 61;
 
     /**
      * Catalog of scope, the metrics processor could use this to group all generated metrics by oal rt.
      */
+    public static final String PROJECT_CATALOG_NAME = "PROJECT";
     public static final String SERVICE_CATALOG_NAME = "SERVICE";
     public static final String SERVICE_INSTANCE_CATALOG_NAME = "SERVICE_INSTANCE";
     public static final String ENDPOINT_CATALOG_NAME = "ENDPOINT";

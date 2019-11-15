@@ -27,6 +27,7 @@ import org.apache.skywalking.oap.server.core.source.DefaultScopeDefine;
  * @author wusheng
  */
 public enum Scope {
+    Project(DefaultScopeDefine.PROJECT_INVENTORY),
     Service(DefaultScopeDefine.SERVICE),
     ServiceInstance(DefaultScopeDefine.SERVICE_INSTANCE),
     Endpoint(DefaultScopeDefine.ENDPOINT),

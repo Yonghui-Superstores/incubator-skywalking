@@ -66,7 +66,7 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
 
     private static final Logger logger = LoggerFactory.getLogger(RegisterServiceHandler.class);
 
-    private final ProjectInventoryCache projectInventoryCache;
+
     private final ServiceInventoryCache serviceInventoryCache;
     private final ServiceInstanceInventoryCache serviceInstanceInventoryCache;
     private final IProjectInventoryRegister projectInventoryRegister;
@@ -77,7 +77,6 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
 
 
     public RegisterServiceHandler(ModuleManager moduleManager) {
-        this.projectInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ProjectInventoryCache.class);
         this.serviceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInventoryCache.class);
         this.serviceInstanceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class);
         this.projectInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IProjectInventoryRegister.class);

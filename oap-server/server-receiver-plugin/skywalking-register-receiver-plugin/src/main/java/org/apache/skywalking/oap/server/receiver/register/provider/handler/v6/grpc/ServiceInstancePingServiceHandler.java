@@ -24,10 +24,13 @@ import org.apache.skywalking.apm.network.common.Commands;
 import org.apache.skywalking.apm.network.register.v2.ServiceInstancePingGrpc;
 import org.apache.skywalking.apm.network.register.v2.ServiceInstancePingPkg;
 import org.apache.skywalking.apm.network.trace.component.command.ServiceResetCommand;
+import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.CoreModule;
+import org.apache.skywalking.oap.server.core.cache.ProjectInventoryCache;
 import org.apache.skywalking.oap.server.core.cache.ServiceInstanceInventoryCache;
 import org.apache.skywalking.oap.server.core.command.CommandService;
 import org.apache.skywalking.oap.server.core.register.ServiceInstanceInventory;
+import org.apache.skywalking.oap.server.core.register.service.IProjectInventoryRegister;
 import org.apache.skywalking.oap.server.core.register.service.IServiceInstanceInventoryRegister;
 import org.apache.skywalking.oap.server.core.register.service.IServiceInventoryRegister;
 import org.apache.skywalking.oap.server.library.module.ModuleManager;
@@ -47,8 +50,10 @@ public class ServiceInstancePingServiceHandler extends ServiceInstancePingGrpc.S
     private final IServiceInventoryRegister serviceInventoryRegister;
     private final IServiceInstanceInventoryRegister serviceInstanceInventoryRegister;
     private final CommandService commandService;
+    private final IProjectInventoryRegister projectInventoryRegister;
 
     public ServiceInstancePingServiceHandler(ModuleManager moduleManager) {
+        this.projectInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IProjectInventoryRegister.class);
         this.serviceInstanceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class);
         this.serviceInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IServiceInventoryRegister.class);
         this.serviceInstanceInventoryRegister = moduleManager.find(CoreModule.NAME).provider().getService(IServiceInstanceInventoryRegister.class);
@@ -63,6 +68,11 @@ public class ServiceInstancePingServiceHandler extends ServiceInstancePingGrpc.S
         ServiceInstanceInventory serviceInstanceInventory = serviceInstanceInventoryCache.get(serviceInstanceId);
         if (Objects.nonNull(serviceInstanceInventory)) {
             serviceInventoryRegister.heartbeat(serviceInstanceInventory.getServiceId(), heartBeatTime);
+            if(serviceInstanceInventory.getProjectId() == Const.NONE){
+                String name = serviceInstanceInventory.getName();
+                int index = name.indexOf("#");
+                projectInventoryRegister.getOrCreate(name.substring(0,index), null, null);
+            }
             responseObserver.onNext(Commands.getDefaultInstance());
         } else {
             logger.warn("Can't find service by service instance id from cache," +

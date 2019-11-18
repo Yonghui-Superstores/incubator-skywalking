@@ -47,42 +47,42 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getServiceTopN(final String name, final int topN, final Duration duration,
-        final Order order) throws IOException {
+        final Order order,final String externalProjectId) throws IOException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
 
-        return getQueryService().getServiceTopN(name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order);
+        return getQueryService().getServiceTopN(name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order,externalProjectId);
     }
 
     public List<TopNEntity> getAllServiceInstanceTopN(final String name, final int topN, final Duration duration,
-        final Order order) throws IOException {
+        final Order order,final String externalProjectId) throws IOException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
 
-        return getQueryService().getAllServiceInstanceTopN(name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order);
+        return getQueryService().getAllServiceInstanceTopN(name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order,externalProjectId);
     }
 
     public List<TopNEntity> getServiceInstanceTopN(final int serviceId, final String name, final int topN,
-        final Duration duration, final Order order) throws IOException {
+        final Duration duration, final Order order,final String externalProjectId) throws IOException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
 
-        return getQueryService().getServiceInstanceTopN(serviceId, name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order);
+        return getQueryService().getServiceInstanceTopN(serviceId, name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order,externalProjectId);
     }
 
     public List<TopNEntity> getAllEndpointTopN(final String name, final int topN,
-        final Duration duration, final Order order) throws IOException {
+        final Duration duration, final Order order,final String externalProjectId) throws IOException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
 
-        return getQueryService().getAllEndpointTopN(name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order);
+        return getQueryService().getAllEndpointTopN(name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order,externalProjectId);
     }
 
     public List<TopNEntity> getEndpointTopN(final int serviceId, final String name, final int topN,
-        final Duration duration, final Order order) throws IOException {
+        final Duration duration, final Order order,final String externalProjectId) throws IOException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
 
-        return getQueryService().getEndpointTopN(serviceId, name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order);
+        return getQueryService().getEndpointTopN(serviceId, name, topN, StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, order,externalProjectId);
     }
 }

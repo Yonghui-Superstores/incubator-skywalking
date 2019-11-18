@@ -50,26 +50,26 @@ public class MetadataQuery implements GraphQLQueryResolver {
         return metadataQueryService;
     }
 
-    public ClusterBrief getGlobalBrief(final Duration duration) throws IOException, ParseException {
+    public ClusterBrief getGlobalBrief(final Duration duration,final String externalProjectId) throws IOException, ParseException {
         long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
         long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
 
-        return getMetadataQueryService().getGlobalBrief(startTimestamp, endTimestamp);
+        return getMetadataQueryService().getGlobalBrief(startTimestamp, endTimestamp,externalProjectId);
     }
 
-    public List<Service> getAllServices(final Duration duration) throws IOException, ParseException {
+    public List<Service> getAllServices(final Duration duration,final String externalProjectId) throws IOException, ParseException {
         long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
         long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
 
-        return getMetadataQueryService().getAllServices(startTimestamp, endTimestamp);
+        return getMetadataQueryService().getAllServices(startTimestamp, endTimestamp,externalProjectId);
     }
 
-    public List<Service> searchServices(final Duration duration, final String keyword)
+    public List<Service> searchServices(final Duration duration, final String keyword,final String externalProjectId)
         throws IOException, ParseException {
         long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
         long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
 
-        return getMetadataQueryService().searchServices(startTimestamp, endTimestamp, keyword);
+        return getMetadataQueryService().searchServices(startTimestamp, endTimestamp, keyword,externalProjectId);
     }
 
     public Service searchService(final String serviceCode) throws IOException {
@@ -77,24 +77,24 @@ public class MetadataQuery implements GraphQLQueryResolver {
     }
 
     public List<ServiceInstance> getServiceInstances(final Duration duration,
-        final String serviceId) throws IOException, ParseException {
+        final String serviceId,final String externalProjectId) throws IOException, ParseException {
         long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
         long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
 
-        return getMetadataQueryService().getServiceInstances(startTimestamp, endTimestamp, serviceId);
+        return getMetadataQueryService().getServiceInstances(startTimestamp, endTimestamp, serviceId, externalProjectId);
     }
 
     public List<Endpoint> searchEndpoint(final String keyword, final String serviceId,
-        final int limit) throws IOException {
-        return getMetadataQueryService().searchEndpoint(keyword, serviceId, limit);
+        final int limit,final String externalProjectId) throws IOException {
+        return getMetadataQueryService().searchEndpoint(keyword, serviceId, limit,externalProjectId);
     }
 
     public EndpointInfo getEndpointInfo(final int endpointId) throws IOException {
         return getMetadataQueryService().getEndpointInfo(endpointId);
     }
 
-    public List<Database> getAllDatabases(final Duration duration) throws IOException {
-        return getMetadataQueryService().getAllDatabases();
+    public List<Database> getAllDatabases(final Duration duration,final String externalProjectId) throws IOException {
+        return getMetadataQueryService().getAllDatabases(externalProjectId);
     }
 
     public TimeInfo getTimeInfo() {

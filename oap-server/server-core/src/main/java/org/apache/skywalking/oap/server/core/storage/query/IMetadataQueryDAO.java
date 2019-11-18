@@ -28,24 +28,26 @@ import org.apache.skywalking.oap.server.core.storage.DAO;
  */
 public interface IMetadataQueryDAO extends DAO {
 
-    int numOfService(final long startTimestamp, final long endTimestamp) throws IOException;
+    int numOfService(final long startTimestamp, final long endTimestamp,final long projectSeq) throws IOException;
 
-    int numOfEndpoint(final long startTimestamp, final long endTimestamp) throws IOException;
+    int numOfEndpoint(final long startTimestamp, final long endTimestamp,final long projectSeq) throws IOException;
 
-    int numOfConjectural(final long startTimestamp, final long endTimestamp, final int nodeTypeValue) throws IOException;
+    int numOfConjectural(final long startTimestamp, final long endTimestamp, final int nodeTypeValue,final long projectSeq) throws IOException;
 
-    List<Service> getAllServices(final long startTimestamp, final long endTimestamp) throws IOException;
+    List<Service> getAllServices(final long startTimestamp, final long endTimestamp,final long projectSeq) throws IOException;
 
-    List<Database> getAllDatabases() throws IOException;
+    List<Database> getAllDatabases(final long projectSeq) throws IOException;
 
     List<Service> searchServices(final long startTimestamp, final long endTimestamp,
-        final String keyword) throws IOException;
+        final String keyword,final long projectSeq) throws IOException;
+
+    Project searchProject(final String projectName) throws IOException;
 
     Service searchService(final String serviceCode) throws IOException;
 
     List<Endpoint> searchEndpoint(final String keyword, final String serviceId,
-        final int limit) throws IOException;
+        final int limit,final long projectSeq) throws IOException;
 
     List<ServiceInstance> getServiceInstances(final long startTimestamp, final long endTimestamp,
-        final String serviceId) throws IOException;
+        final String serviceId,final long projectSeq) throws IOException;
 }

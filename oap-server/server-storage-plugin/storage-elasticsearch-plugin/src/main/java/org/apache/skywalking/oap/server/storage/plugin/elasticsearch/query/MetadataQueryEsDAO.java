@@ -26,17 +26,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.skywalking.oap.server.core.query.entity.Attribute;
-import org.apache.skywalking.oap.server.core.query.entity.Database;
-import org.apache.skywalking.oap.server.core.query.entity.Endpoint;
-import org.apache.skywalking.oap.server.core.query.entity.LanguageTrans;
-import org.apache.skywalking.oap.server.core.query.entity.Service;
-import org.apache.skywalking.oap.server.core.query.entity.ServiceInstance;
-import org.apache.skywalking.oap.server.core.register.EndpointInventory;
-import org.apache.skywalking.oap.server.core.register.NodeType;
-import org.apache.skywalking.oap.server.core.register.RegisterSource;
-import org.apache.skywalking.oap.server.core.register.ServiceInstanceInventory;
-import org.apache.skywalking.oap.server.core.register.ServiceInventory;
+
+import org.apache.skywalking.oap.server.core.query.entity.*;
+import org.apache.skywalking.oap.server.core.register.*;
 import org.apache.skywalking.oap.server.core.source.DetectPoint;
 import org.apache.skywalking.oap.server.core.storage.query.IMetadataQueryDAO;
 import org.apache.skywalking.oap.server.library.client.elasticsearch.ElasticSearchClient;
@@ -69,11 +61,12 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         this.queryMaxSize = queryMaxSize;
     }
 
-    @Override public int numOfService(long startTimestamp, long endTimestamp) throws IOException {
+    @Override public int numOfService(long startTimestamp, long endTimestamp,final long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(timeRangeQueryBuild(startTimestamp, endTimestamp));
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
 
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.IS_ADDRESS, BooleanUtils.FALSE));
 
@@ -84,13 +77,13 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         return (int)response.getHits().getTotalHits();
     }
 
-    @Override public int numOfEndpoint(long startTimestamp, long endTimestamp) throws IOException {
+    @Override public int numOfEndpoint(long startTimestamp, long endTimestamp,final long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
         boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointInventory.DETECT_POINT, DetectPoint.SERVER.ordinal()));
-
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(0);
 
@@ -99,10 +92,12 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public int numOfConjectural(long startTimestamp, long endTimestamp, int nodeTypeValue) throws IOException {
+    public int numOfConjectural(long startTimestamp, long endTimestamp, int nodeTypeValue,final long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
-
-        sourceBuilder.query(QueryBuilders.termQuery(ServiceInventory.NODE_TYPE, nodeTypeValue));
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.NODE_TYPE, nodeTypeValue));
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
+        sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(0);
 
         SearchResponse response = getClient().search(ServiceInventory.INDEX_NAME, sourceBuilder);
@@ -111,12 +106,12 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Service> getAllServices(long startTimestamp, long endTimestamp) throws IOException {
+    public List<Service> getAllServices(long startTimestamp, long endTimestamp, long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(timeRangeQueryBuild(startTimestamp, endTimestamp));
-
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.IS_ADDRESS, BooleanUtils.FALSE));
 
         sourceBuilder.query(boolQueryBuilder);
@@ -128,12 +123,12 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Database> getAllDatabases() throws IOException {
+    public List<Database> getAllDatabases(final long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.NODE_TYPE, NodeType.Database.value()));
-
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(queryMaxSize);
 
@@ -160,12 +155,13 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override public List<Service> searchServices(long startTimestamp, long endTimestamp,
-        String keyword) throws IOException {
+        String keyword, long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(timeRangeQueryBuild(startTimestamp, endTimestamp));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.IS_ADDRESS, BooleanUtils.FALSE));
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
 
         if (!Strings.isNullOrEmpty(keyword)) {
             String matchCName = MatchCNameBuilder.INSTANCE.build(ServiceInventory.NAME);
@@ -177,6 +173,19 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
 
         SearchResponse response = getClient().search(ServiceInventory.INDEX_NAME, sourceBuilder);
         return buildServices(response);
+    }
+
+    @Override
+    public Project searchProject(String projectName) throws IOException {
+        GetResponse response = getClient().get(ProjectInventory.INDEX_NAME, ServiceInventory.buildId(projectName));
+        if (response.isExists()) {
+            Project project = new Project();
+            project.setId(((Number)response.getSource().get(ProjectInventory.SEQUENCE)).intValue());
+            project.setName((String)response.getSource().get(ProjectInventory.NAME));
+            return project;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -193,7 +202,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override public List<Endpoint> searchEndpoint(String keyword, String serviceId,
-        int limit) throws IOException {
+        int limit, long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -205,7 +214,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         }
 
         boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointInventory.DETECT_POINT, DetectPoint.SERVER.ordinal()));
-
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(limit);
 
@@ -225,12 +234,12 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override public List<ServiceInstance> getServiceInstances(long startTimestamp, long endTimestamp,
-        String serviceId) throws IOException {
+        String serviceId, long projectSeq) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(timeRangeQueryBuild(startTimestamp, endTimestamp));
-
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInstanceInventory.SERVICE_ID, serviceId));
 
         sourceBuilder.query(boolQueryBuilder);

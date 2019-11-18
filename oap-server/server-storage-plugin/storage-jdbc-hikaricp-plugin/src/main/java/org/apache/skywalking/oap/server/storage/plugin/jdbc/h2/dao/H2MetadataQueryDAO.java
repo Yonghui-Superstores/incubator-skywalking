@@ -29,17 +29,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.skywalking.oap.server.core.query.entity.Attribute;
-import org.apache.skywalking.oap.server.core.query.entity.Database;
-import org.apache.skywalking.oap.server.core.query.entity.Endpoint;
-import org.apache.skywalking.oap.server.core.query.entity.LanguageTrans;
-import org.apache.skywalking.oap.server.core.query.entity.Service;
-import org.apache.skywalking.oap.server.core.query.entity.ServiceInstance;
-import org.apache.skywalking.oap.server.core.register.EndpointInventory;
-import org.apache.skywalking.oap.server.core.register.NodeType;
-import org.apache.skywalking.oap.server.core.register.RegisterSource;
-import org.apache.skywalking.oap.server.core.register.ServiceInstanceInventory;
-import org.apache.skywalking.oap.server.core.register.ServiceInventory;
+
+import org.apache.skywalking.oap.server.core.query.entity.*;
+import org.apache.skywalking.oap.server.core.register.*;
 import org.apache.skywalking.oap.server.core.source.DetectPoint;
 import org.apache.skywalking.oap.server.core.storage.query.IMetadataQueryDAO;
 import org.apache.skywalking.oap.server.library.client.jdbc.hikaricp.JDBCHikariCPClient;
@@ -66,7 +58,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public int numOfService(long startTimestamp, long endTimestamp) throws IOException {
+    public int numOfService(long startTimestamp, long endTimestamp,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select count(*) num from ").append(ServiceInventory.INDEX_NAME).append(" where ");
@@ -86,7 +78,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public int numOfEndpoint(long startTimestamp, long endTimestamp) throws IOException {
+    public int numOfEndpoint(long startTimestamp, long endTimestamp,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select count(*) num from ").append(EndpointInventory.INDEX_NAME).append(" where ");
@@ -107,7 +99,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
     @Override
     public int numOfConjectural(long startTimestamp, long endTimestamp,
-        int nodeTypeValue) throws IOException {
+        int nodeTypeValue,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select count(*) num from ").append(ServiceInventory.INDEX_NAME).append(" where ");
@@ -127,7 +119,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Service> getAllServices(long startTimestamp, long endTimestamp) throws IOException {
+    public List<Service> getAllServices(long startTimestamp, long endTimestamp,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select * from ").append(ServiceInventory.INDEX_NAME).append(" where ");
@@ -145,7 +137,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Database> getAllDatabases() throws IOException {
+    public List<Database> getAllDatabases(final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(1);
         sql.append("select * from ").append(ServiceInventory.INDEX_NAME).append(" where ");
@@ -179,7 +171,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
     @Override
     public List<Service> searchServices(long startTimestamp, long endTimestamp,
-        String keyword) throws IOException {
+        String keyword,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select * from ").append(ServiceInventory.INDEX_NAME).append(" where ");
@@ -198,6 +190,31 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
         } catch (SQLException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public Project searchProject(String projectName) throws IOException {
+        StringBuilder sql = new StringBuilder();
+        List<Object> condition = new ArrayList<>(5);
+        sql.append("select * from ").append(ProjectInventory.INDEX_NAME).append(" where ");
+        sql.append(ServiceInventory.NAME).append(" = ?");
+        condition.add(projectName);
+
+        try (Connection connection = h2Client.getConnection()) {
+            try (ResultSet resultSet = h2Client.executeQuery(connection, sql.toString(), condition.toArray(new Object[0]))) {
+
+                while (resultSet.next()) {
+                    Project project = new Project();
+                    project.setId(resultSet.getInt(ServiceInventory.SEQUENCE));
+                    project.setName(resultSet.getString(ServiceInventory.NAME));
+                    return project;
+                }
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
+
+        return null;
     }
 
     @Override
@@ -229,7 +246,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
     @Override
     public List<Endpoint> searchEndpoint(String keyword, String serviceId,
-        int limit) throws IOException {
+        int limit,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select * from ").append(EndpointInventory.INDEX_NAME).append(" where ");
@@ -261,7 +278,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
     @Override
     public List<ServiceInstance> getServiceInstances(long startTimestamp, long endTimestamp,
-        String serviceId) throws IOException {
+        String serviceId,final long projectSeq) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select * from ").append(ServiceInstanceInventory.INDEX_NAME).append(" where ");

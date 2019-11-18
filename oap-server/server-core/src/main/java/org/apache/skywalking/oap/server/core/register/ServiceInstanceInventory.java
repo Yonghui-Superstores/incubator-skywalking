@@ -174,14 +174,14 @@ public class ServiceInstanceInventory extends RegisterSource {
         @Override public ServiceInstanceInventory map2Data(Map<String, Object> dbMap) {
             ServiceInstanceInventory inventory = new ServiceInstanceInventory();
             inventory.setSequence(((Number)dbMap.get(SEQUENCE)).intValue());
-            inventory.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
+            inventory.setProjectId(dbMap.get(PROJECT_ID) == null ? Const.NONE : ((Number) dbMap.get(PROJECT_ID)).intValue());
             inventory.setServiceId(((Number)dbMap.get(SERVICE_ID)).intValue());
             inventory.setIsAddress(((Number)dbMap.get(IS_ADDRESS)).intValue());
             inventory.setAddressId(((Number)dbMap.get(ADDRESS_ID)).intValue());
 
             inventory.setRegisterTime(((Number)dbMap.get(REGISTER_TIME)).longValue());
             inventory.setHeartbeatTime(((Number)dbMap.get(HEARTBEAT_TIME)).longValue());
-            inventory.setLastUpdateTime(((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
+            inventory.setLastUpdateTime(dbMap.get(LAST_UPDATE_TIME) == null ? 0 : ((Number) dbMap.get(LAST_UPDATE_TIME)).longValue());
 
             inventory.setName((String)dbMap.get(NAME));
             inventory.setInstanceUUID((String)dbMap.get(INSTANCE_UUID));

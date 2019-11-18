@@ -18,18 +18,19 @@
 
 package org.apache.skywalking.oap.server.core.source;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.*;
 
 /**
  * @author wusheng, peng-yongsheng
  */
-@ScopeDeclaration(id = SERVICE, name = "Service", catalog = SERVICE_CATALOG_NAME)
+@ScopeDeclaration(id = PROJECT, name = "Project", catalog = PROJECT_CATALOG_NAME)
 @ScopeDefaultColumn.VirtualColumnDefinition(fieldName = "entityId", columnName = "entity_id", isID = true, type = String.class)
-public class Service extends Source {
+public class Project extends Source {
     @Override public int scope() {
-        return DefaultScopeDefine.SERVICE;
+        return DefaultScopeDefine.PROJECT;
     }
 
     @Override public String getEntityId() {
@@ -38,6 +39,7 @@ public class Service extends Source {
 
     @Getter @Setter private int id;
     @Getter @Setter private String name;
+    @Getter @Setter private String serviceName;
     @Getter @Setter private String serviceInstanceName;
     @Getter @Setter private String endpointName;
     @Getter @Setter private int latency;

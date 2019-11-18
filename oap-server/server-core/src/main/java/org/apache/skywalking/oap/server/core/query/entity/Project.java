@@ -26,7 +26,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class Service {
-    private int id;
+public class Project {
+    private long id;
     private String name;
 }

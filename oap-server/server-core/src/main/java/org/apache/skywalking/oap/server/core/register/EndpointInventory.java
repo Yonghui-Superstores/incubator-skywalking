@@ -126,12 +126,12 @@ public class EndpointInventory extends RegisterSource {
             EndpointInventory inventory = new EndpointInventory();
             inventory.setSequence(((Number)dbMap.get(SEQUENCE)).intValue());
             inventory.setServiceId(((Number)dbMap.get(SERVICE_ID)).intValue());
-            inventory.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
+            inventory.setProjectId(dbMap.get(PROJECT_ID) ==null?Const.NONE:((Number)dbMap.get(PROJECT_ID)).intValue());
             inventory.setName((String)dbMap.get(NAME));
             inventory.setDetectPoint(((Number)dbMap.get(DETECT_POINT)).intValue());
             inventory.setRegisterTime(((Number)dbMap.get(REGISTER_TIME)).longValue());
             inventory.setHeartbeatTime(((Number)dbMap.get(HEARTBEAT_TIME)).longValue());
-            inventory.setLastUpdateTime(((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
+            inventory.setLastUpdateTime(dbMap.get(LAST_UPDATE_TIME) == null?0:((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
             return inventory;
         }
 

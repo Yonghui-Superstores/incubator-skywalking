@@ -148,7 +148,7 @@ public class NetworkAddressInventory extends RegisterSource {
             inventory.setNodeType(((Number)dbMap.get(NODE_TYPE)).intValue());
             inventory.setRegisterTime(((Number)dbMap.get(REGISTER_TIME)).longValue());
             inventory.setHeartbeatTime(((Number)dbMap.get(HEARTBEAT_TIME)).longValue());
-            inventory.setLastUpdateTime(((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
+            inventory.setLastUpdateTime(dbMap.get(LAST_UPDATE_TIME) == null?0:((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
             return inventory;
         }
 

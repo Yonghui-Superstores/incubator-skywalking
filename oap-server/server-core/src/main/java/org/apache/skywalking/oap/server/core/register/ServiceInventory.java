@@ -223,7 +223,7 @@ public class ServiceInventory extends RegisterSource {
         @Override public ServiceInventory map2Data(Map<String, Object> dbMap) {
             ServiceInventory inventory = new ServiceInventory();
             inventory.setSequence(((Number)dbMap.get(SEQUENCE)).intValue());
-            inventory.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
+            inventory.setProjectId(dbMap.get(PROJECT_ID) ==null?Const.NONE:((Number)dbMap.get(PROJECT_ID)).intValue());
             inventory.setIsAddress(((Number)dbMap.get(IS_ADDRESS)).intValue());
             inventory.setMappingServiceId(((Number)dbMap.get(MAPPING_SERVICE_ID)).intValue());
             inventory.setName((String)dbMap.get(NAME));
@@ -231,7 +231,7 @@ public class ServiceInventory extends RegisterSource {
             inventory.setNodeType(((Number)dbMap.get(NODE_TYPE)).intValue());
             inventory.setRegisterTime(((Number)dbMap.get(REGISTER_TIME)).longValue());
             inventory.setHeartbeatTime(((Number)dbMap.get(HEARTBEAT_TIME)).longValue());
-            inventory.setLastUpdateTime(((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
+            inventory.setLastUpdateTime(dbMap.get(LAST_UPDATE_TIME) == null?0:((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
             inventory.setProp((String)dbMap.get(PROPERTIES));
             return inventory;
         }

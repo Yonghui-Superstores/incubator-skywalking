@@ -36,7 +36,7 @@ import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.PR
  * @author peng-yongsheng
  */
 @ScopeDeclaration(id = PROJECT_INVENTORY, name = "ProjectInventory")
-@Stream(name = ProjectInventory.INDEX_NAME, scopeId = DefaultScopeDefine.SERVICE_INVENTORY, builder = ProjectInventory.Builder.class, processor = InventoryStreamProcessor.class)
+@Stream(name = ProjectInventory.INDEX_NAME, scopeId = DefaultScopeDefine.PROJECT_INVENTORY, builder = ProjectInventory.Builder.class, processor = InventoryStreamProcessor.class)
 public class ProjectInventory extends RegisterSource {
 
     public static final String INDEX_NAME = "project_inventory";
@@ -165,7 +165,7 @@ public class ProjectInventory extends RegisterSource {
             inventory.setExternalProjectId((String)dbMap.get(EXTERNAL_PROJECT_ID));
             inventory.setRegisterTime(((Number)dbMap.get(REGISTER_TIME)).longValue());
             inventory.setHeartbeatTime(((Number)dbMap.get(HEARTBEAT_TIME)).longValue());
-            inventory.setLastUpdateTime(((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
+            inventory.setLastUpdateTime(dbMap.get(LAST_UPDATE_TIME) == null?0:((Number)dbMap.get(LAST_UPDATE_TIME)).longValue());
             inventory.setProp((String)dbMap.get(PROPERTIES));
             return inventory;
         }

@@ -24,6 +24,7 @@ import org.apache.skywalking.apm.util.StringUtil;
 import org.apache.skywalking.oap.server.core.*;
 import org.apache.skywalking.oap.server.core.analysis.TimeBucket;
 import org.apache.skywalking.oap.server.core.cache.*;
+import org.apache.skywalking.oap.server.core.register.ServiceInventory;
 import org.apache.skywalking.oap.server.core.source.*;
 import org.apache.skywalking.oap.server.library.module.ModuleManager;
 import org.apache.skywalking.oap.server.receiver.trace.provider.DBLatencyThresholdsAndWatcher;
@@ -63,6 +64,7 @@ public class MultiScopesSpanListener implements EntrySpanListener, ExitSpanListe
     private final ServiceInstanceInventoryCache instanceInventoryCache;
     private final ServiceInventoryCache serviceInventoryCache;
     private final EndpointInventoryCache endpointInventoryCache;
+    private final ProjectInventoryCache projectInventoryCache;
 
     private final List<SourceBuilder> entrySourceBuilders;
     private final List<SourceBuilder> exitSourceBuilders;
@@ -80,6 +82,7 @@ public class MultiScopesSpanListener implements EntrySpanListener, ExitSpanListe
         this.slowDatabaseAccesses = new ArrayList<>(10);
         this.instanceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class);
         this.serviceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInventoryCache.class);
+        this.projectInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ProjectInventoryCache.class);
         this.endpointInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(EndpointInventoryCache.class);
         this.networkAddressInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(NetworkAddressInventoryCache.class);
         this.config = config;
@@ -220,18 +223,24 @@ public class MultiScopesSpanListener implements EntrySpanListener, ExitSpanListe
                 break;
         }
 
-        sourceBuilder.setSourceServiceName(serviceInventoryCache.get(sourceBuilder.getSourceServiceId()).getName());
+        ServiceInventory sourceInventory = serviceInventoryCache.get(sourceBuilder.getSourceServiceId());
+        sourceBuilder.setSourceServiceName(sourceInventory.getName());
         sourceBuilder.setSourceServiceInstanceName(instanceInventoryCache.get(sourceBuilder.getSourceServiceInstanceId()).getName());
         sourceBuilder.setSourceEndpointName(endpointInventoryCache.get(sourceBuilder.getSourceEndpointId()).getName());
-        sourceBuilder.setDestServiceName(serviceInventoryCache.get(sourceBuilder.getDestServiceId()).getName());
+        sourceBuilder.setSourceProjectId(sourceInventory.getProjectId());
+
+        ServiceInventory destServiceInventory = serviceInventoryCache.get(sourceBuilder.getDestServiceId());
+        sourceBuilder.setDestServiceName(destServiceInventory.getName());
         sourceBuilder.setDestServiceInstanceName(instanceInventoryCache.get(sourceBuilder.getDestServiceInstanceId()).getName());
         sourceBuilder.setDestEndpointName(endpointInventoryCache.get(sourceBuilder.getDestEndpointId()).getName());
+        sourceBuilder.setDestProjectId(destServiceInventory.getProjectId());
     }
 
     @Override public void build() {
         entrySourceBuilders.forEach(entrySourceBuilder -> {
             entrySourceBuilder.setTimeBucket(minuteTimeBucket);
             sourceReceiver.receive(entrySourceBuilder.toAll());
+            sourceReceiver.receive(entrySourceBuilder.toProject());
             sourceReceiver.receive(entrySourceBuilder.toService());
             sourceReceiver.receive(entrySourceBuilder.toServiceInstance());
             sourceReceiver.receive(entrySourceBuilder.toEndpoint());

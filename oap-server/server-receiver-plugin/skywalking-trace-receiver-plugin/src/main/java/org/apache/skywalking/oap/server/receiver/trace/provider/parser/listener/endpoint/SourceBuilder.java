@@ -27,12 +27,16 @@ import org.apache.skywalking.oap.server.core.source.*;
  */
 class SourceBuilder {
 
+    @Getter @Setter private int sourceProjectId;
+    @Getter @Setter private int sourceProjectName;
     @Getter @Setter private int sourceServiceId;
     @Getter @Setter private String sourceServiceName;
     @Getter @Setter private int sourceServiceInstanceId;
     @Getter @Setter private String sourceServiceInstanceName;
     @Getter @Setter private int sourceEndpointId;
     @Getter @Setter private String sourceEndpointName;
+    @Getter @Setter private int destProjectId;
+    @Getter @Setter private String destProjectName;
     @Getter @Setter private int destServiceId;
     @Getter @Setter private String destServiceName;
     @Getter @Setter private int destServiceInstanceId;
@@ -58,6 +62,20 @@ class SourceBuilder {
         all.setType(type);
         all.setTimeBucket(timeBucket);
         return all;
+    }
+
+    Project toProject() {
+        Project project = new Project();
+        project.setId(destProjectId);
+        project.setName(destProjectName);
+        project.setServiceInstanceName(destServiceInstanceName);
+        project.setEndpointName(destEndpointName);
+        project.setLatency(latency);
+        project.setStatus(status);
+        project.setResponseCode(responseCode);
+        project.setType(type);
+        project.setTimeBucket(timeBucket);
+        return project;
     }
 
     Service toService() {

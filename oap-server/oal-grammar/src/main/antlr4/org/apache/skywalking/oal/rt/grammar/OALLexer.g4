@@ -28,6 +28,7 @@ FROM: 'from';
 FILTER: 'filter';
 DISABLE: 'disable';
 SRC_ALL: 'All';
+SRC_PROJECT: 'Project';
 SRC_SERVICE: 'Service';
 SRC_SERVICE_INSTANCE: 'ServiceInstance';
 SRC_ENDPOINT: 'Endpoint';

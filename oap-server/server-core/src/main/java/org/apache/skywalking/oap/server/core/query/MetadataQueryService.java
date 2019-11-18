@@ -63,41 +63,57 @@ public class MetadataQueryService implements org.apache.skywalking.oap.server.li
         return endpointInventoryCache;
     }
 
-    public ClusterBrief getGlobalBrief(final long startTimestamp, final long endTimestamp) throws IOException {
+    public ClusterBrief getGlobalBrief(final long startTimestamp, final long endTimestamp,final String externalProjectId) throws IOException {
+        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
+        long projectId = project == null ? -1 : project.getId();
         ClusterBrief clusterBrief = new ClusterBrief();
-        clusterBrief.setNumOfService(getMetadataQueryDAO().numOfService(startTimestamp, endTimestamp));
-        clusterBrief.setNumOfEndpoint(getMetadataQueryDAO().numOfEndpoint(startTimestamp, endTimestamp));
-        clusterBrief.setNumOfDatabase(getMetadataQueryDAO().numOfConjectural(startTimestamp, endTimestamp, NodeType.Database.value()));
-        clusterBrief.setNumOfCache(getMetadataQueryDAO().numOfConjectural(startTimestamp, endTimestamp, NodeType.Cache.value()));
-        clusterBrief.setNumOfMQ(getMetadataQueryDAO().numOfConjectural(startTimestamp, endTimestamp, NodeType.MQ.value()));
+        clusterBrief.setNumOfService(getMetadataQueryDAO().numOfService(startTimestamp, endTimestamp,projectId));
+        clusterBrief.setNumOfEndpoint(getMetadataQueryDAO().numOfEndpoint(startTimestamp, endTimestamp,projectId));
+        clusterBrief.setNumOfDatabase(getMetadataQueryDAO().numOfConjectural(startTimestamp, endTimestamp, NodeType.Database.value(),projectId));
+        clusterBrief.setNumOfCache(getMetadataQueryDAO().numOfConjectural(startTimestamp, endTimestamp, NodeType.Cache.value(),projectId));
+        clusterBrief.setNumOfMQ(getMetadataQueryDAO().numOfConjectural(startTimestamp, endTimestamp, NodeType.MQ.value(),projectId));
         return clusterBrief;
     }
 
-    public List<Service> getAllServices(final long startTimestamp, final long endTimestamp) throws IOException {
-        return getMetadataQueryDAO().getAllServices(startTimestamp, endTimestamp);
+    public List<Service> getAllServices(final long startTimestamp, final long endTimestamp,final String externalProjectId) throws IOException {
+        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
+        long projectId = project == null ? -1 : project.getId();
+        return getMetadataQueryDAO().getAllServices(startTimestamp, endTimestamp,projectId);
     }
 
-    public List<Database> getAllDatabases() throws IOException {
-        return getMetadataQueryDAO().getAllDatabases();
+    public List<Database> getAllDatabases(final String externalProjectId) throws IOException {
+        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
+        long projectId = project == null ? -1 : project.getId();
+        return getMetadataQueryDAO().getAllDatabases(projectId);
     }
 
     public List<Service> searchServices(final long startTimestamp, final long endTimestamp,
-        final String keyword) throws IOException {
-        return getMetadataQueryDAO().searchServices(startTimestamp, endTimestamp, keyword);
+        final String keyword,final String externalProjectId) throws IOException {
+        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
+        long projectId = project == null ? -1 : project.getId();
+        return getMetadataQueryDAO().searchServices(startTimestamp, endTimestamp, keyword,projectId);
     }
 
     public List<ServiceInstance> getServiceInstances(final long startTimestamp, final long endTimestamp,
-        final String serviceId) throws IOException {
-        return getMetadataQueryDAO().getServiceInstances(startTimestamp, endTimestamp, serviceId);
+        final String serviceId,final String externalProjectId) throws IOException {
+        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
+        long projectId = project == null ? -1 : project.getId();
+        return getMetadataQueryDAO().getServiceInstances(startTimestamp, endTimestamp, serviceId,projectId);
     }
 
     public List<Endpoint> searchEndpoint(final String keyword, final String serviceId,
-        final int limit) throws IOException {
-        return getMetadataQueryDAO().searchEndpoint(keyword, serviceId, limit);
+        final int limit,final String externalProjectId) throws IOException {
+        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
+        long projectId = project == null ? -1 : project.getId();
+        return getMetadataQueryDAO().searchEndpoint(keyword, serviceId, limit,projectId);
     }
 
     public Service searchService(final String serviceCode) throws IOException {
         return getMetadataQueryDAO().searchService(serviceCode);
+    }
+
+    public Project searchProject(final String projectName) throws IOException {
+        return getMetadataQueryDAO().searchProject(projectName);
     }
 
     public EndpointInfo getEndpointInfo(final int endpointId) throws IOException {

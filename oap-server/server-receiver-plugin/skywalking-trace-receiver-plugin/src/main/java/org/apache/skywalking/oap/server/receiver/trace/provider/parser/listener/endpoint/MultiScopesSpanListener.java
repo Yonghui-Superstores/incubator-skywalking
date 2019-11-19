@@ -64,7 +64,6 @@ public class MultiScopesSpanListener implements EntrySpanListener, ExitSpanListe
     private final ServiceInstanceInventoryCache instanceInventoryCache;
     private final ServiceInventoryCache serviceInventoryCache;
     private final EndpointInventoryCache endpointInventoryCache;
-    private final ProjectInventoryCache projectInventoryCache;
 
     private final List<SourceBuilder> entrySourceBuilders;
     private final List<SourceBuilder> exitSourceBuilders;
@@ -82,7 +81,6 @@ public class MultiScopesSpanListener implements EntrySpanListener, ExitSpanListe
         this.slowDatabaseAccesses = new ArrayList<>(10);
         this.instanceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class);
         this.serviceInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInventoryCache.class);
-        this.projectInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ProjectInventoryCache.class);
         this.endpointInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(EndpointInventoryCache.class);
         this.networkAddressInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(NetworkAddressInventoryCache.class);
         this.config = config;

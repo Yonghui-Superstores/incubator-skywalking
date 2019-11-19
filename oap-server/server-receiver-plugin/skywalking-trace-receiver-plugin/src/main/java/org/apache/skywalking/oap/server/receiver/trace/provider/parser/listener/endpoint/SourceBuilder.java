@@ -81,6 +81,7 @@ class SourceBuilder {
     Service toService() {
         Service service = new Service();
         service.setId(destServiceId);
+        service.setProjectId(destProjectId);
         service.setName(destServiceName);
         service.setServiceInstanceName(destServiceInstanceName);
         service.setEndpointName(destEndpointName);
@@ -114,6 +115,7 @@ class SourceBuilder {
     ServiceInstance toServiceInstance() {
         ServiceInstance serviceInstance = new ServiceInstance();
         serviceInstance.setId(destServiceInstanceId);
+        serviceInstance.setProjectId(destProjectId);
         serviceInstance.setServiceId(destServiceId);
         serviceInstance.setName(destServiceInstanceName);
         serviceInstance.setServiceName(destServiceName);

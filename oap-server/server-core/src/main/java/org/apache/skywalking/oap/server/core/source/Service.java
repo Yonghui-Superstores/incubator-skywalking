@@ -35,7 +35,7 @@ public class Service extends Source {
     @Override public String getEntityId() {
         return String.valueOf(id);
     }
-
+    @Getter @Setter @ScopeDefaultColumn.DefinedByField(columnName = "project_id") private int projectId;
     @Getter @Setter private int id;
     @Getter @Setter private String name;
     @Getter @Setter private String serviceInstanceName;

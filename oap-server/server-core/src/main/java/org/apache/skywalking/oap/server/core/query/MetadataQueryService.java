@@ -96,16 +96,13 @@ public class MetadataQueryService implements org.apache.skywalking.oap.server.li
 
     public List<ServiceInstance> getServiceInstances(final long startTimestamp, final long endTimestamp,
         final String serviceId,final String externalProjectId) throws IOException {
-        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
-        long projectId = project == null ? -1 : project.getId();
-        return getMetadataQueryDAO().getServiceInstances(startTimestamp, endTimestamp, serviceId,projectId);
+        return getMetadataQueryDAO().getServiceInstances(startTimestamp, endTimestamp, serviceId);
     }
 
     public List<Endpoint> searchEndpoint(final String keyword, final String serviceId,
-        final int limit,final String externalProjectId) throws IOException {
-        Project project = getMetadataQueryDAO().searchProject(externalProjectId);
-        long projectId = project == null ? -1 : project.getId();
-        return getMetadataQueryDAO().searchEndpoint(keyword, serviceId, limit,projectId);
+        final int limit) throws IOException {
+
+        return getMetadataQueryDAO().searchEndpoint(keyword, serviceId, limit);
     }
 
     public Service searchService(final String serviceCode) throws IOException {

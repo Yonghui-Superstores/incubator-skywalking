@@ -246,7 +246,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
     @Override
     public List<Endpoint> searchEndpoint(String keyword, String serviceId,
-        int limit,final long projectSeq) throws IOException {
+        int limit) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select * from ").append(EndpointInventory.INDEX_NAME).append(" where ");
@@ -278,7 +278,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
     @Override
     public List<ServiceInstance> getServiceInstances(long startTimestamp, long endTimestamp,
-        String serviceId,final long projectSeq) throws IOException {
+        String serviceId) throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(5);
         sql.append("select * from ").append(ServiceInstanceInventory.INDEX_NAME).append(" where ");

@@ -19,6 +19,8 @@
 package org.apache.skywalking.oap.server.core.register;
 
 import lombok.*;
+import org.apache.skywalking.oap.server.core.Const;
+import org.apache.skywalking.oap.server.core.query.entity.ServiceInstance;
 import org.apache.skywalking.oap.server.core.remote.data.StreamData;
 import org.apache.skywalking.oap.server.core.storage.StorageData;
 import org.apache.skywalking.oap.server.core.storage.annotation.Column;
@@ -49,6 +51,15 @@ public abstract class RegisterSource extends StreamData implements StorageData {
             lastUpdateTime = registerSource.getLastUpdateTime();
             isChanged = true;
         }
+
+        if(registerSource instanceof ServiceInventory && ((ServiceInventory) registerSource).getProjectId() != Const.NONE){
+            ((ServiceInventory)this).setProjectId(((ServiceInventory) registerSource).getProjectId());
+        }
+
+        if(registerSource instanceof ServiceInstanceInventory && ((ServiceInstanceInventory) registerSource).getProjectId() != Const.NONE){
+            ((ServiceInstanceInventory)this).setProjectId(((ServiceInstanceInventory) registerSource).getProjectId());
+        }
+
         return isChanged;
     }
 }

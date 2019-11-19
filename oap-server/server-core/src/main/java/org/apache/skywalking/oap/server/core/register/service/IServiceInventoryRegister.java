@@ -35,6 +35,8 @@ public interface IServiceInventoryRegister extends Service {
 
     void update(int serviceId, NodeType nodeType, JsonObject properties);
 
+    void update(int serviceId,int projectId);
+
     void heartbeat(int serviceId, long heartBeatTime);
 
     void updateMapping(int serviceId, int mappingServiceId);

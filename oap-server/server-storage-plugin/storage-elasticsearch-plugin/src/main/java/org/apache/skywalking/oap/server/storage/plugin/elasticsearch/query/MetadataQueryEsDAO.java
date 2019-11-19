@@ -177,7 +177,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
 
     @Override
     public Project searchProject(String projectName) throws IOException {
-        GetResponse response = getClient().get(ProjectInventory.INDEX_NAME, ServiceInventory.buildId(projectName));
+        GetResponse response = getClient().get(ProjectInventory.INDEX_NAME, ProjectInventory.buildId(projectName));
         if (response.isExists()) {
             Project project = new Project();
             project.setId(((Number)response.getSource().get(ProjectInventory.SEQUENCE)).intValue());
@@ -202,7 +202,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override public List<Endpoint> searchEndpoint(String keyword, String serviceId,
-        int limit, long projectSeq) throws IOException {
+        int limit) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -214,7 +214,6 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         }
 
         boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointInventory.DETECT_POINT, DetectPoint.SERVER.ordinal()));
-        boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(limit);
 
@@ -234,12 +233,11 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override public List<ServiceInstance> getServiceInstances(long startTimestamp, long endTimestamp,
-        String serviceId, long projectSeq) throws IOException {
+        String serviceId) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(timeRangeQueryBuild(startTimestamp, endTimestamp));
-        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInstanceInventory.SERVICE_ID, serviceId));
 
         sourceBuilder.query(boolQueryBuilder);

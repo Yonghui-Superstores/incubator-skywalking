@@ -75,6 +75,11 @@ public class SpringSleuthSegmentBuilderTest implements SegmentListener {
             @Override public void update(int serviceId, NodeType nodeType, JsonObject properties) {
             }
 
+            @Override
+            public void update(int serviceId, int projectId) {
+
+            }
+
             @Override public void heartbeat(int serviceId, long heartBeatTime) {
 
             }
@@ -118,6 +123,11 @@ public class SpringSleuthSegmentBuilderTest implements SegmentListener {
             }
 
             @Override public void heartbeat(int serviceInstanceId, long heartBeatTime) {
+
+            }
+
+            @Override
+            public void update(int serviceInstanceId, int projectId) {
 
             }
         };

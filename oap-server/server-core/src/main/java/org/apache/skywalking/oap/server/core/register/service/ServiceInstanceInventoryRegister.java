@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import java.util.Objects;
 import org.apache.skywalking.oap.server.core.*;
 import org.apache.skywalking.oap.server.core.cache.ServiceInstanceInventoryCache;
+import org.apache.skywalking.oap.server.core.register.ProjectInventory;
 import org.apache.skywalking.oap.server.core.register.ServiceInstanceInventory;
 import org.apache.skywalking.oap.server.core.register.worker.InventoryStreamProcessor;
 import org.apache.skywalking.oap.server.library.module.ModuleDefineHolder;
@@ -114,5 +115,13 @@ public class ServiceInstanceInventoryRegister implements IServiceInstanceInvento
         } else {
             logger.warn("Service instance {} heartbeat, but not found in storage.", serviceInstanceId);
         }
+    }
+
+    @Override
+    public void update(int serviceInstanceId, int projectId) {
+        ServiceInstanceInventory serviceInstanceInventory = getServiceInstanceInventoryCache().get(serviceInstanceId);
+        serviceInstanceInventory.setProjectId(projectId);
+        serviceInstanceInventory.setLastUpdateTime(System.currentTimeMillis());
+        InventoryStreamProcessor.getInstance().in(serviceInstanceInventory);
     }
 }

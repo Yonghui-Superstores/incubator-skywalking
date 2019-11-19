@@ -117,6 +117,14 @@ public class ServiceInventoryRegister implements IServiceInventoryRegister {
         }
     }
 
+    @Override
+    public void update(int serviceId, int projectId) {
+        ServiceInventory serviceInventory = getServiceInventoryCache().get(serviceId);
+        serviceInventory.setProjectId(projectId);
+        serviceInventory.setLastUpdateTime(System.currentTimeMillis());
+        InventoryStreamProcessor.getInstance().in(serviceInventory);
+    }
+
     @Override public void heartbeat(int serviceId, long heartBeatTime) {
         ServiceInventory serviceInventory = getServiceInventoryCache().get(serviceId);
         if (Objects.nonNull(serviceInventory)) {

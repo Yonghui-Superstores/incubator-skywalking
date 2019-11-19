@@ -96,14 +96,12 @@ public class RegisterServiceHandler extends RegisterGrpc.RegisterImplBase implem
             }
             int index = serviceName.indexOf("#");
             int externalProjectId = Const.NONE;
-            String shortServiceName = serviceName;
             if (index >= 0) {
                 externalProjectId = projectInventoryRegister.getOrCreate(serviceName.substring(0,index), null, null);
-                shortServiceName = serviceName.substring(index + 1);
             }
             int serviceId = Const.NONE;
             if (externalProjectId != Const.NONE) {
-                serviceId = serviceInventoryRegister.getOrCreate(shortServiceName, null, externalProjectId);
+                serviceId = serviceInventoryRegister.getOrCreate(serviceName, null, externalProjectId);
             }
 
 

@@ -40,6 +40,7 @@ public class Endpoint extends Source {
     @Getter @Setter private int id;
     @Getter @Setter private String name;
     @Getter @Setter @ScopeDefaultColumn.DefinedByField(columnName = "service_id") private int serviceId;
+    @Getter @Setter @ScopeDefaultColumn.DefinedByField(columnName = "project_id") private int projectId;
     @Getter @Setter private String serviceName;
     @Getter @Setter @ScopeDefaultColumn.DefinedByField(columnName = "service_instance_id") private int serviceInstanceId;
     @Getter @Setter private String serviceInstanceName;

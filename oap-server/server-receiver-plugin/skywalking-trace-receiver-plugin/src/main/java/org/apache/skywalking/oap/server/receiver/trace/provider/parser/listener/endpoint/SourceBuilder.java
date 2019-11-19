@@ -150,6 +150,7 @@ class SourceBuilder {
     Endpoint toEndpoint() {
         Endpoint endpoint = new Endpoint();
         endpoint.setId(destEndpointId);
+        endpoint.setProjectId(destProjectId);
         endpoint.setName(destEndpointName);
         endpoint.setServiceId(destServiceId);
         endpoint.setServiceName(destServiceName);

@@ -25,4 +25,5 @@ import lombok.*;
 public class MetricCondition {
     private String id;
     private String name;
+    private String externalProjectId;
 }

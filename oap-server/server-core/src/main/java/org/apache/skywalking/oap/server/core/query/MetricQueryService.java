@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.skywalking.apm.util.StringUtil;
 import org.apache.skywalking.oap.server.core.Const;
+import org.apache.skywalking.oap.server.core.CoreModule;
 import org.apache.skywalking.oap.server.core.analysis.Downsampling;
 import org.apache.skywalking.oap.server.core.analysis.metrics.Metrics;
+import org.apache.skywalking.oap.server.core.cache.ProjectInventoryCache;
 import org.apache.skywalking.oap.server.core.query.entity.IntValues;
 import org.apache.skywalking.oap.server.core.query.entity.Thermodynamic;
 import org.apache.skywalking.oap.server.core.query.sql.KeyValues;
@@ -48,6 +50,7 @@ public class MetricQueryService implements Service {
 
     private final ModuleManager moduleManager;
     private IMetricsQueryDAO metricQueryDAO;
+    private ProjectInventoryCache projectInventoryCache;
 
     public MetricQueryService(ModuleManager moduleManager) {
         this.moduleManager = moduleManager;
@@ -58,6 +61,13 @@ public class MetricQueryService implements Service {
             metricQueryDAO = moduleManager.find(StorageModule.NAME).provider().getService(IMetricsQueryDAO.class);
         }
         return metricQueryDAO;
+    }
+
+    private ProjectInventoryCache getProjectInventoryCache(){
+        if (projectInventoryCache == null){
+            projectInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ProjectInventoryCache.class);
+        }
+        return projectInventoryCache;
     }
 
     public IntValues getValues(final String indName, final List<String> ids, final Downsampling downsampling,
@@ -82,13 +92,18 @@ public class MetricQueryService implements Service {
         return getMetricQueryDAO().getValues(indName, downsampling, startTB, endTB, where, ValueColumnIds.INSTANCE.getValueCName(indName), ValueColumnIds.INSTANCE.getValueFunction(indName));
     }
 
-    public IntValues getLinearIntValues(final String indName, final String id, final Downsampling downsampling,
+    public IntValues getLinearIntValues(final String indName, final String id,final String externalProjectId, final Downsampling downsampling,
         final long startTB,
         final long endTB) throws IOException, ParseException {
         List<DurationPoint> durationPoints = DurationUtils.INSTANCE.getDurationPoints(downsampling, startTB, endTB);
         List<String> ids = new ArrayList<>();
+        int projectId = Const.NONE ;
+        if (externalProjectId != null) {
+            projectId = getProjectInventoryCache().getProjectId(externalProjectId);
+        }
+        final String suffix = Const.ID_SPLIT + projectId;
         if (StringUtil.isEmpty(id)) {
-            durationPoints.forEach(durationPoint -> ids.add(String.valueOf(durationPoint.getPoint())));
+            durationPoints.forEach(durationPoint -> ids.add(durationPoint.getPoint() + suffix));
         } else {
             durationPoints.forEach(durationPoint -> ids.add(durationPoint.getPoint() + Const.ID_SPLIT + id));
         }
@@ -96,14 +111,20 @@ public class MetricQueryService implements Service {
         return getMetricQueryDAO().getLinearIntValues(indName, downsampling, ids, ValueColumnIds.INSTANCE.getValueCName(indName));
     }
 
-    public Thermodynamic getThermodynamic(final String indName, final String id, final Downsampling downsampling,
+    public Thermodynamic getThermodynamic(final String indName, final String id,final String externalProjectId, final Downsampling downsampling,
         final long startTB,
         final long endTB) throws IOException, ParseException {
         List<DurationPoint> durationPoints = DurationUtils.INSTANCE.getDurationPoints(downsampling, startTB, endTB);
         List<String> ids = new ArrayList<>();
+        int projectId = Const.NONE ;
+        if (externalProjectId != null) {
+             projectId = getProjectInventoryCache().getProjectId(externalProjectId);
+        }
+
+        final String suffix = Const.ID_SPLIT + projectId;
         durationPoints.forEach(durationPoint -> {
             if (id == null) {
-                ids.add(String.valueOf(durationPoint.getPoint()));
+                ids.add(durationPoint.getPoint() + suffix);
             } else {
                 ids.add(durationPoint.getPoint() + Const.ID_SPLIT + id);
             }

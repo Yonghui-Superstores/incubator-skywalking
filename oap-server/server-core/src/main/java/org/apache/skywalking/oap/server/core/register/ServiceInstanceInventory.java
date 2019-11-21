@@ -154,7 +154,7 @@ public class ServiceInstanceInventory extends RegisterSource {
         setServiceId(remoteData.getDataIntegers(1));
         setIsAddress(remoteData.getDataIntegers(2));
         setAddressId(remoteData.getDataIntegers(3));
-        setServiceId(remoteData.getDataIntegers(4));
+        setProjectId(remoteData.getDataIntegers(4));
 
         setRegisterTime(remoteData.getDataLongs(0));
         setHeartbeatTime(remoteData.getDataLongs(1));

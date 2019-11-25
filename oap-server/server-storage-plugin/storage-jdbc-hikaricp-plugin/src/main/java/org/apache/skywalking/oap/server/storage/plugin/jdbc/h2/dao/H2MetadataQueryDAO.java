@@ -137,7 +137,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Database> getAllDatabases(final long projectSeq) throws IOException {
+    public List<Database> getAllDatabases() throws IOException {
         StringBuilder sql = new StringBuilder();
         List<Object> condition = new ArrayList<>(1);
         sql.append("select * from ").append(ServiceInventory.INDEX_NAME).append(" where ");

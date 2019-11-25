@@ -123,12 +123,11 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Database> getAllDatabases(final long projectSeq) throws IOException {
+    public List<Database> getAllDatabases() throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.NODE_TYPE, NodeType.Database.value()));
-        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(queryMaxSize);
 

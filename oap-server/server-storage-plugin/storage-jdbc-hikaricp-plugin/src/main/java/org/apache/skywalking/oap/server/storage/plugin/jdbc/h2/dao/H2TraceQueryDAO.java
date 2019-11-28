@@ -40,7 +40,7 @@ public class H2TraceQueryDAO implements ITraceQueryDAO {
     }
 
     @Override
-    public TraceBrief queryBasicTraces(long startSecondTB, long endSecondTB, long minDuration, long maxDuration,
+    public TraceBrief queryBasicTraces(int projectId,long startSecondTB, long endSecondTB, long minDuration, long maxDuration,
         String endpointName, int serviceId, int serviceInstanceId, int endpointId, String traceId, int limit, int from,
         TraceState traceState, QueryOrder queryOrder) throws IOException {
         StringBuilder sql = new StringBuilder();

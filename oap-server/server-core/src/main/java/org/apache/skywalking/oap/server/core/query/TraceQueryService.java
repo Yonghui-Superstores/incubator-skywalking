@@ -50,6 +50,7 @@ public class TraceQueryService implements Service {
     private EndpointInventoryCache endpointInventoryCache;
     private NetworkAddressInventoryCache networkAddressInventoryCache;
     private IComponentLibraryCatalogService componentLibraryCatalogService;
+    private ProjectInventoryCache projectInventoryCache;
 
     public TraceQueryService(ModuleManager moduleManager) {
         this.moduleManager = moduleManager;
@@ -60,6 +61,13 @@ public class TraceQueryService implements Service {
             this.traceQueryDAO = moduleManager.find(StorageModule.NAME).provider().getService(ITraceQueryDAO.class);
         }
         return traceQueryDAO;
+    }
+
+    private ProjectInventoryCache getProjectInventoryCache(){
+        if (projectInventoryCache == null) {
+            this.projectInventoryCache = moduleManager.find(CoreModule.NAME).provider().getService(ProjectInventoryCache.class);
+        }
+        return projectInventoryCache;
     }
 
     private ServiceInventoryCache getServiceInventoryCache() {
@@ -90,13 +98,16 @@ public class TraceQueryService implements Service {
         return componentLibraryCatalogService;
     }
 
-    public TraceBrief queryBasicTraces(final int serviceId, final int serviceInstanceId, final int endpointId,
+    public TraceBrief queryBasicTraces(final String externalProjectId,final int serviceId, final int serviceInstanceId, final int endpointId,
         final String traceId, final String endpointName, final int minTraceDuration, int maxTraceDuration,
         final TraceState traceState, final QueryOrder queryOrder,
         final Pagination paging, final long startTB, final long endTB) throws IOException {
         PaginationUtils.Page page = PaginationUtils.INSTANCE.exchange(paging);
-
-        return getTraceQueryDAO().queryBasicTraces(startTB, endTB, minTraceDuration, maxTraceDuration, endpointName,
+        int projectId = Const.NONE;
+        if (externalProjectId != null) {
+            projectId = getProjectInventoryCache().getProjectId(externalProjectId);
+        }
+        return getTraceQueryDAO().queryBasicTraces(projectId, startTB, endTB, minTraceDuration, maxTraceDuration, endpointName,
             serviceId, serviceInstanceId, endpointId, traceId, page.getLimit(), page.getFrom(), traceState, queryOrder);
     }
 

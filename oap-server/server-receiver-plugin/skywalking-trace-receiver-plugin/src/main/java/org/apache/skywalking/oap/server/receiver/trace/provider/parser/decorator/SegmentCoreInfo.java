@@ -35,4 +35,5 @@ public class SegmentCoreInfo {
     private long minuteTimeBucket;
     private byte[] dataBinary;
     private boolean isV2;
+    private int projectId;
 }

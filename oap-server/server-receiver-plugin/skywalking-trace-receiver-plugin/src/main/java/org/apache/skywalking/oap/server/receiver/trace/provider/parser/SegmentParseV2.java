@@ -25,6 +25,7 @@ import org.apache.skywalking.apm.network.language.agent.*;
 import org.apache.skywalking.apm.network.language.agent.v2.SegmentObject;
 import org.apache.skywalking.oap.server.core.CoreModule;
 import org.apache.skywalking.oap.server.core.cache.ServiceInstanceInventoryCache;
+import org.apache.skywalking.oap.server.core.register.ServiceInstanceInventory;
 import org.apache.skywalking.oap.server.library.buffer.*;
 import org.apache.skywalking.oap.server.library.module.ModuleManager;
 import org.apache.skywalking.oap.server.core.analysis.TimeBucket;
@@ -94,14 +95,15 @@ public class SegmentParseV2 {
 
             // Recheck in case that the segment comes from file buffer
             final int serviceInstanceId = segmentObject.getServiceInstanceId();
-            if (serviceInstanceInventoryCache.get(serviceInstanceId) == null) {
+            ServiceInstanceInventory serviceInstanceInventory = null;
+            if ((serviceInstanceInventory=serviceInstanceInventoryCache.get(serviceInstanceId)) == null) {
                 logger.warn("Cannot recognize service instance id [{}] from cache, segment will be ignored", serviceInstanceId);
                 return true; // to mark it "completed" thus won't be retried
             }
 
             SegmentDecorator segmentDecorator = new SegmentDecorator(segmentObject);
 
-            if (!preBuild(traceIds, segmentDecorator)) {
+            if (!preBuild(traceIds, segmentDecorator,serviceInstanceInventory)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("This segment id exchange not success, write to buffer file, id: {}", segmentCoreInfo.getSegmentId());
                 }
@@ -132,7 +134,7 @@ public class SegmentParseV2 {
         return SegmentObject.parseFrom(segment.getSegment());
     }
 
-    private boolean preBuild(List<UniqueId> traceIds, SegmentDecorator segmentDecorator) {
+    private boolean preBuild(List<UniqueId> traceIds, SegmentDecorator segmentDecorator,ServiceInstanceInventory serviceInstanceInventory) {
         StringBuilder segmentIdBuilder = new StringBuilder();
 
         for (int i = 0; i < segmentDecorator.getTraceSegmentId().getIdPartsList().size(); i++) {
@@ -151,6 +153,7 @@ public class SegmentParseV2 {
         segmentCoreInfo.setServiceId(segmentDecorator.getServiceId());
         segmentCoreInfo.setServiceInstanceId(segmentDecorator.getServiceInstanceId());
         segmentCoreInfo.setDataBinary(segmentDecorator.toByteArray());
+        segmentCoreInfo.setProjectId(serviceInstanceInventory.getProjectId());
         segmentCoreInfo.setV2(true);
 
         boolean exchanged = true;

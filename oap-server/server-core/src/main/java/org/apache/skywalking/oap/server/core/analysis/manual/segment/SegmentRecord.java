@@ -49,7 +49,9 @@ public class SegmentRecord extends Record {
     public static final String IS_ERROR = "is_error";
     public static final String DATA_BINARY = "data_binary";
     public static final String VERSION = "version";
+    public static final String PROJECT_ID = "project_id";
 
+    @Setter @Getter @Column(columnName = PROJECT_ID) private int projectId;
     @Setter @Getter @Column(columnName = SEGMENT_ID) private String segmentId;
     @Setter @Getter @Column(columnName = TRACE_ID) private String traceId;
     @Setter @Getter @Column(columnName = SERVICE_ID) private int serviceId;
@@ -82,6 +84,7 @@ public class SegmentRecord extends Record {
             map.put(LATENCY, storageData.getLatency());
             map.put(IS_ERROR, storageData.getIsError());
             map.put(TIME_BUCKET, storageData.getTimeBucket());
+            map.put(PROJECT_ID,storageData.getProjectId());
             if (CollectionUtils.isEmpty(storageData.getDataBinary())) {
                 map.put(DATA_BINARY, Const.EMPTY_STRING);
             } else {
@@ -104,6 +107,7 @@ public class SegmentRecord extends Record {
             record.setLatency(((Number)dbMap.get(LATENCY)).intValue());
             record.setIsError(((Number)dbMap.get(IS_ERROR)).intValue());
             record.setTimeBucket(((Number)dbMap.get(TIME_BUCKET)).longValue());
+            record.setProjectId(((Number)dbMap.get(PROJECT_ID)).intValue());
             if (StringUtil.isEmpty((String)dbMap.get(DATA_BINARY))) {
                 record.setDataBinary(new byte[] {});
             } else {

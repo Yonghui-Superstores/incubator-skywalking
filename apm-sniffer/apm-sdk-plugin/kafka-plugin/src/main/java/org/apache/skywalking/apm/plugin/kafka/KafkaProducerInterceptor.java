@@ -56,11 +56,11 @@ public class KafkaProducerInterceptor implements InstanceMethodsAroundIntercepto
         SpanLayer.asMQ(activeSpan);
         activeSpan.setComponent(ComponentsDefine.KAFKA_PRODUCER);
 
-        CarrierItem next = contextCarrier.items();
+/*        CarrierItem next = contextCarrier.items();
         while (next.hasNext()) {
             next = next.next();
             record.headers().add(next.getHeadKey(), next.getHeadValue().getBytes());
-        }
+        }*/
         EnhancedInstance callbackInstance = (EnhancedInstance) allArguments[1];
         if (null != callbackInstance) {
             ContextSnapshot snapshot = ContextManager.capture();

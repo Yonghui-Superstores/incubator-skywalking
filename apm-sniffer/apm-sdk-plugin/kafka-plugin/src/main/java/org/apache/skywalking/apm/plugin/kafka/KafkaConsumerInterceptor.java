@@ -67,7 +67,7 @@ public class KafkaConsumerInterceptor implements InstanceMethodsAroundIntercepto
             Tags.MQ_BROKER.set(activeSpan, requiredInfo.getBrokerServers());
             Tags.MQ_TOPIC.set(activeSpan, requiredInfo.getTopics());
 
-            for (List<ConsumerRecord<?, ?>> consumerRecords : records.values()) {
+/*            for (List<ConsumerRecord<?, ?>> consumerRecords : records.values()) {
                 for (ConsumerRecord<?, ?> record : consumerRecords) {
                     ContextCarrier contextCarrier = new ContextCarrier();
 
@@ -81,7 +81,7 @@ public class KafkaConsumerInterceptor implements InstanceMethodsAroundIntercepto
                     }
                     ContextManager.extract(contextCarrier);
                 }
-            }
+            }*/
             ContextManager.stopSpan();
         }
         return ret;

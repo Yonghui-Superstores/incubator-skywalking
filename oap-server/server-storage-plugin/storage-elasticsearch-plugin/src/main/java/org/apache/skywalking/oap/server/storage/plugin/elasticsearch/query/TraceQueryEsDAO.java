@@ -115,6 +115,18 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
         traceBrief.setTotal((int)response.getHits().totalHits);
 
         for (SearchHit searchHit : response.getHits().getHits()) {
+            String segmentId = (String)searchHit.getSourceAsMap().get(SegmentRecord.SEGMENT_ID);
+            String selfTraceId = (String)searchHit.getSourceAsMap().get(SegmentRecord.TRACE_ID);
+
+            String[] segmentStamp = segmentId.split("\\.",3);
+            String[] traceStamp = selfTraceId.split("\\.",3);
+            if (
+                    !segmentStamp[0].equals(traceStamp[0])
+                            || !segmentStamp[1].equals(traceStamp[1])
+                            || !Long.valueOf(segmentStamp[2]).equals(Long.valueOf(traceStamp[2]) - 1)) {
+                continue;
+            }
+
             BasicTrace basicTrace = new BasicTrace();
 
             basicTrace.setSegmentId((String)searchHit.getSourceAsMap().get(SegmentRecord.SEGMENT_ID));

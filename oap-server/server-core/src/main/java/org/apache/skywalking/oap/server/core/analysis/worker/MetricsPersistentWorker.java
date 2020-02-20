@@ -133,6 +133,7 @@ public class MetricsPersistentWorker extends PersistenceWorker<Metrics, MergeDat
                         }
                     }
                 } catch (Throwable t) {
+                    logger.error("model is "+model.getName());
                     logger.error(t.getMessage(), t);
                 }
             }

@@ -101,14 +101,14 @@ public class TraceQueryService implements Service {
     public TraceBrief queryBasicTraces(final String externalProjectId,final int serviceId, final int serviceInstanceId, final int endpointId,
         final String traceId, final String endpointName, final int minTraceDuration, int maxTraceDuration,
         final TraceState traceState, final QueryOrder queryOrder,
-        final Pagination paging, final long startTB, final long endTB) throws IOException {
+        final Pagination paging, final long startTB, final long endTB,long startTimestamp,long endTimeStamp) throws IOException {
         PaginationUtils.Page page = PaginationUtils.INSTANCE.exchange(paging);
         int projectId = Const.NONE;
         if (externalProjectId != null) {
             projectId = getProjectInventoryCache().getProjectId(externalProjectId);
         }
         return getTraceQueryDAO().queryBasicTraces(projectId, startTB, endTB, minTraceDuration, maxTraceDuration, endpointName,
-            serviceId, serviceInstanceId, endpointId, traceId, page.getLimit(), page.getFrom(), traceState, queryOrder);
+            serviceId, serviceInstanceId, endpointId, traceId, page.getLimit(), page.getFrom(), traceState, queryOrder,startTimestamp,endTimeStamp);
     }
 
     public Trace queryTrace(final String traceId) throws IOException {

@@ -21,6 +21,8 @@ package org.apache.skywalking.oap.query.graphql.resolver;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.text.ParseException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.skywalking.oap.query.graphql.type.TraceQueryCondition;
 import org.apache.skywalking.oap.server.core.*;
@@ -49,9 +51,11 @@ public class TraceQuery implements GraphQLQueryResolver {
         return queryService;
     }
 
-    public TraceBrief queryBasicTraces(final TraceQueryCondition condition) throws IOException {
+    public TraceBrief queryBasicTraces(final TraceQueryCondition condition) throws IOException, ParseException {
         long startSecondTB = 0;
         long endSecondTB = 0;
+        long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(condition.getQueryDuration().getStep(), condition.getQueryDuration().getStart());
+        long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(condition.getQueryDuration().getStep(), condition.getQueryDuration().getEnd());
         String traceId = Const.EMPTY_STRING;
 
         if (!Strings.isNullOrEmpty(condition.getTraceId())) {
@@ -59,6 +63,7 @@ public class TraceQuery implements GraphQLQueryResolver {
         } else if (nonNull(condition.getQueryDuration())) {
             startSecondTB = DurationUtils.INSTANCE.startTimeDurationToSecondTimeBucket(condition.getQueryDuration().getStep(), condition.getQueryDuration().getStart());
             endSecondTB = DurationUtils.INSTANCE.endTimeDurationToSecondTimeBucket(condition.getQueryDuration().getStep(), condition.getQueryDuration().getEnd());
+
         } else {
             throw new UnexpectedException("The condition must contains either queryDuration or traceId.");
         }
@@ -74,7 +79,7 @@ public class TraceQuery implements GraphQLQueryResolver {
         QueryOrder queryOrder = condition.getQueryOrder();
         Pagination pagination = condition.getPaging();
 
-        return getQueryService().queryBasicTraces(externalProjectId,serviceId, serviceInstanceId, endpointId, traceId, endpointName, minDuration, maxDuration, traceState, queryOrder, pagination, startSecondTB, endSecondTB);
+        return getQueryService().queryBasicTraces(externalProjectId,serviceId, serviceInstanceId, endpointId, traceId, endpointName, minDuration, maxDuration, traceState, queryOrder, pagination,startSecondTB,endSecondTB, startTimestamp, endTimestamp);
     }
 
     public Trace queryTrace(final String traceId) throws IOException {

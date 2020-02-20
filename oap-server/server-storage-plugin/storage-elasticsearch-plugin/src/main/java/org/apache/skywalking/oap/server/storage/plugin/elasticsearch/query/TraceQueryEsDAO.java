@@ -21,6 +21,8 @@ package org.apache.skywalking.oap.server.storage.plugin.elasticsearch.query;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.skywalking.oap.server.core.analysis.manual.segment.SegmentRecord;
 import org.apache.skywalking.oap.server.core.query.entity.*;
 import org.apache.skywalking.oap.server.core.storage.query.ITraceQueryDAO;
@@ -29,6 +31,8 @@ import org.apache.skywalking.oap.server.library.util.BooleanUtils;
 import org.apache.skywalking.oap.server.storage.plugin.elasticsearch.base.*;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -48,7 +52,7 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
     @Override
     public TraceBrief queryBasicTraces(int projectId,long startSecondTB, long endSecondTB, long minDuration,
         long maxDuration, String endpointName, int serviceId, int serviceInstanceId, int endpointId, String traceId,
-        int limit, int from, TraceState traceState, QueryOrder queryOrder) throws IOException {
+        int limit, int from, TraceState traceState, QueryOrder queryOrder,long startTimeStamp,long endTimeStamp) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -69,6 +73,8 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
             }
             boolQueryBuilder.must().add(rangeQueryBuilder);
         }
+
+
         if (!Strings.isNullOrEmpty(endpointName)) {
             String matchCName = MatchCNameBuilder.INSTANCE.build(SegmentRecord.ENDPOINT_NAME);
             mustQueryList.add(QueryBuilders.matchPhraseQuery(matchCName, endpointName));
@@ -106,16 +112,27 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
                 sourceBuilder.sort(SegmentRecord.LATENCY, SortOrder.DESC);
                 break;
         }
+/*        if (!StringUtils.isEmpty(traceId)) {
+            String lan = "String segmentId = doc['segment_id'].value;" +
+                    "String selfTraceId = doc['trace_id'].value;" +
+                    "String[] segmentStamp = segmentId.split(\"\\.\",3);" +
+                    "String[] traceStamp = selfTraceId.split(\"\\.\",3);" +
+                    " return (segmentStamp[0].equals(traceStamp[0])" +
+                    " && segmentStamp[1].equals(traceStamp[1]) " +
+                    " && Long.valueOf(segmentStamp[2]).equals(Long.valueOf(traceStamp[2]) - 1))";
+            boolQueryBuilder.must().add(QueryBuilders.scriptQuery(new Script(ScriptType.INLINE, lan,
+                    "segmentIdEqualsTraceId", Collections.emptyMap())));
+        }*/
         sourceBuilder.size(limit);
         sourceBuilder.from(from);
 
-        SearchResponse response = getClient().search(SegmentRecord.INDEX_NAME, sourceBuilder);
+        SearchResponse response = getClient().search(SegmentRecord.INDEX_NAME, sourceBuilder, startTimeStamp, endTimeStamp);
 
         TraceBrief traceBrief = new TraceBrief();
         traceBrief.setTotal((int)response.getHits().totalHits);
 
         for (SearchHit searchHit : response.getHits().getHits()) {
-            String segmentId = (String)searchHit.getSourceAsMap().get(SegmentRecord.SEGMENT_ID);
+ /*           String segmentId = (String)searchHit.getSourceAsMap().get(SegmentRecord.SEGMENT_ID);
             String selfTraceId = (String)searchHit.getSourceAsMap().get(SegmentRecord.TRACE_ID);
 
             String[] segmentStamp = segmentId.split("\\.",3);
@@ -125,8 +142,7 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
                             || !segmentStamp[1].equals(traceStamp[1])
                             || !Long.valueOf(segmentStamp[2]).equals(Long.valueOf(traceStamp[2]) - 1)) {
                 continue;
-            }
-
+            }*/
             BasicTrace basicTrace = new BasicTrace();
 
             basicTrace.setSegmentId((String)searchHit.getSourceAsMap().get(SegmentRecord.SEGMENT_ID));
@@ -137,7 +153,6 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
             basicTrace.getTraceIds().add((String)searchHit.getSourceAsMap().get(SegmentRecord.TRACE_ID));
             traceBrief.getTraces().add(basicTrace);
         }
-
         return traceBrief;
     }
 
@@ -146,9 +161,11 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
         sourceBuilder.query(QueryBuilders.termQuery(SegmentRecord.TRACE_ID, traceId));
         sourceBuilder.size(segmentQueryMaxSize);
 
-        SearchResponse response = getClient().search(SegmentRecord.INDEX_NAME, sourceBuilder);
+        SearchResponse response = getClient().search(SegmentRecord.INDEX_NAME, sourceBuilder,traceId);
 
         List<SegmentRecord> segmentRecords = new ArrayList<>();
+        if (response == null)
+            return segmentRecords;
         for (SearchHit searchHit : response.getHits().getHits()) {
             SegmentRecord segmentRecord = new SegmentRecord();
             segmentRecord.setSegmentId((String)searchHit.getSourceAsMap().get(SegmentRecord.SEGMENT_ID));

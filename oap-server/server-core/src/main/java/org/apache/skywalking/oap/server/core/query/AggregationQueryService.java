@@ -53,10 +53,10 @@ public class AggregationQueryService implements Service {
     }
 
     public List<TopNEntity> getServiceTopN(final String indName, final int topN, final Downsampling downsampling, final long startTB,
-        final long endTB, final Order order,final String externalProjectId) throws IOException {
+        final long endTB, final Order order,final String externalProjectId,long startTimestamp,long endTimeStamp) throws IOException {
         Project project = getMetadataQueryDAO().searchProject(externalProjectId);
         long projectId = project == null ? -1 : project.getId();
-        List<TopNEntity> topNEntities = getAggregationQueryDAO().getServiceTopN(indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId);
+        List<TopNEntity> topNEntities = getAggregationQueryDAO().getServiceTopN(indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId,startTimestamp,endTimeStamp);
         for (TopNEntity entity : topNEntities) {
             ServiceInventory inventory = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInventoryCache.class).get(Integer.parseInt(entity.getId()));
             if (inventory != null) {
@@ -67,10 +67,10 @@ public class AggregationQueryService implements Service {
     }
 
     public List<TopNEntity> getAllServiceInstanceTopN(final String indName, final int topN, final Downsampling downsampling,
-        final long startTB, final long endTB, final Order order,final String externalProjectId) throws IOException {
+        final long startTB, final long endTB, final Order order,final String externalProjectId,long startTimestamp,long endTimeStamp) throws IOException {
         Project project = getMetadataQueryDAO().searchProject(externalProjectId);
         long projectId = project == null ? -1 : project.getId();
-        List<TopNEntity> topNEntities = getAggregationQueryDAO().getAllServiceInstanceTopN(indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId);
+        List<TopNEntity> topNEntities = getAggregationQueryDAO().getAllServiceInstanceTopN(indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId,startTimestamp,endTimeStamp);
         for (TopNEntity entity : topNEntities) {
             ServiceInstanceInventory inventory = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class).get(Integer.parseInt(entity.getId()));
             if (inventory != null) {
@@ -81,10 +81,10 @@ public class AggregationQueryService implements Service {
     }
 
     public List<TopNEntity> getServiceInstanceTopN(final int serviceId, final String indName, final int topN,
-        final Downsampling downsampling, final long startTB, final long endTB, final Order order,final String externalProjectId) throws IOException {
+        final Downsampling downsampling, final long startTB, final long endTB, final Order order,final String externalProjectId,long startTimestamp,long endTimeStamp) throws IOException {
         Project project = getMetadataQueryDAO().searchProject(externalProjectId);
         long projectId = project == null ? -1 : project.getId();
-        List<TopNEntity> topNEntities = getAggregationQueryDAO().getServiceInstanceTopN(serviceId, indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId);
+        List<TopNEntity> topNEntities = getAggregationQueryDAO().getServiceInstanceTopN(serviceId, indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId,startTimestamp,endTimeStamp);
         for (TopNEntity entity : topNEntities) {
             ServiceInstanceInventory inventory = moduleManager.find(CoreModule.NAME).provider().getService(ServiceInstanceInventoryCache.class).get(Integer.parseInt(entity.getId()));
             if (inventory != null) {
@@ -95,10 +95,10 @@ public class AggregationQueryService implements Service {
     }
 
     public List<TopNEntity> getAllEndpointTopN(final String indName, final int topN, final Downsampling downsampling,
-        final long startTB, final long endTB, final Order order,final String externalProjectId) throws IOException {
+        final long startTB, final long endTB, final Order order,final String externalProjectId,long startTimestamp,long endTimeStamp) throws IOException {
         Project project = getMetadataQueryDAO().searchProject(externalProjectId);
         long projectId = project == null ? -1 : project.getId();
-        List<TopNEntity> topNEntities = getAggregationQueryDAO().getAllEndpointTopN(indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId);
+        List<TopNEntity> topNEntities = getAggregationQueryDAO().getAllEndpointTopN(indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId,startTimestamp,endTimeStamp);
         for (TopNEntity entity : topNEntities) {
             EndpointInventory inventory = moduleManager.find(CoreModule.NAME).provider().getService(EndpointInventoryCache.class).get(Integer.parseInt(entity.getId()));
             if (inventory != null) {
@@ -109,10 +109,10 @@ public class AggregationQueryService implements Service {
     }
 
     public List<TopNEntity> getEndpointTopN(final int serviceId, final String indName, final int topN,
-        final Downsampling downsampling, final long startTB, final long endTB, final Order order,final String externalProjectId) throws IOException {
+        final Downsampling downsampling, final long startTB, final long endTB, final Order order,final String externalProjectId,long startTimestamp,long endTimeStamp) throws IOException {
         Project project = getMetadataQueryDAO().searchProject(externalProjectId);
         long projectId = project == null ? -1 : project.getId();
-        List<TopNEntity> topNEntities = getAggregationQueryDAO().getEndpointTopN(serviceId, indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId);
+        List<TopNEntity> topNEntities = getAggregationQueryDAO().getEndpointTopN(serviceId, indName, ValueColumnIds.INSTANCE.getValueCName(indName), topN, downsampling, startTB, endTB, order,projectId,startTimestamp,endTimeStamp);
         for (TopNEntity entity : topNEntities) {
             EndpointInventory inventory = moduleManager.find(CoreModule.NAME).provider().getService(EndpointInventoryCache.class).get(Integer.parseInt(entity.getId()));
             if (inventory != null) {

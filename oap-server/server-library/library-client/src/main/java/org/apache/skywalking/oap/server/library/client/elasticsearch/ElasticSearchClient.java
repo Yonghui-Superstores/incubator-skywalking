@@ -22,6 +22,7 @@ import com.google.common.base.Splitter;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,12 +33,13 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import org.joda.time.LocalDate;
+
+
+import java.util.*;
 import javax.net.ssl.SSLContext;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -103,7 +105,7 @@ public class ElasticSearchClient implements Client {
     protected RestHighLevelClient client;
 
     public ElasticSearchClient(String clusterNodes, String protocol, String trustStorePath, String trustStorePass,
-        String namespace, String user, String password) {
+                               String namespace, String user, String password) {
         this.clusterNodes = clusterNodes;
         this.protocol = protocol;
         this.namespace = namespace;
@@ -123,17 +125,17 @@ public class ElasticSearchClient implements Client {
 
             if (StringUtils.isBlank(trustStorePath)) {
                 builder = RestClient.builder(pairsList.toArray(new HttpHost[0]))
-                    .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+                        .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
             } else {
                 KeyStore truststore = KeyStore.getInstance("jks");
                 try (InputStream is = Files.newInputStream(Paths.get(trustStorePath))) {
                     truststore.load(is, trustStorePass.toCharArray());
                 }
                 SSLContextBuilder sslBuilder = SSLContexts.custom()
-                    .loadTrustMaterial(truststore, null);
+                        .loadTrustMaterial(truststore, null);
                 final SSLContext sslContext = sslBuilder.build();
                 builder = RestClient.builder(pairsList.toArray(new HttpHost[0]))
-                    .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider).setSSLContext(sslContext));
+                        .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider).setSSLContext(sslContext));
             }
         } else {
             builder = RestClient.builder(pairsList.toArray(new HttpHost[0]));
@@ -143,7 +145,8 @@ public class ElasticSearchClient implements Client {
         client.ping();
     }
 
-    @Override public void shutdown() throws IOException {
+    @Override
+    public void shutdown() throws IOException {
         client.close();
     }
 
@@ -283,10 +286,38 @@ public class ElasticSearchClient implements Client {
         return client.search(searchRequest);
     }
 
+    public SearchResponse search(String indexName, SearchSourceBuilder searchSourceBuilder, String traceId) throws IOException {
+        String[] fullIndexNames = formatIndexNames(indexName,0,0, traceId);
+        if (fullIndexNames == null || fullIndexNames.length == 0) {
+            return null;
+        }
+        SearchRequest searchRequest = new SearchRequest(fullIndexNames);
+        searchRequest.types(TYPE);
+        searchRequest.source(searchSourceBuilder);
+        return client.search(searchRequest);
+    }
+
+    public SearchResponse search(String indexName, SearchSourceBuilder searchSourceBuilder, long startTimestamp, long endTimestamp) throws IOException {
+        String[] fullIndexNames = formatIndexNames(indexName, startTimestamp, endTimestamp,null);
+        SearchRequest searchRequest = new SearchRequest(fullIndexNames);
+        searchRequest.types(TYPE);
+        searchRequest.source(searchSourceBuilder);
+        return client.search(searchRequest);
+    }
+
     public GetResponse get(String indexName, String id) throws IOException {
         indexName = formatIndexName(indexName);
         GetRequest request = new GetRequest(indexName, TYPE, id);
         return client.get(request);
+    }
+
+    public SearchResponse ids(String indexName, String[] ids, long startTimestamp, long endTimestamp) throws IOException {
+        String[] fullIndexNames = formatIndexNames(indexName, startTimestamp, endTimestamp,null);
+
+        SearchRequest searchRequest = new SearchRequest(fullIndexNames);
+        searchRequest.types(TYPE);
+        searchRequest.source().query(QueryBuilders.idsQuery().addIds(ids)).size(ids.length);
+        return client.search(searchRequest);
     }
 
     public SearchResponse ids(String indexName, String[] ids) throws IOException {
@@ -331,14 +362,14 @@ public class ElasticSearchClient implements Client {
         indexName = formatIndexName(indexName);
         Map<String, String> params = Collections.singletonMap("conflicts", "proceed");
         String jsonString = "{" +
-            "  \"query\": {" +
-            "    \"range\": {" +
-            "      \"" + timeBucketColumnName + "\": {" +
-            "        \"lte\": " + endTimeBucket +
-            "      }" +
-            "    }" +
-            "  }" +
-            "}";
+                "  \"query\": {" +
+                "    \"range\": {" +
+                "      \"" + timeBucketColumnName + "\": {" +
+                "        \"lte\": " + endTimeBucket +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
         HttpEntity entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);
         Response response = client.getLowLevelClient().performRequest(HttpPost.METHOD_NAME, "/" + indexName + "/_delete_by_query", params, entity);
         logger.debug("delete indexName: {}, jsonString : {}", indexName, jsonString);
@@ -382,11 +413,11 @@ public class ElasticSearchClient implements Client {
         };
 
         return BulkProcessor.builder(client::bulkAsync, listener)
-            .setBulkActions(bulkActions)
-            .setFlushInterval(TimeValue.timeValueSeconds(flushInterval))
-            .setConcurrentRequests(concurrentRequests)
-            .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
-            .build();
+                .setBulkActions(bulkActions)
+                .setFlushInterval(TimeValue.timeValueSeconds(flushInterval))
+                .setConcurrentRequests(concurrentRequests)
+                .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
+                .build();
     }
 
     public String formatIndexName(String indexName) {
@@ -395,4 +426,68 @@ public class ElasticSearchClient implements Client {
         }
         return indexName;
     }
+
+
+    private String[] formatIndexNames(String indexName, long startTimestamp, long endTimestamp, String traceId) throws IOException {
+        ArrayList<String> indexList = new ArrayList<>();
+        ArrayList<String> dateList = new ArrayList<>();
+        String baseName = formatIndexName(indexName);
+
+        if (startTimestamp != 0 && endTimestamp != 0) {
+            //use dateTime limit
+            LocalDate nowDate = LocalDate.now();
+            LocalDate startDate = LocalDate.fromDateFields(new Date(startTimestamp));
+            LocalDate endDate = LocalDate.fromDateFields(new Date(endTimestamp));
+            if (indexName.endsWith("month")) {
+                for (; !startDate.isAfter(endDate); startDate = startDate.plusMonths(1)) {
+                    if (!startDate.isAfter(nowDate))
+                        dateList.add(startDate.toString("yyyyMM"));
+                }
+            } else {
+                for (; !startDate.isAfter(endDate); startDate = startDate.plusDays(1)) {
+                    if (!startDate.isAfter(nowDate))
+                        dateList.add(startDate.toString("yyyyMMdd"));
+                }
+            }
+            //use traceId limit
+            if (traceId != null) {
+                long ts = Long.valueOf(traceId.split("\\.")[2]) / 10000;
+                String traceDateStr = LocalDate.fromDateFields(new Date(ts)).toString("yyyyMMdd");
+                for (String dtString : dateList) {
+                    if (dtString.compareTo(traceDateStr) > 0) {
+                        dateList.remove(dtString);
+                    }
+                }
+            }
+        } else {
+            if (traceId != null) {
+                long ts = Long.valueOf(traceId.split("\\.")[2]) / 10000;
+                LocalDate traceDate = LocalDate.fromDateFields(new Date(ts));
+                LocalDate nextDate = traceDate.plusDays(1);
+                dateList.add(traceDate.toString("yyyyMMdd"));
+                dateList.add(nextDate.toString("yyyyMMdd"));
+            }
+        }
+
+        if (dateList.size() > 0) {
+            for (String dateStr : dateList) {
+                indexList.add(baseName + "-" + dateStr);
+            }
+        }
+
+        //drop index if not exists
+
+        if (indexList.size() > 0) {
+            List<String> existsIndexes = retrievalIndexByAliases(indexName);
+            indexList.removeIf(s -> !existsIndexes.contains(s));
+        }
+
+        if (indexList.size() > 0) {
+            return  indexList.toArray(new String[0]);
+        } else {
+            return null;
+        }
+    }
+
+
 }

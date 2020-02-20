@@ -94,7 +94,7 @@ public class MetricQueryService implements Service {
 
     public IntValues getLinearIntValues(final String indName, final String id,final String externalProjectId, final Downsampling downsampling,
         final long startTB,
-        final long endTB) throws IOException, ParseException {
+        final long endTB,long startTimestamp,long endTimeStamp) throws IOException, ParseException {
         List<DurationPoint> durationPoints = DurationUtils.INSTANCE.getDurationPoints(downsampling, startTB, endTB);
         List<String> ids = new ArrayList<>();
         int projectId = Const.NONE ;
@@ -108,12 +108,12 @@ public class MetricQueryService implements Service {
             durationPoints.forEach(durationPoint -> ids.add(durationPoint.getPoint() + Const.ID_SPLIT + id));
         }
 
-        return getMetricQueryDAO().getLinearIntValues(indName, downsampling, ids, ValueColumnIds.INSTANCE.getValueCName(indName));
+        return getMetricQueryDAO().getLinearIntValues(indName, downsampling, ids, ValueColumnIds.INSTANCE.getValueCName(indName),startTimestamp,endTimeStamp);
     }
 
     public Thermodynamic getThermodynamic(final String indName, final String id,final String externalProjectId, final Downsampling downsampling,
         final long startTB,
-        final long endTB) throws IOException, ParseException {
+        final long endTB,long startTimestamp,long endTimeStamp) throws IOException, ParseException {
         List<DurationPoint> durationPoints = DurationUtils.INSTANCE.getDurationPoints(downsampling, startTB, endTB);
         List<String> ids = new ArrayList<>();
         int projectId = Const.NONE ;
@@ -130,6 +130,6 @@ public class MetricQueryService implements Service {
             }
         });
 
-        return getMetricQueryDAO().getThermodynamic(indName, downsampling, ids, ValueColumnIds.INSTANCE.getValueCName(indName));
+        return getMetricQueryDAO().getThermodynamic(indName, downsampling, ids, ValueColumnIds.INSTANCE.getValueCName(indName),startTimestamp,endTimeStamp);
     }
 }

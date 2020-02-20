@@ -46,18 +46,18 @@ public class AggregationQueryEsDAO extends EsDAO implements IAggregationQueryDAO
 
     @Override
     public List<TopNEntity> getServiceTopN(String indName, String valueCName, int topN, Downsampling downsampling, long startTB,
-        long endTB, Order order,final long projectSeq) throws IOException {
+        long endTB, Order order,final long projectSeq,long startTimeStamp,long endTimeStamp) throws IOException {
         String indexName = ModelName.build(downsampling, indName);
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
         boolQueryBuilder.must().add(QueryBuilders.rangeQuery(Metrics.TIME_BUCKET).lte(endTB).gte(startTB));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
-        return aggregation(indexName, valueCName, sourceBuilder, topN, order);
+        return aggregation(indexName, valueCName, sourceBuilder, topN, order, startTimeStamp, endTimeStamp);
     }
 
     @Override public List<TopNEntity> getAllServiceInstanceTopN(String indName, String valueCName, int topN, Downsampling downsampling,
-        long startTB, long endTB, Order order,final long projectSeq) throws IOException {
+        long startTB, long endTB, Order order,final long projectSeq,long startTimeStamp,long endTimeStamp) throws IOException {
         String indexName = ModelName.build(downsampling, indName);
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
@@ -65,11 +65,11 @@ public class AggregationQueryEsDAO extends EsDAO implements IAggregationQueryDAO
         boolQueryBuilder.must().add(QueryBuilders.rangeQuery(Metrics.TIME_BUCKET).lte(endTB).gte(startTB));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
-        return aggregation(indexName, valueCName, sourceBuilder, topN, order);
+        return aggregation(indexName, valueCName, sourceBuilder, topN, order, startTimeStamp, endTimeStamp);
     }
 
     @Override public List<TopNEntity> getServiceInstanceTopN(int serviceId, String indName, String valueCName, int topN,
-        Downsampling downsampling, long startTB, long endTB, Order order,final long projectSeq) throws IOException {
+        Downsampling downsampling, long startTB, long endTB, Order order,final long projectSeq,long startTimeStamp,long endTimeStamp) throws IOException {
         String indexName = ModelName.build(downsampling, indName);
 
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
@@ -81,24 +81,24 @@ public class AggregationQueryEsDAO extends EsDAO implements IAggregationQueryDAO
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInstanceInventory.SERVICE_ID, serviceId));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
 
-        return aggregation(indexName, valueCName, sourceBuilder, topN, order);
+        return aggregation(indexName, valueCName, sourceBuilder, topN, order, startTimeStamp, endTimeStamp);
     }
 
     @Override
     public List<TopNEntity> getAllEndpointTopN(String indName, String valueCName, int topN, Downsampling downsampling, long startTB,
-        long endTB, Order order,final long projectSeq) throws IOException {
+        long endTB, Order order,final long projectSeq,long startTimeStamp,long endTimeStamp) throws IOException {
         String indexName = ModelName.build(downsampling, indName);
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
         boolQueryBuilder.must().add(QueryBuilders.rangeQuery(Metrics.TIME_BUCKET).lte(endTB).gte(startTB));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceInventory.PROJECT_ID, projectSeq));
         sourceBuilder.query(boolQueryBuilder);
-        return aggregation(indexName, valueCName, sourceBuilder, topN, order);
+        return aggregation(indexName, valueCName, sourceBuilder, topN, order, startTimeStamp, endTimeStamp);
     }
 
     @Override
     public List<TopNEntity> getEndpointTopN(int serviceId, String indName, String valueCName, int topN, Downsampling downsampling,
-        long startTB, long endTB, Order order,final long projectSeq) throws IOException {
+        long startTB, long endTB, Order order,final long projectSeq,long startTimeStamp,long endTimeStamp) throws IOException {
         String indexName = ModelName.build(downsampling, indName);
 
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
@@ -109,11 +109,11 @@ public class AggregationQueryEsDAO extends EsDAO implements IAggregationQueryDAO
         boolQueryBuilder.must().add(QueryBuilders.rangeQuery(Metrics.TIME_BUCKET).lte(endTB).gte(startTB));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointInventory.SERVICE_ID, serviceId));
 
-        return aggregation(indexName, valueCName, sourceBuilder, topN, order);
+        return aggregation(indexName, valueCName, sourceBuilder, topN, order, startTimeStamp, endTimeStamp);
     }
 
     private List<TopNEntity> aggregation(String indexName, String valueCName, SearchSourceBuilder sourceBuilder,
-        int topN, Order order) throws IOException {
+        int topN, Order order,long startTimeStamp,long endTimeStamp) throws IOException {
         boolean asc = false;
         if (order.equals(Order.ASC)) {
             asc = true;
@@ -129,7 +129,7 @@ public class AggregationQueryEsDAO extends EsDAO implements IAggregationQueryDAO
             );
         sourceBuilder.aggregation(aggregationBuilder);
 
-        SearchResponse response = getClient().search(indexName, sourceBuilder);
+        SearchResponse response = getClient().search(indexName, sourceBuilder, startTimeStamp, endTimeStamp);
 
         List<TopNEntity> topNEntities = new ArrayList<>();
         Terms idTerms = response.getAggregations().get(Metrics.ENTITY_ID);

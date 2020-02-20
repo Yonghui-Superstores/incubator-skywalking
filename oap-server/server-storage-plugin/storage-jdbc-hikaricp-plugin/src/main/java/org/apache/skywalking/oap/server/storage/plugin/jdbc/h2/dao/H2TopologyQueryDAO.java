@@ -43,29 +43,29 @@ public class H2TopologyQueryDAO implements ITopologyQueryDAO {
     }
 
     @Override public List<Call.CallDetail> loadSpecifiedServerSideServiceRelations(Downsampling downsampling, long startTB, long endTB,
-        List<Integer> serviceIds) throws IOException {
+        List<Integer> serviceIds,long startTimeStamp,long endTimeStamp) throws IOException {
         String tableName = ModelName.build(downsampling, ServiceRelationServerSideMetrics.INDEX_NAME);
         return loadServiceCalls(tableName, startTB, endTB, ServiceRelationServerSideMetrics.SOURCE_SERVICE_ID, ServiceRelationServerSideMetrics.DEST_SERVICE_ID, serviceIds, false);
     }
 
     @Override public List<Call.CallDetail> loadSpecifiedClientSideServiceRelations(Downsampling downsampling, long startTB, long endTB,
-        List<Integer> serviceIds) throws IOException {
+        List<Integer> serviceIds,long startTimeStamp,long endTimeStamp) throws IOException {
         String tableName = ModelName.build(downsampling, ServiceRelationClientSideMetrics.INDEX_NAME);
         return loadServiceCalls(tableName, startTB, endTB, ServiceRelationServerSideMetrics.SOURCE_SERVICE_ID, ServiceRelationServerSideMetrics.DEST_SERVICE_ID, serviceIds, true);
     }
 
-    @Override public List<Call.CallDetail> loadServerSideServiceRelations(Downsampling downsampling, long startTB, long endTB) throws IOException {
+    @Override public List<Call.CallDetail> loadServerSideServiceRelations(Downsampling downsampling, long startTB, long endTB,long startTimeStamp,long endTimeStamp) throws IOException {
         String tableName = ModelName.build(downsampling, ServiceRelationServerSideMetrics.INDEX_NAME);
         return loadServiceCalls(tableName, startTB, endTB, ServiceRelationServerSideMetrics.SOURCE_SERVICE_ID, ServiceRelationServerSideMetrics.DEST_SERVICE_ID, new ArrayList<>(0), false);
     }
 
-    @Override public List<Call.CallDetail> loadClientSideServiceRelations(Downsampling downsampling, long startTB, long endTB) throws IOException {
+    @Override public List<Call.CallDetail> loadClientSideServiceRelations(Downsampling downsampling, long startTB, long endTB,long startTimeStamp,long endTimeStamp) throws IOException {
         String tableName = ModelName.build(downsampling, ServiceRelationClientSideMetrics.INDEX_NAME);
         return loadServiceCalls(tableName, startTB, endTB, ServiceRelationServerSideMetrics.SOURCE_SERVICE_ID, ServiceRelationServerSideMetrics.DEST_SERVICE_ID, new ArrayList<>(0), true);
     }
 
     @Override
-    public List<Call.CallDetail> loadSpecifiedDestOfServerSideEndpointRelations(Downsampling downsampling, long startTB, long endTB, int destEndpointId) throws IOException {
+    public List<Call.CallDetail> loadSpecifiedDestOfServerSideEndpointRelations(Downsampling downsampling, long startTB, long endTB, int destEndpointId,long startTimeStamp,long endTimeStamp) throws IOException {
         String tableName = ModelName.build(downsampling, EndpointRelationServerSideMetrics.INDEX_NAME);
 
         List<Call.CallDetail> calls = loadEndpointFromSide(tableName, startTB, endTB, EndpointRelationServerSideMetrics.SOURCE_ENDPOINT_ID, EndpointRelationServerSideMetrics.DEST_ENDPOINT_ID, destEndpointId, false);

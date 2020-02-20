@@ -59,7 +59,7 @@ public class JaegerTraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
     @Override
     public TraceBrief queryBasicTraces(int projectId,long startSecondTB, long endSecondTB, long minDuration, long maxDuration,
         String endpointName, int serviceId, int serviceInstanceId, int endpointId, String traceId, int limit, int from,
-        TraceState traceState, QueryOrder queryOrder) throws IOException {
+        TraceState traceState, QueryOrder queryOrder,long startTimeStamp,long endTimeStamp) throws IOException {
 
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 

@@ -463,7 +463,7 @@ public class OALRuntime implements OALEngine {
     }
 
     private void writeGeneratedFile(CtClass metricsClass, String className, String type) throws OALCompileException {
-        if (openEngineDebug) {
+        if (true) {
             DataOutputStream printWriter = null;
             try {
                 File workPath = WorkPath.getPath();

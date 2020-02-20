@@ -20,6 +20,8 @@ package org.apache.skywalking.oap.query.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import java.io.IOException;
+import java.text.ParseException;
+
 import org.apache.skywalking.oap.query.graphql.type.Duration;
 import org.apache.skywalking.oap.server.core.CoreModule;
 import org.apache.skywalking.oap.server.core.query.*;
@@ -45,24 +47,27 @@ public class TopologyQuery implements GraphQLQueryResolver {
         return queryService;
     }
 
-    public Topology getGlobalTopology(final Duration duration) throws IOException {
+    public Topology getGlobalTopology(final Duration duration) throws IOException, ParseException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
-
-        return getQueryService().getGlobalTopology(StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket);
+        long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
+        long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
+        return getQueryService().getGlobalTopology(StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, startTimestamp, endTimestamp);
     }
 
-    public Topology getServiceTopology(final int serviceId, final Duration duration) throws IOException {
+    public Topology getServiceTopology(final int serviceId, final Duration duration) throws IOException, ParseException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
-
-        return getQueryService().getServiceTopology(StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, serviceId);
+        long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
+        long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
+        return getQueryService().getServiceTopology(StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, serviceId, startTimestamp, endTimestamp);
     }
 
-    public Topology getEndpointTopology(final int endpointId, final Duration duration) throws IOException {
+    public Topology getEndpointTopology(final int endpointId, final Duration duration) throws IOException, ParseException {
         long startTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getStart());
         long endTimeBucket = DurationUtils.INSTANCE.exchangeToTimeBucket(duration.getEnd());
-
-        return getQueryService().getEndpointTopology(StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, endpointId);
+        long startTimestamp = DurationUtils.INSTANCE.startTimeToTimestamp(duration.getStep(), duration.getStart());
+        long endTimestamp = DurationUtils.INSTANCE.endTimeToTimestamp(duration.getStep(), duration.getEnd());
+        return getQueryService().getEndpointTopology(StepToDownsampling.transform(duration.getStep()), startTimeBucket, endTimeBucket, endpointId, startTimestamp, endTimestamp);
     }
 }

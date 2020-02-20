@@ -299,18 +299,18 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     private BoolQueryBuilder timeRangeQueryBuild(long startTimestamp, long endTimestamp) {
-        BoolQueryBuilder boolQuery1 = QueryBuilders.boolQuery();
+   /*     BoolQueryBuilder boolQuery1 = QueryBuilders.boolQuery();
         boolQuery1.must().add(QueryBuilders.rangeQuery(RegisterSource.HEARTBEAT_TIME).gte(endTimestamp));
         boolQuery1.must().add(QueryBuilders.rangeQuery(RegisterSource.REGISTER_TIME).lte(endTimestamp));
-
+*/
         BoolQueryBuilder boolQuery2 = QueryBuilders.boolQuery();
         boolQuery2.must().add(QueryBuilders.rangeQuery(RegisterSource.REGISTER_TIME).lte(endTimestamp));
         boolQuery2.must().add(QueryBuilders.rangeQuery(RegisterSource.HEARTBEAT_TIME).gte(startTimestamp));
 
         BoolQueryBuilder timeBoolQuery = QueryBuilders.boolQuery();
-        timeBoolQuery.should().add(boolQuery1);
-        timeBoolQuery.should().add(boolQuery2);
+       // timeBoolQuery.should().add(boolQuery1);
+       // timeBoolQuery.should().add(boolQuery2);
 
-        return timeBoolQuery;
+        return boolQuery2;
     }
 }

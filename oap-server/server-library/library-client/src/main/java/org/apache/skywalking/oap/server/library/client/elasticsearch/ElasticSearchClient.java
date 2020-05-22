@@ -19,40 +19,73 @@
 package org.apache.skywalking.oap.server.library.client.elasticsearch;
 
 import com.google.common.base.Splitter;
-import com.google.gson.*;
-import java.io.*;
-import java.nio.file.*;
-import java.security.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+
+import org.joda.time.LocalDate;
+
+
 import java.util.*;
 import javax.net.ssl.SSLContext;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.*;
-import org.apache.http.auth.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.nio.entity.NStringEntity;
-import org.apache.http.ssl.*;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.skywalking.oap.server.library.client.Client;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.elasticsearch.action.bulk.*;
-import org.elasticsearch.action.get.*;
+import org.elasticsearch.action.bulk.BackoffPolicy;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.*;
-import org.elasticsearch.action.support.*;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.ActiveShardCount;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.client.*;
-import org.elasticsearch.client.indices.*;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.*;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.joda.time.LocalDate;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author peng-yongsheng
@@ -72,7 +105,7 @@ public class ElasticSearchClient implements Client {
     protected RestHighLevelClient client;
 
     public ElasticSearchClient(String clusterNodes, String protocol, String trustStorePath, String trustStorePass,
-        String namespace, String user, String password) {
+                               String namespace, String user, String password) {
         this.clusterNodes = clusterNodes;
         this.protocol = protocol;
         this.namespace = namespace;
@@ -92,17 +125,17 @@ public class ElasticSearchClient implements Client {
 
             if (StringUtils.isBlank(trustStorePath)) {
                 builder = RestClient.builder(pairsList.toArray(new HttpHost[0]))
-                    .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+                        .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
             } else {
                 KeyStore truststore = KeyStore.getInstance("jks");
                 try (InputStream is = Files.newInputStream(Paths.get(trustStorePath))) {
                     truststore.load(is, trustStorePass.toCharArray());
                 }
                 SSLContextBuilder sslBuilder = SSLContexts.custom()
-                    .loadTrustMaterial(truststore, null);
+                        .loadTrustMaterial(truststore, null);
                 final SSLContext sslContext = sslBuilder.build();
                 builder = RestClient.builder(pairsList.toArray(new HttpHost[0]))
-                    .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider).setSSLContext(sslContext));
+                        .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider).setSSLContext(sslContext));
             }
         } else {
             builder = RestClient.builder(pairsList.toArray(new HttpHost[0]));
@@ -135,7 +168,7 @@ public class ElasticSearchClient implements Client {
         indexName = formatIndexName(indexName);
 
         CreateIndexRequest request = new CreateIndexRequest(indexName);
-        CreateIndexResponse response = client.indices().create(request, RequestOptions.DEFAULT);
+        CreateIndexResponse response = client.indices().create(request);
         logger.debug("create {} index finished, isAcknowledged: {}", indexName, response.isAcknowledged());
         return response.isAcknowledged();
     }
@@ -144,8 +177,8 @@ public class ElasticSearchClient implements Client {
         indexName = formatIndexName(indexName);
         CreateIndexRequest request = new CreateIndexRequest(indexName);
         request.settings(settings.toString(), XContentType.JSON);
-        request.mapping(mapping.toString(), XContentType.JSON);
-        CreateIndexResponse response = client.indices().create(request, RequestOptions.DEFAULT);
+        request.mapping(TYPE, mapping.toString(), XContentType.JSON);
+        CreateIndexResponse response = client.indices().create(request);
         logger.debug("create {} index finished, isAcknowledged: {}", indexName, response.isAcknowledged());
         return response.isAcknowledged();
     }
@@ -189,7 +222,8 @@ public class ElasticSearchClient implements Client {
             indexName = formatIndexName(indexName);
         }
         DeleteIndexRequest request = new DeleteIndexRequest(indexName);
-        AcknowledgedResponse response = client.indices().delete(request, RequestOptions.DEFAULT);
+        DeleteIndexResponse response;
+        response = client.indices().delete(request);
         logger.debug("delete {} index finished, isAcknowledged: {}", indexName, response.isAcknowledged());
         return response.isAcknowledged();
     }
@@ -253,7 +287,7 @@ public class ElasticSearchClient implements Client {
     }
 
     public SearchResponse search(String indexName, SearchSourceBuilder searchSourceBuilder, String traceId) throws IOException {
-        String[] fullIndexNames = formatIndexNames(indexName, 0, 0, traceId);
+        String[] fullIndexNames = formatIndexNames(indexName,0,0, traceId);
         if (fullIndexNames == null || fullIndexNames.length == 0) {
             return null;
         }
@@ -264,7 +298,7 @@ public class ElasticSearchClient implements Client {
     }
 
     public SearchResponse search(String indexName, SearchSourceBuilder searchSourceBuilder, long startTimestamp, long endTimestamp) throws IOException {
-        String[] fullIndexNames = formatIndexNames(indexName, startTimestamp, endTimestamp, null);
+        String[] fullIndexNames = formatIndexNames(indexName, startTimestamp, endTimestamp,null);
         SearchRequest searchRequest = new SearchRequest(fullIndexNames);
         searchRequest.types(TYPE);
         searchRequest.source(searchSourceBuilder);
@@ -278,7 +312,7 @@ public class ElasticSearchClient implements Client {
     }
 
     public SearchResponse ids(String indexName, String[] ids, long startTimestamp, long endTimestamp) throws IOException {
-        String[] fullIndexNames = formatIndexNames(indexName, startTimestamp, endTimestamp, null);
+        String[] fullIndexNames = formatIndexNames(indexName, startTimestamp, endTimestamp,null);
 
         SearchRequest searchRequest = new SearchRequest(fullIndexNames);
         searchRequest.types(TYPE);
@@ -328,14 +362,14 @@ public class ElasticSearchClient implements Client {
         indexName = formatIndexName(indexName);
         Map<String, String> params = Collections.singletonMap("conflicts", "proceed");
         String jsonString = "{" +
-            "  \"query\": {" +
-            "    \"range\": {" +
-            "      \"" + timeBucketColumnName + "\": {" +
-            "        \"lte\": " + endTimeBucket +
-            "      }" +
-            "    }" +
-            "  }" +
-            "}";
+                "  \"query\": {" +
+                "    \"range\": {" +
+                "      \"" + timeBucketColumnName + "\": {" +
+                "        \"lte\": " + endTimeBucket +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
         HttpEntity entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);
         Response response = client.getLowLevelClient().performRequest(HttpPost.METHOD_NAME, "/" + indexName + "/_delete_by_query", params, entity);
         logger.debug("delete indexName: {}, jsonString : {}", indexName, jsonString);
@@ -379,11 +413,11 @@ public class ElasticSearchClient implements Client {
         };
 
         return BulkProcessor.builder(client::bulkAsync, listener)
-            .setBulkActions(bulkActions)
-            .setFlushInterval(TimeValue.timeValueSeconds(flushInterval))
-            .setConcurrentRequests(concurrentRequests)
-            .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
-            .build();
+                .setBulkActions(bulkActions)
+                .setFlushInterval(TimeValue.timeValueSeconds(flushInterval))
+                .setConcurrentRequests(concurrentRequests)
+                .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
+                .build();
     }
 
     public String formatIndexName(String indexName) {
@@ -392,6 +426,7 @@ public class ElasticSearchClient implements Client {
         }
         return indexName;
     }
+
 
     private String[] formatIndexNames(String indexName, long startTimestamp, long endTimestamp, String traceId) throws IOException {
         ArrayList<String> indexList = new ArrayList<>();
@@ -448,10 +483,11 @@ public class ElasticSearchClient implements Client {
         }
 
         if (indexList.size() > 0) {
-            return indexList.toArray(new String[0]);
+            return  indexList.toArray(new String[0]);
         } else {
             return null;
         }
     }
+
 
 }

@@ -20,7 +20,9 @@ package org.apache.skywalking.oap.server.storage.plugin.elasticsearch.base;
 
 import java.io.IOException;
 import java.util.*;
+
 import org.apache.skywalking.oap.server.core.CoreModule;
+import org.apache.skywalking.oap.server.core.analysis.Downsampling;
 import org.apache.skywalking.oap.server.core.config.ConfigService;
 import org.apache.skywalking.oap.server.core.storage.IHistoryDeleteDAO;
 import org.apache.skywalking.oap.server.core.storage.model.Model;
@@ -57,6 +59,9 @@ public class HistoryDeleteEsDAO extends EsDAO implements IHistoryDeleteDAO {
             ttlCalculator = storageTTL.recordCalculator();
         } else {
             ttlCalculator = storageTTL.metricsCalculator(model.getDownsampling());
+            if (!model.getDownsampling().equals(Downsampling.Day)) {
+                return;
+            }
         }
         long timeBefore = ttlCalculator.timeBefore(new DateTime(), configService.getDataTTLConfig());
 

@@ -41,11 +41,11 @@ public class StorageModels implements IModelGetter, IModelSetter, IModelOverride
         // Check this scope id is valid.
         DefaultScopeDefine.nameOf(scopeId);
 
-        for (Model model : models) {
-            if (model.getName().equals(storage.getModelName())) {
-                return model;
-            }
-        }
+//        for (Model model : models) {
+//            if (model.getName().equals(storage.getModelName())) {
+//                return model;
+//            }
+//        }
 
         List<ModelColumn> modelColumns = new LinkedList<>();
         retrieval(aClass, storage.getModelName(), modelColumns);

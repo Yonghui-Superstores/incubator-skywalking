@@ -32,9 +32,8 @@ public class TimeSeriesUtils {
     }
 
     public static String timeSeries(String modelName, long timeBucket, Downsampling downsampling) {
+        System.out.println("time series, model name: " + modelName + ",downsampling: " + downsampling.getName() + ",timebucket: " + timeBucket);
         switch (downsampling) {
-            case None:
-                return modelName;
             case Hour:
                 return modelName + Const.LINE + timeBucket / 100;
             case Minute:

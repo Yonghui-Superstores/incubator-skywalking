@@ -26,6 +26,7 @@ import org.apache.skywalking.apm.network.language.agent.Downstream;
 import org.apache.skywalking.apm.network.language.agent.TraceSegmentServiceGrpc;
 import org.apache.skywalking.apm.network.language.agent.UniqueId;
 import org.apache.skywalking.apm.network.language.agent.UpstreamSegment;
+import org.joda.time.DateTime;
 
 /**
  * @author peng-yongsheng
@@ -42,8 +43,8 @@ public class AgentDataMock {
         StreamObserver<UpstreamSegment> streamObserver = createStreamObserver();
 
         UniqueId.Builder globalTraceId = UniqueIdBuilder.INSTANCE.create();
-        long startTimestamp = System.currentTimeMillis();
-        //long startTimestamp = new DateTime().minusDays(2).getMillis();
+//        long startTimestamp = System.currentTimeMillis();
+        long startTimestamp = new DateTime().minusDays(43).getMillis();
 
         // ServiceAMock
         ServiceAMock serviceAMock = new ServiceAMock(registerMock);
@@ -68,7 +69,7 @@ public class AgentDataMock {
 
         TimeUnit.SECONDS.sleep(10);
 
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 100; i++) {
             startTimestamp = startTimestamp + 100;
             globalTraceId = UniqueIdBuilder.INSTANCE.create();
             serviceASegmentId = UniqueIdBuilder.INSTANCE.create();

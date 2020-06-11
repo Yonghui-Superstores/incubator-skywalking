@@ -83,6 +83,7 @@ public enum PersistenceTimer {
 
             try {
                 List<PersistenceWorker> persistenceWorkers = new ArrayList<>();
+                persistenceWorkers.addAll(SecondMetricsStreamProcessor.getInstance().getPersistentWorkers());
                 persistenceWorkers.addAll(TopNStreamProcessor.getInstance().getPersistentWorkers());
                 persistenceWorkers.addAll(MetricsStreamProcessor.getInstance().getPersistentWorkers());
 

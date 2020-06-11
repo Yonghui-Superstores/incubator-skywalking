@@ -43,8 +43,8 @@ public class AgentDataMock {
         StreamObserver<UpstreamSegment> streamObserver = createStreamObserver();
 
         UniqueId.Builder globalTraceId = UniqueIdBuilder.INSTANCE.create();
-//        long startTimestamp = System.currentTimeMillis();
-        long startTimestamp = new DateTime().minusDays(43).getMillis();
+        long startTimestamp = System.currentTimeMillis();
+//        long startTimestamp = new DateTime().minusDays(43).getMillis();
 
         // ServiceAMock
         ServiceAMock serviceAMock = new ServiceAMock(registerMock);
@@ -69,7 +69,7 @@ public class AgentDataMock {
 
         TimeUnit.SECONDS.sleep(10);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             startTimestamp = startTimestamp + 100;
             globalTraceId = UniqueIdBuilder.INSTANCE.create();
             serviceASegmentId = UniqueIdBuilder.INSTANCE.create();

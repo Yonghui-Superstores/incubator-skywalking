@@ -73,6 +73,7 @@ public class CoreModule extends ModuleDefine {
         classes.add(AggregationQueryService.class);
         classes.add(AlarmQueryService.class);
         classes.add(TopNRecordsQueryService.class);
+        classes.add(ServiceDotsQueryService.class);
     }
 
     private void addServerInterface(List<Class> classes) {

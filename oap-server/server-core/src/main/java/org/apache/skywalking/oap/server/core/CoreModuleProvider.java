@@ -164,6 +164,7 @@ public class CoreModuleProvider extends ModuleProvider {
         this.registerServiceImplementation(AggregationQueryService.class, new AggregationQueryService(getManager()));
         this.registerServiceImplementation(AlarmQueryService.class, new AlarmQueryService(getManager()));
         this.registerServiceImplementation(TopNRecordsQueryService.class, new TopNRecordsQueryService(getManager()));
+        this.registerServiceImplementation(ServiceDotsQueryService.class, new ServiceDotsQueryService(getManager()));
 
         this.registerServiceImplementation(CommandService.class, new CommandService(getManager()));
 

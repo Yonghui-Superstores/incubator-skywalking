@@ -30,8 +30,8 @@ import java.util.Random;
  */
 public class ServiceDispatcher implements SourceDispatcher<Segment> {
 
-    private static final int STEP = 50;
-    private static final int NUM_OF_STEPS = 200;
+    private static final int STEP = 30;
+    private static final int NUM_OF_STEPS = 300;
     private Random random = new Random();
 
     @Override
@@ -49,8 +49,8 @@ public class ServiceDispatcher implements SourceDispatcher<Segment> {
         metrics.setNumOfSteps(NUM_OF_STEPS);
         metrics.setTimeBucket(source.getTimeBucket());
         metrics.setEntityId(String.valueOf(source.getServiceId()));
-//        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
-        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
+        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
+//        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
         SecondMetricsStreamProcessor.getInstance().in(metrics);
     }
 
@@ -60,8 +60,8 @@ public class ServiceDispatcher implements SourceDispatcher<Segment> {
         metrics.setNumOfSteps(NUM_OF_STEPS);
         metrics.setTimeBucket(source.getTimeBucket());
         metrics.setEntityId(String.valueOf(source.getServiceId()));
-//        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
-        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
+        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
+//        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
         SecondMetricsStreamProcessor.getInstance().in(metrics);
     }
 }

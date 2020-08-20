@@ -19,6 +19,8 @@
 package org.apache.skywalking.oap.server.core.register.service;
 
 import java.util.Objects;
+
+import org.apache.skywalking.apm.util.StringUtil;
 import org.apache.skywalking.oap.server.core.*;
 import org.apache.skywalking.oap.server.core.cache.EndpointInventoryCache;
 import org.apache.skywalking.oap.server.core.register.EndpointInventory;
@@ -56,6 +58,8 @@ public class EndpointInventoryRegister implements IEndpointInventoryRegister {
     }
 
     @Override public int getOrCreate(int projectId, int serviceId, String endpointName, DetectPoint detectPoint) {
+        endpointName = cutDownEndpoint(endpointName);
+
         int endpointId = getCacheService().getEndpointId(serviceId, endpointName, detectPoint.ordinal());
 
         if (endpointId == Const.NONE) {
@@ -87,5 +91,17 @@ public class EndpointInventoryRegister implements IEndpointInventoryRegister {
         } else {
             logger.warn("Endpoint {} heartbeat, but not found in storage.", endpointId);
         }
+    }
+
+    public String cutDownEndpoint(String endpointName) {
+        if (!StringUtil.isEmpty(endpointName) && endpointName.length() > 500) {
+            endpointName = endpointName.replaceAll("%2F", "/");
+            if (endpointName.lastIndexOf("/") == 0) {
+                endpointName = "/too_long_endpoint";
+            } else {
+                endpointName = endpointName.substring(0, endpointName.lastIndexOf("/"));
+            }
+        }
+        return endpointName;
     }
 }

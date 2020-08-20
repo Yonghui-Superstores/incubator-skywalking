@@ -21,6 +21,7 @@ package org.apache.skywalking.apm.agent.core.remote;
 import io.grpc.Channel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -29,6 +30,7 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.DefaultImplementor;
 import org.apache.skywalking.apm.agent.core.boot.DefaultNamedThreadFactory;
@@ -67,13 +69,13 @@ public class GRPCChannelManager implements BootService, Runnable {
         }
         grpcServers = Arrays.asList(Config.Collector.BACKEND_SERVICE.split(","));
         connectCheckFuture = Executors
-            .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("GRPCChannelManager"))
-            .scheduleAtFixedRate(new RunnableWithExceptionProtection(this, new RunnableWithExceptionProtection.CallbackWhenException() {
-                @Override
-                public void handle(Throwable t) {
-                    logger.error("unexpected exception.", t);
-                }
-            }), 0, Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL, TimeUnit.SECONDS);
+                .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("GRPCChannelManager"))
+                .scheduleAtFixedRate(new RunnableWithExceptionProtection(this, new RunnableWithExceptionProtection.CallbackWhenException() {
+                    @Override
+                    public void handle(Throwable t) {
+                        logger.error("unexpected exception.", t);
+                    }
+                }), 0, Config.Collector.GRPC_CHANNEL_CHECK_INTERVAL, TimeUnit.SECONDS);
     }
 
     @Override
@@ -101,6 +103,8 @@ public class GRPCChannelManager implements BootService, Runnable {
                 try {
                     int index = Math.abs(random.nextInt()) % grpcServers.size();
                     if (index != selectedIdx) {
+                        logger.debug("Selected another server, index is {}.", selectedIdx);
+
                         selectedIdx = index;
 
                         server = grpcServers.get(index);
@@ -111,22 +115,45 @@ public class GRPCChannelManager implements BootService, Runnable {
                         }
 
                         managedChannel = GRPCChannel.newBuilder(ipAndPort[0], Integer.parseInt(ipAndPort[1]))
-                            .addManagedChannelBuilder(new StandardChannelBuilder())
-                            .addManagedChannelBuilder(new TLSChannelBuilder())
-                            .addChannelDecorator(new AgentIDDecorator())
-                            .addChannelDecorator(new AuthenticationDecorator())
-                            .build();
+                                .addManagedChannelBuilder(new StandardChannelBuilder())
+                                .addManagedChannelBuilder(new TLSChannelBuilder())
+                                .addChannelDecorator(new AgentIDDecorator())
+                                .addChannelDecorator(new AuthenticationDecorator())
+                                .build();
                         notify(GRPCChannelStatus.CONNECTED);
                         reconnectCount = 0;
                         reconnect = false;
                     } else if (managedChannel.isConnected(++reconnectCount > Config.Agent.FORCE_RECONNECTION_PERIOD)) {
+                        logger.debug("Selected a same server, index is {}, turn to GRPC for automatic reconnection, count is {}.", selectedIdx, reconnectCount);
+
                         // Reconnect to the same server is automatically done by GRPC,
                         // therefore we are responsible to check the connectivity and
                         // set the state and notify listeners
                         reconnectCount = 0;
                         notify(GRPCChannelStatus.CONNECTED);
                         reconnect = false;
+                    } else if (reconnectCount > Config.Agent.FORCE_RECONNECTION_PERIOD * 2) {
+                        logger.debug("Selected a same server, index is {}, try to reconnect by agent, count is {}.", selectedIdx, reconnectCount);
+
+                        if (managedChannel != null) {
+                            managedChannel.shutdownNow();
+                        }
+
+                        server = grpcServers.get(index);
+                        String[] ipAndPort = server.split(":");
+
+                        managedChannel = GRPCChannel.newBuilder(ipAndPort[0], Integer.parseInt(ipAndPort[1]))
+                                .addManagedChannelBuilder(new StandardChannelBuilder())
+                                .addManagedChannelBuilder(new TLSChannelBuilder())
+                                .addChannelDecorator(new AgentIDDecorator())
+                                .addChannelDecorator(new AuthenticationDecorator())
+                                .build();
+                        notify(GRPCChannelStatus.CONNECTED);
+
+                        reconnectCount = 0;
+                        reconnect = false;
                     }
+                    logger.debug("reconnect count: {}", reconnectCount);
 
                     return;
                 } catch (Throwable t) {
@@ -172,11 +199,11 @@ public class GRPCChannelManager implements BootService, Runnable {
         if (throwable instanceof StatusRuntimeException) {
             StatusRuntimeException statusRuntimeException = (StatusRuntimeException) throwable;
             return statusEquals(statusRuntimeException.getStatus(),
-                Status.UNAVAILABLE,
-                Status.PERMISSION_DENIED,
-                Status.UNAUTHENTICATED,
-                Status.RESOURCE_EXHAUSTED,
-                Status.UNKNOWN
+                    Status.UNAVAILABLE,
+                    Status.PERMISSION_DENIED,
+                    Status.UNAUTHENTICATED,
+                    Status.RESOURCE_EXHAUSTED,
+                    Status.UNKNOWN
             );
         }
         return false;

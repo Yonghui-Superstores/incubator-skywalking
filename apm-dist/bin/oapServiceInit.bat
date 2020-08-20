@@ -19,7 +19,8 @@
 setlocal
 set OAP_PROCESS_TITLE=Skywalking-Collector
 set OAP_HOME=%~dp0%..
-set OAP_OPTS="-Xms256M -Xmx512M -Doap.logDir=%OAP_HOME%\logs"
+set OAP_OPTS="-Xms256M -Xmx512M -D
+oap.logDir=%OAP_HOME%\logs"
 
 set CLASSPATH=%OAP_HOME%\config;.;
 set CLASSPATH=%OAP_HOME%\oap-libs\*;%CLASSPATH%

@@ -26,3 +26,4 @@ org.apache.skywalking.apm.agent.core.context.ContextManagerExtendService
 org.apache.skywalking.apm.agent.core.commands.CommandService
 org.apache.skywalking.apm.agent.core.commands.CommandExecutorService
 org.apache.skywalking.apm.agent.core.context.OperationNameFormatService
+org.apache.skywalking.apm.agent.core.logging.LoggingService

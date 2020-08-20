@@ -28,7 +28,7 @@ import org.apache.skywalking.apm.network.language.agent.v3.SpanType;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 class ServiceCMock {
-    public static String SERVICE_NAME = "mock_c_service";
+    public static String SERVICE_NAME = "project_c#mock_c_service";
     public static String SERVICE_INSTANCE_NAME = "mock_c_service_instance";
 
     void mock(StreamObserver<SegmentObject> streamObserver, String traceId,

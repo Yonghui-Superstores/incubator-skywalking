@@ -20,6 +20,7 @@ package org.apache.skywalking.oap.server.core.analysis;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,19 @@ import org.apache.skywalking.oap.server.library.util.BooleanUtils;
  * IDManager includes all ID encode/decode functions for service, service instance and endpoint.
  */
 public class IDManager {
+
+    public static class ProjectId {
+
+        public static String getProjectName(String serviceName) {
+            String[] names = serviceName.split("#");
+            return names.length > 1 ? names[0] : "None";
+        }
+
+        public static String buildProjectId(String name) {
+            return encode(name);
+        }
+    }
+
     /**
      * Service ID related functions.
      */
@@ -55,8 +69,8 @@ public class IDManager {
                 throw new UnexpectedException("Can't split service id into 2 parts, " + id);
             }
             return new ServiceID.ServiceIDDefinition(
-                decode(strings[0]),
-                BooleanUtils.valueToBoolean(Integer.parseInt(strings[1]))
+                    decode(strings[0]),
+                    BooleanUtils.valueToBoolean(Integer.parseInt(strings[1]))
             );
         }
 
@@ -108,8 +122,8 @@ public class IDManager {
          */
         public static String buildId(String serviceId, String instanceName) {
             return serviceId
-                + Const.ID_CONNECTOR
-                + encode(instanceName);
+                    + Const.ID_CONNECTOR
+                    + encode(instanceName);
         }
 
         /**
@@ -121,8 +135,8 @@ public class IDManager {
                 throw new UnexpectedException("Can't split instance id into 2 parts, " + id);
             }
             return new ServiceInstanceID.InstanceIDDefinition(
-                strings[0],
-                decode(strings[1])
+                    strings[0],
+                    decode(strings[1])
             );
         }
 
@@ -180,8 +194,8 @@ public class IDManager {
          */
         public static String buildId(String serviceId, String endpointName) {
             return serviceId
-                + Const.ID_CONNECTOR
-                + encode(endpointName);
+                    + Const.ID_CONNECTOR
+                    + encode(endpointName);
         }
 
         /**
@@ -193,8 +207,8 @@ public class IDManager {
                 throw new UnexpectedException("Can't split endpoint id into 2 parts, " + id);
             }
             return new EndpointIDDefinition(
-                strings[0],
-                decode(strings[1])
+                    strings[0],
+                    decode(strings[1])
             );
         }
 
@@ -203,12 +217,12 @@ public class IDManager {
          */
         public static String buildRelationId(EndpointRelationDefine define) {
             return define.sourceServiceId
-                + Const.RELATION_ID_CONNECTOR
-                + encode(define.source)
-                + Const.RELATION_ID_CONNECTOR
-                + define.destServiceId
-                + Const.RELATION_ID_CONNECTOR
-                + encode(define.dest);
+                    + Const.RELATION_ID_CONNECTOR
+                    + encode(define.source)
+                    + Const.RELATION_ID_CONNECTOR
+                    + define.destServiceId
+                    + Const.RELATION_ID_CONNECTOR
+                    + encode(define.dest);
         }
 
         /**
@@ -220,10 +234,10 @@ public class IDManager {
                 throw new UnexpectedException("Illegal endpoint Relation entity id, " + entityId);
             }
             return new EndpointRelationDefine(
-                parts[0],
-                decode(parts[1]),
-                parts[2],
-                decode(parts[3])
+                    parts[0],
+                    decode(parts[1]),
+                    parts[2],
+                    decode(parts[3])
             );
         }
 

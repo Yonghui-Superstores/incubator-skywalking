@@ -29,7 +29,7 @@ import org.apache.skywalking.apm.network.language.agent.v3.SpanType;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 class ServiceBMock {
-    public static String SERVICE_NAME = "mock_b_service";
+    public static String SERVICE_NAME = "project_b#mock_b_service";
     public static String SERVICE_INSTANCE_NAME = "mock_b_service_instance";
 
     static String DUBBO_PROVIDER_ENDPOINT = "org.skywaking.apm.testcase.dubbo.services.GreetServiceImpl.doBusiness()";

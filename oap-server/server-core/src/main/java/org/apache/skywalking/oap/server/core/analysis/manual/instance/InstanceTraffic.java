@@ -42,8 +42,7 @@ import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.SE
     builder = InstanceTraffic.Builder.class, processor = MetricsStreamProcessor.class)
 @MetricsExtension(supportDownSampling = false, supportUpdate = true)
 @EqualsAndHashCode(of = {
-    "serviceId",
-    "name"
+    "serviceId", "name", "project_id"
 })
 public class InstanceTraffic extends Metrics {
     public static final String INDEX_NAME = "instance_traffic";
@@ -51,6 +50,7 @@ public class InstanceTraffic extends Metrics {
     public static final String NAME = "name";
     public static final String LAST_PING_TIME_BUCKET = "last_ping";
     public static final String PROPERTIES = "properties";
+    public static final String PROJECT_ID = "project_id";
 
     private static final Gson GSON = new Gson();
 
@@ -63,14 +63,21 @@ public class InstanceTraffic extends Metrics {
     @Getter
     @Column(columnName = NAME, storageOnly = true)
     private String name;
+
     @Setter
     @Getter
     @Column(columnName = LAST_PING_TIME_BUCKET)
     private long lastPingTimestamp;
+
     @Setter
     @Getter
     @Column(columnName = PROPERTIES, storageOnly = true)
     private JsonObject properties;
+
+    @Setter
+    @Getter
+    @Column(columnName = PROJECT_ID)
+    private String projectId;
 
     @Override
     public void combine(final Metrics metrics) {
@@ -100,6 +107,7 @@ public class InstanceTraffic extends Metrics {
         if (StringUtil.isNotEmpty(propString)) {
             setProperties(GSON.fromJson(propString, JsonObject.class));
         }
+        setProjectId(remoteData.getDataStrings(3));
         setLastPingTimestamp(remoteData.getDataLongs(0));
         setTimeBucket(remoteData.getDataLongs(1));
     }
@@ -114,6 +122,7 @@ public class InstanceTraffic extends Metrics {
         } else {
             builder.addDataStrings(GSON.toJson(properties));
         }
+        builder.addDataStrings(projectId);
         builder.addDataLongs(lastPingTimestamp);
         builder.addDataLongs(getTimeBucket());
         return builder;
@@ -134,6 +143,7 @@ public class InstanceTraffic extends Metrics {
             if (StringUtil.isNotEmpty(propString)) {
                 instanceTraffic.setProperties(GSON.fromJson(propString, JsonObject.class));
             }
+            instanceTraffic.setProjectId((String) dbMap.get(PROJECT_ID));
             instanceTraffic.setLastPingTimestamp(((Number) dbMap.get(LAST_PING_TIME_BUCKET)).longValue());
             instanceTraffic.setTimeBucket(((Number) dbMap.get(TIME_BUCKET)).longValue());
             return instanceTraffic;
@@ -149,6 +159,7 @@ public class InstanceTraffic extends Metrics {
             } else {
                 map.put(PROPERTIES, Const.EMPTY_STRING);
             }
+            map.put(PROJECT_ID, storageData.getProjectId());
             map.put(LAST_PING_TIME_BUCKET, storageData.getLastPingTimestamp());
             map.put(TIME_BUCKET, storageData.getTimeBucket());
             return map;

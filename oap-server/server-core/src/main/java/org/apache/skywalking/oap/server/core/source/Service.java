@@ -64,4 +64,12 @@ public class Service extends Source {
     @Getter
     @Setter
     private RequestType type;
+    @Getter
+    @Setter
+    private String projectId;
+
+    @Override
+    public void prepare() {
+        projectId = IDManager.ProjectId.buildProjectId(IDManager.ProjectId.getProjectName(name));
+    }
 }

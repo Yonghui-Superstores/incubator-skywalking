@@ -45,15 +45,22 @@ public class EndpointTraffic extends Metrics {
 
     public static final String SERVICE_ID = "service_id";
     public static final String NAME = "name";
+    public static final String PROJECT_ID = "project_id";
 
     @Setter
     @Getter
     @Column(columnName = SERVICE_ID)
     private String serviceId;
+
     @Setter
     @Getter
     @Column(columnName = NAME, matchQuery = true)
     private String name = Const.EMPTY_STRING;
+
+    @Setter
+    @Getter
+    @Column(columnName = PROJECT_ID)
+    private String projectId;
 
     @Override
     public String id() {
@@ -70,6 +77,7 @@ public class EndpointTraffic extends Metrics {
 
         remoteBuilder.addDataStrings(serviceId);
         remoteBuilder.addDataStrings(Strings.isNullOrEmpty(name) ? Const.EMPTY_STRING : name);
+        remoteBuilder.addDataStrings(projectId);
         return remoteBuilder;
     }
 
@@ -79,6 +87,7 @@ public class EndpointTraffic extends Metrics {
 
         setServiceId(remoteData.getDataStrings(0));
         setName(remoteData.getDataStrings(1));
+        setProjectId(remoteData.getDataStrings(2));
     }
 
     @Override
@@ -94,6 +103,7 @@ public class EndpointTraffic extends Metrics {
             inventory.setServiceId((String) dbMap.get(SERVICE_ID));
             inventory.setName((String) dbMap.get(NAME));
             inventory.setTimeBucket(((Number) dbMap.get(TIME_BUCKET)).longValue());
+            inventory.setProjectId((String) dbMap.get(PROJECT_ID));
             return inventory;
         }
 
@@ -103,6 +113,7 @@ public class EndpointTraffic extends Metrics {
             map.put(SERVICE_ID, storageData.getServiceId());
             map.put(NAME, storageData.getName());
             map.put(TIME_BUCKET, storageData.getTimeBucket());
+            map.put(PROJECT_ID, storageData.getProjectId());
             return map;
         }
     }

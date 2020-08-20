@@ -26,7 +26,7 @@ import org.apache.skywalking.apm.network.language.agent.v3.SpanType;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 class ServiceAMock {
-    public static String SERVICE_NAME = "mock_a_service";
+    public static String SERVICE_NAME = "project_a#mock_a_service";
     public static String SERVICE_INSTANCE_NAME = "mock_a_service_instance";
 
     static String REST_ENDPOINT = "/dubbox-case/case/dubbox-rest";

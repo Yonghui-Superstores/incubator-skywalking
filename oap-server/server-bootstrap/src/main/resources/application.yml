@@ -90,7 +90,7 @@ core:
     # The max length of service + endpoint names should be less than 240
     endpointNameMaxLength: ${SW_ENDPOINT_NAME_MAX_LENGTH:150}
 storage:
-  selector: ${SW_STORAGE:h2}
+  selector: ${SW_STORAGE:elasticsearch}
   elasticsearch:
     nameSpace: ${SW_NAMESPACE:""}
     clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:localhost:9200}
@@ -187,27 +187,9 @@ receiver-jvm:
   selector: ${SW_RECEIVER_JVM:default}
   default:
 
-receiver-clr:
-  selector: ${SW_RECEIVER_CLR:default}
-  default:
-
 receiver-profile:
   selector: ${SW_RECEIVER_PROFILE:default}
   default:
-
-service-mesh:
-  selector: ${SW_SERVICE_MESH:default}
-  default:
-
-istio-telemetry:
-  selector: ${SW_ISTIO_TELEMETRY:default}
-  default:
-
-envoy-metric:
-  selector: ${SW_ENVOY_METRIC:default}
-  default:
-    acceptMetricsService: ${SW_ENVOY_METRIC_SERVICE:true}
-    alsHTTPAnalysis: ${SW_ENVOY_METRIC_ALS_HTTP_ANALYSIS:""}
 
 prometheus-fetcher:
   selector: ${SW_PROMETHEUS_FETCHER:default}

@@ -25,17 +25,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.analysis.NodeType;
 import org.apache.skywalking.oap.server.core.analysis.TimeBucket;
 import org.apache.skywalking.oap.server.core.analysis.manual.endpoint.EndpointTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.instance.InstanceTraffic;
+import org.apache.skywalking.oap.server.core.analysis.manual.project.ProjectTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.service.ServiceTraffic;
 import org.apache.skywalking.oap.server.core.query.enumeration.Language;
-import org.apache.skywalking.oap.server.core.query.type.Attribute;
-import org.apache.skywalking.oap.server.core.query.type.Database;
-import org.apache.skywalking.oap.server.core.query.type.Endpoint;
-import org.apache.skywalking.oap.server.core.query.type.Service;
-import org.apache.skywalking.oap.server.core.query.type.ServiceInstance;
+import org.apache.skywalking.oap.server.core.query.type.*;
 import org.apache.skywalking.oap.server.core.storage.query.IMetadataQueryDAO;
 import org.apache.skywalking.oap.server.library.client.elasticsearch.ElasticSearchClient;
 import org.apache.skywalking.oap.server.storage.plugin.elasticsearch.base.EsDAO;
@@ -57,11 +56,41 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Service> getAllServices(long startTimestamp, long endTimestamp) throws IOException {
+    public List<Project> getProjects(List<String> projectNames) throws IOException {
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+        for (String projectName : projectNames) {
+            boolQuery.should(QueryBuilders.termQuery(ProjectTraffic.NAME, projectName));
+        }
+
+        sourceBuilder.query(boolQuery);
+        sourceBuilder.size(queryMaxSize);
+
+        SearchResponse response = getClient().search(ProjectTraffic.INDEX_NAME, sourceBuilder);
+
+        List<Project> projects = new ArrayList<>();
+
+        for (SearchHit searchHit : response.getHits().getHits()) {
+            final ProjectTraffic.Builder builder = new ProjectTraffic.Builder();
+            final ProjectTraffic projectTraffic = builder.map2Data(searchHit.getSourceAsMap());
+
+            Project project = new Project();
+            project.setId(projectTraffic.id());
+            project.setName(projectTraffic.getName());
+            projects.add(project);
+        }
+
+        return projects;
+    }
+
+    @Override
+    public List<Service> getAllServices(long startTimestamp, long endTimestamp, String projectId) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceTraffic.NODE_TYPE, NodeType.Normal.value()));
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceTraffic.PROJECT_ID, projectId));
 
         sourceBuilder.query(boolQueryBuilder);
         sourceBuilder.size(queryMaxSize);

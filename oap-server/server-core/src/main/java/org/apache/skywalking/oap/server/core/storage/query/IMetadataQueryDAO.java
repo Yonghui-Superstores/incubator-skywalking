@@ -20,14 +20,12 @@ package org.apache.skywalking.oap.server.core.storage.query;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.skywalking.oap.server.core.query.type.Database;
-import org.apache.skywalking.oap.server.core.query.type.Endpoint;
-import org.apache.skywalking.oap.server.core.query.type.Service;
-import org.apache.skywalking.oap.server.core.query.type.ServiceInstance;
+
+import org.apache.skywalking.oap.server.core.query.type.*;
 import org.apache.skywalking.oap.server.core.storage.DAO;
 
 public interface IMetadataQueryDAO extends DAO {
-    List<Service> getAllServices(final long startTimestamp, final long endTimestamp) throws IOException;
+    List<Service> getAllServices(final long startTimestamp, final long endTimestamp, final String projectId) throws IOException;
 
     List<Service> getAllBrowserServices(long startTimestamp, long endTimestamp) throws IOException;
 
@@ -42,4 +40,6 @@ public interface IMetadataQueryDAO extends DAO {
 
     List<ServiceInstance> getServiceInstances(final long startTimestamp, final long endTimestamp,
         final String serviceId) throws IOException;
+
+    List<Project> getProjects(final List<String> projectNames) throws IOException;
 }

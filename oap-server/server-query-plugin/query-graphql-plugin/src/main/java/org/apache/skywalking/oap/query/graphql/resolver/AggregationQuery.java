@@ -42,13 +42,13 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getServiceTopN(final String name, final int topN, final Duration duration,
-                                           final Order order, final String externalProjectId) throws IOException {
+                                           final Order order, final String projectId) throws IOException {
         TopNCondition condition = new TopNCondition();
         condition.setName(name);
         condition.setScope(Scope.Service);
         condition.setOrder(order);
         condition.setTopN(topN);
-        condition.setExternalProjectId(externalProjectId);
+        condition.setProjectId(projectId);
         List<TopNEntity> list = new ArrayList<>();
         query.sortMetrics(condition, duration).forEach(selectedRecord -> {
             TopNEntity entity = new TopNEntity(selectedRecord);
@@ -58,7 +58,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getAllServiceInstanceTopN(final String name, final int topN, final Duration duration,
-                                                      final Order order, final String externalProjectId) throws IOException {
+                                                      final Order order, final String projectName) throws IOException {
         TopNCondition condition = new TopNCondition();
         condition.setName(name);
         condition.setScope(Scope.ServiceInstance);
@@ -73,7 +73,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getServiceInstanceTopN(final String serviceId, final String name, final int topN,
-                                                   final Duration duration, final Order order, final String externalProjectId) throws IOException {
+                                                   final Duration duration, final Order order, final String projectName) throws IOException {
         TopNCondition condition = new TopNCondition();
         condition.setName(name);
         condition.setScope(Scope.ServiceInstance);
@@ -91,7 +91,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getAllEndpointTopN(final String name, final int topN, final Duration duration,
-                                               final Order order, final String externalProjectId) throws IOException {
+                                               final Order order, final String projectName) throws IOException {
         TopNCondition condition = new TopNCondition();
         condition.setName(name);
         condition.setScope(Scope.Endpoint);
@@ -106,7 +106,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getEndpointTopN(final String serviceId, final String name, final int topN,
-                                            final Duration duration, final Order order, final String externalProjectId) throws IOException {
+                                            final Duration duration, final Order order, final String projectName) throws IOException {
         TopNCondition condition = new TopNCondition();
         condition.setName(name);
         condition.setScope(Scope.Endpoint);

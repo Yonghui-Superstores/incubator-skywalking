@@ -21,11 +21,7 @@ package org.apache.skywalking.oap.server.core.query;
 import java.io.IOException;
 import java.util.List;
 import org.apache.skywalking.oap.server.core.analysis.IDManager;
-import org.apache.skywalking.oap.server.core.query.type.Database;
-import org.apache.skywalking.oap.server.core.query.type.Endpoint;
-import org.apache.skywalking.oap.server.core.query.type.EndpointInfo;
-import org.apache.skywalking.oap.server.core.query.type.Service;
-import org.apache.skywalking.oap.server.core.query.type.ServiceInstance;
+import org.apache.skywalking.oap.server.core.query.type.*;
 import org.apache.skywalking.oap.server.core.storage.StorageModule;
 import org.apache.skywalking.oap.server.core.storage.query.IMetadataQueryDAO;
 import org.apache.skywalking.oap.server.library.module.ModuleManager;
@@ -46,8 +42,8 @@ public class MetadataQueryService implements org.apache.skywalking.oap.server.li
         return metadataQueryDAO;
     }
 
-    public List<Service> getAllServices(final long startTimestamp, final long endTimestamp) throws IOException {
-        return getMetadataQueryDAO().getAllServices(startTimestamp, endTimestamp);
+    public List<Service> getAllServices(final long startTimestamp, final long endTimestamp, final String projectId) throws IOException {
+        return getMetadataQueryDAO().getAllServices(startTimestamp, endTimestamp, projectId);
     }
 
     public List<Service> getAllBrowserServices(final long startTimestamp, final long endTimestamp) throws IOException {
@@ -89,5 +85,9 @@ public class MetadataQueryService implements org.apache.skywalking.oap.server.li
         endpointInfo.setServiceId(endpointIDDefinition.getServiceId());
         endpointInfo.setServiceName(serviceIDDefinition.getName());
         return endpointInfo;
+    }
+
+    public List<Project> getProjects(final List<String> projectNames) throws IOException {
+       return getMetadataQueryDAO().getProjects(projectNames);
     }
 }

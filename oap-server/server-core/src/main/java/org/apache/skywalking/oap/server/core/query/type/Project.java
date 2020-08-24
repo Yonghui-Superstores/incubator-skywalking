@@ -16,25 +16,14 @@
  *
  */
 
-package org.apache.skywalking.oap.server.core.query.input;
+package org.apache.skywalking.oap.server.core.query.type;
 
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @since 8.0.0
- */
 @Getter
 @Setter
-public class MetricsCondition {
-    /**
-     * Metrics name
-     */
+public class Project {
+    private String id;
     private String name;
-    /**
-     * See {@link Entity}
-     */
-    private Entity entity;
-
-    private String projectId;
 }

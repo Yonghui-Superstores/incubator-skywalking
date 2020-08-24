@@ -27,7 +27,7 @@ import org.apache.skywalking.oap.server.core.query.type.TraceState;
 @Getter
 @Setter
 public class TraceQueryCondition {
-    private String externalProjectId;
+    private String projectName;
     private String serviceId;
     private String serviceInstanceId;
     private String traceId;

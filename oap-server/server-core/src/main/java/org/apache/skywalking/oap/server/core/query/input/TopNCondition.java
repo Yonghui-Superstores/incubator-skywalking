@@ -52,5 +52,5 @@ public class TopNCondition {
     private Scope scope;
     private int topN;
     private Order order;
-    private String externalProjectId;
+    private String projectId;
 }

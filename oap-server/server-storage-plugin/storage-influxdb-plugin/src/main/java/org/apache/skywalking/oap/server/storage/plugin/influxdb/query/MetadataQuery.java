@@ -37,11 +37,7 @@ import org.apache.skywalking.oap.server.core.analysis.manual.endpoint.EndpointTr
 import org.apache.skywalking.oap.server.core.analysis.manual.instance.InstanceTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.service.ServiceTraffic;
 import org.apache.skywalking.oap.server.core.query.enumeration.Language;
-import org.apache.skywalking.oap.server.core.query.type.Attribute;
-import org.apache.skywalking.oap.server.core.query.type.Database;
-import org.apache.skywalking.oap.server.core.query.type.Endpoint;
-import org.apache.skywalking.oap.server.core.query.type.Service;
-import org.apache.skywalking.oap.server.core.query.type.ServiceInstance;
+import org.apache.skywalking.oap.server.core.query.type.*;
 import org.apache.skywalking.oap.server.core.storage.query.IMetadataQueryDAO;
 import org.apache.skywalking.oap.server.storage.plugin.influxdb.InfluxClient;
 import org.apache.skywalking.oap.server.storage.plugin.influxdb.InfluxConstants;
@@ -67,7 +63,7 @@ public class MetadataQuery implements IMetadataQueryDAO {
     private final InfluxClient client;
 
     @Override
-    public List<Service> getAllServices(final long startTimestamp, final long endTimestamp) throws IOException {
+    public List<Service> getAllServices(final long startTimestamp, final long endTimestamp, final String projectId) throws IOException {
         SelectSubQueryImpl<SelectQueryImpl> subQuery = select()
             .fromSubQuery(client.getDatabase())
             .column(ID_COLUMN).column(NAME)
@@ -253,5 +249,10 @@ public class MetadataQuery implements IMetadataQueryDAO {
             }
         }
         return services;
+    }
+
+    @Override
+    public List<Project> getProjects(List<String> projectNames) throws IOException {
+        return null;
     }
 }

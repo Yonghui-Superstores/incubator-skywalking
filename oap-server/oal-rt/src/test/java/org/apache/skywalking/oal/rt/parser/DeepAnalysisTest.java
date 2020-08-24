@@ -64,7 +64,7 @@ public class DeepAnalysisTest {
         Assert.assertEquals(1, source.size());
 
         List<DataColumn> persistentFields = result.getPersistentFields();
-        Assert.assertEquals(4, persistentFields.size());
+        Assert.assertEquals(5, persistentFields.size());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class DeepAnalysisTest {
         Assert.assertEquals(2, source.size());
 
         List<DataColumn> persistentFields = result.getPersistentFields();
-        Assert.assertEquals(4, persistentFields.size());
+        Assert.assertEquals(5, persistentFields.size());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class DeepAnalysisTest {
         Assert.assertEquals(2, source.size());
 
         List<DataColumn> persistentFields = result.getPersistentFields();
-        Assert.assertEquals(4, persistentFields.size());
+        Assert.assertEquals(5, persistentFields.size());
 
         List<Expression> filterExpressions = result.getFilterExpressions();
         Assert.assertEquals(1, filterExpressions.size());

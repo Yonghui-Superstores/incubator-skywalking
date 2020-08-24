@@ -69,11 +69,12 @@ public class ServiceInstance extends Source {
     private RequestType type;
     @Getter
     @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
     private String projectId;
 
     @Override
     public void prepare() {
         serviceId = IDManager.ServiceID.buildId(serviceName, nodeType);
-        projectId = IDManager.ProjectId.buildProjectId(IDManager.ProjectId.getProjectName(serviceName));
+        projectId = IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName));
     }
 }

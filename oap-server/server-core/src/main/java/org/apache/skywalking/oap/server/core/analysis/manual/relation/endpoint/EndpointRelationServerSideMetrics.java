@@ -35,8 +35,7 @@ import org.apache.skywalking.oap.server.core.storage.annotation.Column;
 @Stream(name = EndpointRelationServerSideMetrics.INDEX_NAME, scopeId = DefaultScopeDefine.ENDPOINT_RELATION,
     builder = EndpointRelationServerSideMetrics.Builder.class, processor = MetricsStreamProcessor.class)
 @EqualsAndHashCode(of = {
-    "entityId",
-    "timeBucket"
+    "entityId", "timeBucket", "projectId"
 })
 public class EndpointRelationServerSideMetrics extends Metrics {
 
@@ -87,6 +86,7 @@ public class EndpointRelationServerSideMetrics extends Metrics {
         metrics.setDestEndpoint(getDestEndpoint());
         metrics.setComponentId(getComponentId());
         metrics.setEntityId(getEntityId());
+        metrics.setProjectId(getProjectId());
         return metrics;
     }
 
@@ -98,6 +98,7 @@ public class EndpointRelationServerSideMetrics extends Metrics {
         metrics.setDestEndpoint(getDestEndpoint());
         metrics.setComponentId(getComponentId());
         metrics.setEntityId(getEntityId());
+        metrics.setProjectId(getProjectId());
         return metrics;
     }
 
@@ -118,6 +119,7 @@ public class EndpointRelationServerSideMetrics extends Metrics {
         setEntityId(remoteData.getDataStrings(0));
         setSourceEndpoint(remoteData.getDataStrings(1));
         setDestEndpoint(remoteData.getDataStrings(2));
+        setProjectId(remoteData.getDataStrings(3));
     }
 
     @Override
@@ -131,6 +133,7 @@ public class EndpointRelationServerSideMetrics extends Metrics {
         remoteBuilder.addDataStrings(getEntityId());
         remoteBuilder.addDataStrings(getSourceEndpoint());
         remoteBuilder.addDataStrings(getDestEndpoint());
+        remoteBuilder.addDataStrings(getProjectId());
         return remoteBuilder;
     }
 
@@ -144,6 +147,7 @@ public class EndpointRelationServerSideMetrics extends Metrics {
             metrics.setComponentId(((Number) dbMap.get(COMPONENT_ID)).intValue());
             metrics.setTimeBucket(((Number) dbMap.get(TIME_BUCKET)).longValue());
             metrics.setEntityId((String) dbMap.get(ENTITY_ID));
+            metrics.setProjectId((String) dbMap.get(PROJECT_ID));
             return metrics;
         }
 
@@ -155,6 +159,7 @@ public class EndpointRelationServerSideMetrics extends Metrics {
             map.put(COMPONENT_ID, storageData.getComponentId());
             map.put(TIME_BUCKET, storageData.getTimeBucket());
             map.put(ENTITY_ID, storageData.getEntityId());
+            map.put(PROJECT_ID, storageData.getProjectId());
             return map;
         }
     }

@@ -35,13 +35,29 @@ public class IDManager {
 
     public static class ProjectId {
 
+        public static String buildId(String name) {
+            return encode(name);
+        }
+
         public static String getProjectName(String serviceName) {
             String[] names = serviceName.split("#");
             return names.length > 1 ? names[0] : "None";
         }
 
-        public static String buildProjectId(String name) {
-            return encode(name);
+        /**
+         * @return project ID object decoded from {@link #buildId(String)} result
+         */
+        public static ProjectId.ProjectIDDefinition analysisId(String id) {
+            return new ProjectId.ProjectIDDefinition(
+                    decode(id)
+            );
+        }
+
+        @RequiredArgsConstructor
+        @Getter
+        @EqualsAndHashCode
+        public static class ProjectIDDefinition {
+            private final String name;
         }
     }
 

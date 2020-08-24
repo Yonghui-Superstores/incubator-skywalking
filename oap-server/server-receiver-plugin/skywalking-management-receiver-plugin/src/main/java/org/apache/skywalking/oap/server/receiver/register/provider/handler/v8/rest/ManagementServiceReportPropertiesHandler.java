@@ -69,6 +69,7 @@ public class ManagementServiceReportPropertiesHandler extends JettyJsonHandler {
 
         ServiceInstanceUpdate serviceInstanceUpdate = new ServiceInstanceUpdate();
         serviceInstanceUpdate.setServiceId(IDManager.ServiceID.buildId(serviceName, NodeType.Normal));
+        serviceInstanceUpdate.setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
         serviceInstanceUpdate.setName(instanceName);
 
         JsonObject properties = new JsonObject();
@@ -83,8 +84,7 @@ public class ManagementServiceReportPropertiesHandler extends JettyJsonHandler {
 
         properties.addProperty(InstanceTraffic.PropertyUtil.IPV4S, ipv4List.stream().collect(Collectors.joining(",")));
         serviceInstanceUpdate.setProperties(properties);
-        serviceInstanceUpdate.setTimeBucket(
-            TimeBucket.getTimeBucket(System.currentTimeMillis(), DownSampling.Minute));
+        serviceInstanceUpdate.setTimeBucket(TimeBucket.getTimeBucket(System.currentTimeMillis(), DownSampling.Minute));
         sourceReceiver.receive(serviceInstanceUpdate);
 
         return gson.fromJson(ProtoBufJsonUtils.toJSON(Commands.newBuilder().build()), JsonElement.class);

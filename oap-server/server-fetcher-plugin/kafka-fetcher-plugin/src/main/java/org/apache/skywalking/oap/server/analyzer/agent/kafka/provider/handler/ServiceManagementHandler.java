@@ -78,6 +78,7 @@ public class ServiceManagementHandler implements KafkaHandler {
         final String instanceName = namingLengthControl.formatInstanceName(request.getServiceInstance());
         serviceInstanceUpdate.setServiceId(IDManager.ServiceID.buildId(serviceName, NodeType.Normal));
         serviceInstanceUpdate.setName(instanceName);
+        serviceInstanceUpdate.setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
 
         if (log.isDebugEnabled()) {
             log.debug(
@@ -120,6 +121,7 @@ public class ServiceManagementHandler implements KafkaHandler {
         serviceInstanceUpdate.setServiceId(IDManager.ServiceID.buildId(serviceName, NodeType.Normal));
         serviceInstanceUpdate.setName(instanceName);
         serviceInstanceUpdate.setTimeBucket(timeBucket);
+        serviceInstanceUpdate.setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
         sourceReceiver.receive(serviceInstanceUpdate);
     }
 

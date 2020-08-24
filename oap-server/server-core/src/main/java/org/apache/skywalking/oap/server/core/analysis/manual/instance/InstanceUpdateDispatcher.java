@@ -31,6 +31,7 @@ public class InstanceUpdateDispatcher implements SourceDispatcher<ServiceInstanc
         traffic.setServiceId(source.getServiceId());
         traffic.setLastPingTimestamp(source.getTimeBucket());
         traffic.setProperties(source.getProperties());
+        traffic.setProjectId(source.getProjectId());
         MetricsStreamProcessor.getInstance().in(traffic);
     }
 }

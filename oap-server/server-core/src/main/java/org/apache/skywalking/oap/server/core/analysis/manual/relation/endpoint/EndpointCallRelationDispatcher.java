@@ -37,12 +37,11 @@ public class EndpointCallRelationDispatcher implements SourceDispatcher<Endpoint
     private void serverSide(EndpointRelation source) {
         EndpointRelationServerSideMetrics metrics = new EndpointRelationServerSideMetrics();
         metrics.setTimeBucket(source.getTimeBucket());
-        metrics.setSourceEndpoint(
-            IDManager.EndpointID.buildId(source.getServiceId(), source.getEndpoint()));
-        metrics.setDestEndpoint(
-            IDManager.EndpointID.buildId(source.getChildServiceId(), source.getChildEndpoint()));
+        metrics.setSourceEndpoint(IDManager.EndpointID.buildId(source.getServiceId(), source.getEndpoint()));
+        metrics.setDestEndpoint(IDManager.EndpointID.buildId(source.getChildServiceId(), source.getChildEndpoint()));
         metrics.setComponentId(source.getComponentId());
         metrics.setEntityId(source.getEntityId());
+        metrics.setProjectId(source.getProjectId());
         MetricsStreamProcessor.getInstance().in(metrics);
     }
 }

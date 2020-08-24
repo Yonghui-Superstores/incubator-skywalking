@@ -25,6 +25,7 @@ import org.junit.Test;
 public class EndpointTrafficTest {
     @Test
     public void testSerialization() {
+        String projectId = "mock_project_id";
         String serviceId = "mock_id";
         String endpointName = "/endpoint-123";
         DetectPoint detectPoint = DetectPoint.SERVER;
@@ -33,6 +34,7 @@ public class EndpointTrafficTest {
         endpointTraffic.setTimeBucket(202003281420L);
         endpointTraffic.setServiceId(serviceId);
         endpointTraffic.setName(endpointName);
+        endpointTraffic.setProjectId(projectId);
 
         EndpointTraffic another = new EndpointTraffic();
         another.deserialize(endpointTraffic.serialize().build());

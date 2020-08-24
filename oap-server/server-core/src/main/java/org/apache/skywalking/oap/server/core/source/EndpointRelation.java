@@ -93,9 +93,14 @@ public class EndpointRelation extends Source {
     @Getter
     @Setter
     private DetectPoint detectPoint;
+    @Getter
+    @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
+    private String projectId;
 
     @Override
     public void prepare() {
+        projectId = IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName));
         serviceId = IDManager.ServiceID.buildId(serviceName, serviceNodeType);
         childServiceId = IDManager.ServiceID.buildId(childServiceName, childServiceNodeType);
     }

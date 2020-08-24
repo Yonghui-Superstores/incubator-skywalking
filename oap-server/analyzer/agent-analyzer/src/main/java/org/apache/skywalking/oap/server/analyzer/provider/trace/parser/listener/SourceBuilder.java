@@ -22,18 +22,20 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.skywalking.apm.util.StringUtil;
+import org.apache.skywalking.oap.server.core.analysis.IDManager;
 import org.apache.skywalking.oap.server.core.analysis.NodeType;
 import org.apache.skywalking.oap.server.core.config.NamingControl;
 import org.apache.skywalking.oap.server.core.source.All;
+import org.apache.skywalking.oap.server.core.source.ServiceMeta;
 import org.apache.skywalking.oap.server.core.source.DatabaseAccess;
 import org.apache.skywalking.oap.server.core.source.DetectPoint;
 import org.apache.skywalking.oap.server.core.source.Endpoint;
 import org.apache.skywalking.oap.server.core.source.EndpointRelation;
 import org.apache.skywalking.oap.server.core.source.RequestType;
+import org.apache.skywalking.oap.server.core.source.Project;
 import org.apache.skywalking.oap.server.core.source.Service;
 import org.apache.skywalking.oap.server.core.source.ServiceInstance;
 import org.apache.skywalking.oap.server.core.source.ServiceInstanceRelation;
-import org.apache.skywalking.oap.server.core.source.ServiceMeta;
 import org.apache.skywalking.oap.server.core.source.ServiceRelation;
 
 @RequiredArgsConstructor
@@ -41,10 +43,14 @@ class SourceBuilder {
     private final NamingControl namingControl;
 
     @Getter
+    private String sourceProjectName;
+
+    @Getter
     private String sourceServiceName;
 
     public void setSourceServiceName(final String sourceServiceName) {
         this.sourceServiceName = namingControl.formatServiceName(sourceServiceName);
+        this.sourceProjectName = IDManager.ProjectId.getProjectName(this.sourceServiceName);
     }
 
     @Getter
@@ -76,10 +82,14 @@ class SourceBuilder {
     }
 
     @Getter
+    private String destProjectName;
+
+    @Getter
     private String destServiceName;
 
     public void setDestServiceName(final String destServiceName) {
         this.destServiceName = namingControl.formatServiceName(destServiceName);
+        this.destProjectName = IDManager.ProjectId.getProjectName(this.destServiceName);
     }
 
     @Getter
@@ -135,6 +145,20 @@ class SourceBuilder {
         all.setType(type);
         all.setTimeBucket(timeBucket);
         return all;
+    }
+
+    Project toProject() {
+        Project project = new Project();
+        project.setName(destProjectName);
+        project.setServiceName(destServiceName);
+        project.setServiceInstanceName(destServiceInstanceName);
+        project.setEndpointName(destEndpointName);
+        project.setLatency(latency);
+        project.setStatus(status);
+        project.setResponseCode(responseCode);
+        project.setType(type);
+        project.setTimeBucket(timeBucket);
+        return project;
     }
 
     /**

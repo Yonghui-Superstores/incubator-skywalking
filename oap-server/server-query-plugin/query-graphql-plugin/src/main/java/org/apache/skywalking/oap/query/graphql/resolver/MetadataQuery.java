@@ -58,21 +58,21 @@ public class MetadataQuery implements GraphQLQueryResolver {
      * @return all 0 of metadata.
      */
     @Deprecated
-    public ClusterBrief getGlobalBrief(final Duration duration) throws IOException, ParseException {
+    public ClusterBrief getGlobalBrief(final Duration duration, final String externalProjectId) throws IOException, ParseException {
         return new ClusterBrief();
     }
 
-    public List<Service> getAllServices(final Duration duration) throws IOException, ParseException {
+    public List<Service> getAllServices(final Duration duration, final String externalProjectId) throws IOException, ParseException {
         return getMetadataQueryService().getAllServices(duration.getStartTimestamp(), duration.getEndTimestamp());
     }
 
-    public List<Service> getAllBrowserServices(final Duration duration) throws IOException, ParseException {
+    public List<Service> getAllBrowserServices(final Duration duration, final String externalProjectId) throws IOException, ParseException {
         return getMetadataQueryService().getAllBrowserServices(
             duration.getStartTimestamp(), duration.getEndTimestamp());
     }
 
     public List<Service> searchServices(final Duration duration,
-                                        final String keyword) throws IOException, ParseException {
+                                        final String keyword, final String externalProjectId) throws IOException, ParseException {
         return getMetadataQueryService().searchServices(
             duration.getStartTimestamp(), duration.getEndTimestamp(), keyword);
     }
@@ -96,7 +96,7 @@ public class MetadataQuery implements GraphQLQueryResolver {
         return getMetadataQueryService().getEndpointInfo(endpointId);
     }
 
-    public List<Database> getAllDatabases(final Duration duration) throws IOException {
+    public List<Database> getAllDatabases(final Duration duration, final String externalProjectId) throws IOException {
         return getMetadataQueryService().getAllDatabases();
     }
 

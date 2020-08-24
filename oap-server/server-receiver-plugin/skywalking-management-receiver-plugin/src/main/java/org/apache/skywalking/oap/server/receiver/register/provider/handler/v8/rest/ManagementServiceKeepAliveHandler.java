@@ -68,6 +68,7 @@ public class ManagementServiceKeepAliveHandler extends JettyJsonHandler {
         serviceInstanceUpdate.setServiceId(IDManager.ServiceID.buildId(serviceName, NodeType.Normal));
         serviceInstanceUpdate.setName(instanceName);
         serviceInstanceUpdate.setTimeBucket(timeBucket);
+        serviceInstanceUpdate.setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
         sourceReceiver.receive(serviceInstanceUpdate);
 
         ServiceMeta serviceMeta = new ServiceMeta();

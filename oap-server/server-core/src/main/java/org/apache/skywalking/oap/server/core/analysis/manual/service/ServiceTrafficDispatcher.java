@@ -18,6 +18,8 @@
 
 package org.apache.skywalking.oap.server.core.analysis.manual.service;
 
+import org.apache.skywalking.apm.util.StringUtil;
+import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.analysis.SourceDispatcher;
 import org.apache.skywalking.oap.server.core.analysis.worker.MetricsStreamProcessor;
 import org.apache.skywalking.oap.server.core.source.Service;
@@ -29,7 +31,7 @@ public class ServiceTrafficDispatcher implements SourceDispatcher<Service> {
         traffic.setTimeBucket(source.getTimeBucket());
         traffic.setName(source.getName());
         traffic.setNodeType(source.getNodeType());
-        traffic.setProjectId(source.getProjectId());
+        traffic.setProjectId(StringUtil.isEmpty(source.getProjectId()) ? Const.NONE_STR : source.getProjectId());
         MetricsStreamProcessor.getInstance().in(traffic);
     }
 }

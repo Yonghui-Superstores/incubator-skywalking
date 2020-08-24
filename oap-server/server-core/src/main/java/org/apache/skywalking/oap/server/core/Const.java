@@ -20,6 +20,7 @@ package org.apache.skywalking.oap.server.core;
 
 public class Const {
     public static final int NONE = 0;
+    public static final String NONE_STR = "NONE";
     public static final String SERVICE_ID_CONNECTOR = ".";
     public static final String SERVICE_ID_PARSER_SPLIT = "\\.";
     public static final String ID_CONNECTOR = "_";

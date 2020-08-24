@@ -16,27 +16,18 @@
  *
  */
 
-package org.apache.skywalking.oap.server.core.query.input;
+package org.apache.skywalking.oap.server.core.analysis.manual.project;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.skywalking.oap.server.core.query.type.Pagination;
-import org.apache.skywalking.oap.server.core.query.type.QueryOrder;
-import org.apache.skywalking.oap.server.core.query.type.TraceState;
+import org.apache.skywalking.oap.server.core.analysis.SourceDispatcher;
+import org.apache.skywalking.oap.server.core.analysis.worker.MetricsStreamProcessor;
+import org.apache.skywalking.oap.server.core.source.Project;
 
-@Getter
-@Setter
-public class TraceQueryCondition {
-    private String externalProjectId;
-    private String serviceId;
-    private String serviceInstanceId;
-    private String traceId;
-    private String endpointName;
-    private String endpointId;
-    private Duration queryDuration;
-    private int minTraceDuration;
-    private int maxTraceDuration;
-    private TraceState traceState;
-    private QueryOrder queryOrder;
-    private Pagination paging;
+public class ProjectTrafficDispatcher implements SourceDispatcher<Project> {
+    @Override
+    public void dispatch(final Project source) {
+        ProjectTraffic traffic = new ProjectTraffic();
+        traffic.setTimeBucket(source.getTimeBucket());
+        traffic.setName(source.getName());
+        MetricsStreamProcessor.getInstance().in(traffic);
+    }
 }

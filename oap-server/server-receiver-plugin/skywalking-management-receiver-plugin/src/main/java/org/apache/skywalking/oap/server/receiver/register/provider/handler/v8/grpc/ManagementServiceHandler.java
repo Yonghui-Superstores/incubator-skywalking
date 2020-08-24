@@ -73,6 +73,7 @@ public class ManagementServiceHandler extends ManagementServiceGrpc.ManagementSe
         serviceInstanceUpdate.setProperties(properties);
         serviceInstanceUpdate.setTimeBucket(
             TimeBucket.getTimeBucket(System.currentTimeMillis(), DownSampling.Minute));
+        serviceInstanceUpdate.setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
         sourceReceiver.receive(serviceInstanceUpdate);
 
         responseObserver.onNext(Commands.newBuilder().build());
@@ -89,6 +90,7 @@ public class ManagementServiceHandler extends ManagementServiceGrpc.ManagementSe
         serviceInstanceUpdate.setServiceId(IDManager.ServiceID.buildId(serviceName, NodeType.Normal));
         serviceInstanceUpdate.setName(instanceName);
         serviceInstanceUpdate.setTimeBucket(timeBucket);
+        serviceInstanceUpdate.setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
         sourceReceiver.receive(serviceInstanceUpdate);
 
         ServiceMeta serviceMeta = new ServiceMeta();

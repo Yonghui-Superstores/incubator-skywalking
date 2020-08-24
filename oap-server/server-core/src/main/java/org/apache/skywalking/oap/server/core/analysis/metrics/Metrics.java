@@ -31,6 +31,7 @@ import org.apache.skywalking.oap.server.core.storage.annotation.Column;
  */
 public abstract class Metrics extends StreamData implements StorageData {
 
+    public static final String PROJECT_ID = "project_id";
     public static final String TIME_BUCKET = "time_bucket";
     public static final String ENTITY_ID = "entity_id";
 
@@ -41,6 +42,14 @@ public abstract class Metrics extends StreamData implements StorageData {
     @Setter
     @Column(columnName = TIME_BUCKET)
     private long timeBucket;
+
+    /**
+     * projectId attribute
+     */
+    @Getter
+    @Setter
+    @Column(columnName = PROJECT_ID)
+    private String projectId;
 
     /**
      * Time in the cache, only work when MetricsPersistentWorker#enableDatabaseSession == true.

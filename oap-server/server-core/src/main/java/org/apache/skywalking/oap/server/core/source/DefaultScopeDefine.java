@@ -68,10 +68,12 @@ public class DefaultScopeDefine {
     public static final int NETWORK_ADDRESS_ALIAS = 31;
     public static final int UI_TEMPLATE = 32;
     public static final int SERVICE_INSTANCE_JVM_THREAD = 33;
+    public static final int PROJECT = 100;
 
     /**
      * Catalog of scope, the metrics processor could use this to group all generated metrics by oal rt.
      */
+    public static final String PROJECT_CATALOG_NAME = "PROJECT";
     public static final String SERVICE_CATALOG_NAME = "SERVICE";
     public static final String SERVICE_INSTANCE_CATALOG_NAME = "SERVICE_INSTANCE";
     public static final String ENDPOINT_CATALOG_NAME = "ENDPOINT";
@@ -79,6 +81,7 @@ public class DefaultScopeDefine {
     public static final String SERVICE_INSTANCE_RELATION_CATALOG_NAME = "SERVICE_INSTANCE_RELATION";
     public static final String ENDPOINT_RELATION_CATALOG_NAME = "ENDPOINT_RELATION";
 
+    private static final Map<Integer, Boolean> PROJECT_CATALOG = new HashMap<>();
     private static final Map<Integer, Boolean> SERVICE_CATALOG = new HashMap<>();
     private static final Map<Integer, Boolean> SERVICE_INSTANCE_CATALOG = new HashMap<>();
     private static final Map<Integer, Boolean> ENDPOINT_CATALOG = new HashMap<>();
@@ -168,6 +171,9 @@ public class DefaultScopeDefine {
 
         String catalogName = declaration.catalog();
         switch (catalogName) {
+            case PROJECT_CATALOG_NAME:
+                PROJECT_CATALOG.put(id, Boolean.TRUE);
+                break;
             case SERVICE_CATALOG_NAME:
                 SERVICE_CATALOG.put(id, Boolean.TRUE);
                 break;
@@ -224,6 +230,16 @@ public class DefaultScopeDefine {
         NAME_2_ID.clear();
         ID_2_NAME.clear();
         SCOPE_COLUMNS.clear();
+    }
+
+    /**
+     * Check whether current service belongs project catalog
+     *
+     * @param scopeId represents an existing scope id.
+     * @return true is current scope set {@link ScopeDeclaration#catalog()} == {@link #PROJECT_CATALOG_NAME}
+     */
+    public static boolean inProjectCatalog(int scopeId) {
+        return PROJECT_CATALOG.containsKey(scopeId);
     }
 
     /**

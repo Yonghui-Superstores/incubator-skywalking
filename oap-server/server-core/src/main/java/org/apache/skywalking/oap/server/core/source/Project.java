@@ -20,49 +20,37 @@ package org.apache.skywalking.oap.server.core.source;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.skywalking.apm.util.StringUtil;
 import org.apache.skywalking.oap.server.core.analysis.IDManager;
-import org.apache.skywalking.oap.server.core.analysis.NodeType;
 
-import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.ENDPOINT;
-import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.ENDPOINT_CATALOG_NAME;
+import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.PROJECT;
+import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.PROJECT_CATALOG_NAME;
 
-@ScopeDeclaration(id = ENDPOINT, name = "Endpoint", catalog = ENDPOINT_CATALOG_NAME)
+@ScopeDeclaration(id = PROJECT, name = "Project", catalog = PROJECT_CATALOG_NAME)
 @ScopeDefaultColumn.VirtualColumnDefinition(fieldName = "entityId", columnName = "entity_id", isID = true, type = String.class)
-@Slf4j
-public class Endpoint extends Source {
-    private String entityId;
-
+public class Project extends Source {
     @Override
     public int scope() {
-        return DefaultScopeDefine.ENDPOINT;
+        return PROJECT;
     }
 
     @Override
     public String getEntityId() {
-        if (StringUtil.isEmpty(entityId)) {
-            entityId = IDManager.EndpointID.buildId(serviceId, name);
-        }
-        return entityId;
+        return IDManager.ProjectId.buildId(name);
     }
 
     @Getter
     @Setter
     @ScopeDefaultColumn.DefinedByField(columnName = "name", requireDynamicActive = true)
     private String name;
-    @Getter
-    @ScopeDefaultColumn.DefinedByField(columnName = "service_id")
-    private String serviceId;
-    @Getter
     @Setter
-    @ScopeDefaultColumn.DefinedByField(columnName = "service_name", requireDynamicActive = true)
+    @Getter
     private String serviceName;
-    @Setter
-    private NodeType serviceNodeType;
     @Getter
     @Setter
     private String serviceInstanceName;
+    @Getter
+    @Setter
+    private String endpointName;
     @Getter
     @Setter
     private int latency;
@@ -75,6 +63,7 @@ public class Endpoint extends Source {
     @Getter
     @Setter
     private RequestType type;
+
     @Getter
     @Setter
     @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
@@ -82,7 +71,6 @@ public class Endpoint extends Source {
 
     @Override
     public void prepare() {
-        serviceId = IDManager.ServiceID.buildId(serviceName, serviceNodeType);
-        projectId = IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName));
+        projectId = getEntityId();
     }
 }

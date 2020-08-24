@@ -27,7 +27,13 @@ import org.apache.skywalking.oap.server.core.source.DefaultScopeDefine;
 public class MetricFormatter {
     protected String getEntityName(MetricsMetaInfo meta) {
         int scope = meta.getScope();
-        if (DefaultScopeDefine.inServiceCatalog(scope)) {
+
+        if (DefaultScopeDefine.inProjectCatalog(scope)) {
+            final String projectId = meta.getId();
+            final IDManager.ProjectId.ProjectIDDefinition projectIDDefinition = IDManager.ProjectId.analysisId(
+                    projectId);
+            return projectIDDefinition.getName();
+        } else if (DefaultScopeDefine.inServiceCatalog(scope)) {
             final String serviceId = meta.getId();
             final IDManager.ServiceID.ServiceIDDefinition serviceIDDefinition = IDManager.ServiceID.analysisId(
                 serviceId);

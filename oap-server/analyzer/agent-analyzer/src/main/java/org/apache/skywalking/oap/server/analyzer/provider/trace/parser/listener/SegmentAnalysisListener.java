@@ -74,7 +74,7 @@ public class SegmentAnalysisListener implements FirstAnalysisListener, EntryAnal
                 serviceName,
                 NodeType.Normal
             );
-            projectId = IDManager.ProjectId.buildProjectId(IDManager.ProjectId.getProjectName(serviceName));
+            projectId = IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName));
         }
 
         long timeBucket = TimeBucket.getRecordTimeBucket(startTimestamp);
@@ -108,7 +108,7 @@ public class SegmentAnalysisListener implements FirstAnalysisListener, EntryAnal
             serviceName = namingControl.formatServiceName(segmentObject.getService());
             serviceId = IDManager.ServiceID.buildId(
                 serviceName, NodeType.Normal);
-            projectId = IDManager.ProjectId.buildProjectId(IDManager.ProjectId.getProjectName(serviceName));
+            projectId = IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName));
         }
 
         endpointId = IDManager.EndpointID.buildId(

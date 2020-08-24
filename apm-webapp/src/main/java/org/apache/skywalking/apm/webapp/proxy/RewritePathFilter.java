@@ -20,14 +20,8 @@ package org.apache.skywalking.apm.webapp.proxy;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import org.apache.skywalking.apm.webapp.compont.SSOConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_DECORATION_FILTER_ORDER;
 
@@ -37,9 +31,6 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 @Component
 @ConfigurationProperties(prefix = "collector")
 public class RewritePathFilter extends ZuulFilter {
-
-    @Autowired
-    SSOConfiguration ssoConfiguration;
 
     private static final String REQUEST_URI = "requestURI";
 
@@ -67,23 +58,14 @@ public class RewritePathFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
-        return true;
+        RequestContext ctx = RequestContext.getCurrentContext();
+        return ctx.containsKey(REQUEST_URI);
     }
 
     @Override
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
-        HttpServletRequest request = ctx.getRequest();
-        HttpServletResponse response = ctx.getResponse();
-
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.setHeader("url", ssoConfiguration.getSsologin());
-            response.setHeader("invalid", "true");
-
-            ctx.set(REQUEST_URI, path);
-
-        }
+        ctx.set(REQUEST_URI, path);
         return null;
     }
 }

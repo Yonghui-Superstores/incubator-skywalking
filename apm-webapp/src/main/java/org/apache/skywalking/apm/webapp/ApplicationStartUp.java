@@ -21,10 +21,8 @@ package org.apache.skywalking.apm.webapp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
-@EnableFeignClients
 @SpringBootApplication
 @EnableZuulProxy
 public class ApplicationStartUp extends SpringBootServletInitializer {

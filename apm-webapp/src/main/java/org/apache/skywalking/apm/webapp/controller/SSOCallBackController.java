@@ -19,8 +19,10 @@
 package org.apache.skywalking.apm.webapp.controller;
 
 import org.apache.catalina.session.StandardSessionFacade;
+import org.apache.skywalking.apm.webapp.Const;
 import org.apache.skywalking.apm.webapp.compont.SSOConfiguration;
 import org.apache.skywalking.apm.webapp.service.SSOservice;
+import org.apache.skywalking.apm.webapp.vo.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +53,20 @@ public class SSOCallBackController {
         //return code;
         StandardSessionFacade session = (StandardSessionFacade) request.getSession(true);
         session.setMaxInactiveInterval(1800);
-        String userId = ssOservice.getUserId(code, env);
-        session.setAttribute("userId", userId);
-        session.setAttribute("env", env);
+        User user = ssOservice.getUser(code, env);
+        session.setAttribute(Const.SESSION_USER, user);
+        session.setAttribute(Const.SESSION_ENV, env);
         try {
             response.sendRedirect(ssoConfiguration.getRedicturl());
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error(e.getMessage(), e);
         }
+    }
 
+    @GetMapping(value = "clearSession")
+    public void clearSession(HttpServletRequest request, HttpServletResponse response){
+        StandardSessionFacade session = (StandardSessionFacade) request.getSession(true);
+        session.setAttribute(Const.SESSION_USER, null);
+        session.setAttribute(Const.SESSION_ENV, null);
     }
 }

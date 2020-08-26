@@ -16,21 +16,15 @@
  *
  */
 
-package org.apache.skywalking.apm.webapp;
+package org.apache.skywalking.apm.webapp.vo;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
-import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
+import lombok.Data;
 
-@EnableFeignClients
-@SpringBootApplication
-@EnableZuulProxy
-public class ApplicationStartUp extends SpringBootServletInitializer {
-
-    public static void main(String[] args) {
-        SpringApplication.run(ApplicationStartUp.class, args);
-    }
-
+/**
+ * @author Liu-XinYuan
+ */
+@Data
+public class TokenInfo {
+    private String access_token;
+    private String token_type;
 }

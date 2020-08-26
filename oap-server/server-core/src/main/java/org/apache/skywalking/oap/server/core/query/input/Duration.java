@@ -29,6 +29,7 @@ public class Duration {
     private String start;
     private String end;
     private Step step;
+    private int gap = 1;
 
     /**
      * See {@link DurationUtils#convertToTimeBucket(String)}

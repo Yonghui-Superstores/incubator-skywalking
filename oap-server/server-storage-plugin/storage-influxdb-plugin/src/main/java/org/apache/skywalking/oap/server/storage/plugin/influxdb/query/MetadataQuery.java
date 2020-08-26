@@ -111,7 +111,7 @@ public class MetadataQuery implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Service> searchServices(long startTimestamp, long endTimestamp, String keyword) throws IOException {
+    public List<Service> searchServices(long startTimestamp, long endTimestamp, String keyword, String projectId) throws IOException {
         WhereSubQueryImpl<SelectSubQueryImpl<SelectQueryImpl>, SelectQueryImpl> subQuery = select()
             .fromSubQuery(client.getDatabase())
             .column(ID_COLUMN)

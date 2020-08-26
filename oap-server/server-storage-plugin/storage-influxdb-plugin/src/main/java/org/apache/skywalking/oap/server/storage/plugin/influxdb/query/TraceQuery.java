@@ -62,6 +62,7 @@ public class TraceQuery implements ITraceQueryDAO {
                                        long minDuration,
                                        long maxDuration,
                                        String endpointName,
+                                       List<String> projectIds,
                                        String serviceId,
                                        String serviceInstanceId,
                                        String endpointId,

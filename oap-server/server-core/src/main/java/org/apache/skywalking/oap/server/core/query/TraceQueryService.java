@@ -72,7 +72,8 @@ public class TraceQueryService implements Service {
         return componentLibraryCatalogService;
     }
 
-    public TraceBrief queryBasicTraces(final String serviceId,
+    public TraceBrief queryBasicTraces(final List<String> projectIds,
+                                       final String serviceId,
                                        final String serviceInstanceId,
                                        final String endpointId,
                                        final String traceId,
@@ -87,7 +88,7 @@ public class TraceQueryService implements Service {
         PaginationUtils.Page page = PaginationUtils.INSTANCE.exchange(paging);
 
         return getTraceQueryDAO().queryBasicTraces(
-            startTB, endTB, minTraceDuration, maxTraceDuration, endpointName, serviceId, serviceInstanceId, endpointId,
+            startTB, endTB, minTraceDuration, maxTraceDuration, endpointName, projectIds, serviceId, serviceInstanceId, endpointId,
             traceId, page
                 .getLimit(), page.getFrom(), traceState, queryOrder
         );

@@ -21,8 +21,10 @@ package org.apache.skywalking.oap.server.receiver.trace.mock;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.skywalking.apm.network.common.v3.Commands;
 import org.apache.skywalking.apm.network.common.v3.KeyStringValuePair;
 import org.apache.skywalking.apm.network.language.agent.v3.SegmentObject;
@@ -43,14 +45,14 @@ public class AgentDataMock {
         //long startTimestamp = new DateTime().minusDays(2).getMillis();
 
         ManagementServiceGrpc.ManagementServiceBlockingStub managementServiceBlockingStub = ManagementServiceGrpc.newBlockingStub(
-            channel);
+                channel);
 
         // ServiceAMock
         ServiceAMock serviceAMock = new ServiceAMock();
         managementServiceBlockingStub.keepAlive(InstancePingPkg.newBuilder()
-                                                               .setService(ServiceAMock.SERVICE_NAME)
-                                                               .setServiceInstance(ServiceAMock.SERVICE_INSTANCE_NAME)
-                                                               .build());
+                .setService(ServiceAMock.SERVICE_NAME)
+                .setServiceInstance(ServiceAMock.SERVICE_INSTANCE_NAME)
+                .build());
 
         // ServiceBMock
         ServiceBMock serviceBMock = new ServiceBMock();
@@ -60,49 +62,55 @@ public class AgentDataMock {
 
         TimeUnit.SECONDS.sleep(10);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 50000; i++) {
+            startTimestamp = System.currentTimeMillis();
+
             String traceId = UUID.randomUUID().toString();
             String serviceASegmentId = UUID.randomUUID().toString();
             String serviceBSegmentId = UUID.randomUUID().toString();
             String serviceCSegmentId = UUID.randomUUID().toString();
             serviceAMock.mock(
-                streamObserver, traceId, serviceASegmentId, startTimestamp);
+                    streamObserver, traceId, serviceASegmentId, startTimestamp);
             serviceBMock.mock(
-                streamObserver, traceId, serviceBSegmentId, serviceASegmentId, startTimestamp);
+                    streamObserver, traceId, serviceBSegmentId, serviceASegmentId, startTimestamp);
             serviceCMock.mock(
-                streamObserver, traceId, serviceCSegmentId, serviceBSegmentId, startTimestamp);
+                    streamObserver, traceId, serviceCSegmentId, serviceBSegmentId, startTimestamp);
+
+            if (i % 100 == 0) {
+                TimeUnit.MILLISECONDS.sleep(500);
+            }
         }
 
         streamObserver.onCompleted();
 
         managementServiceBlockingStub.reportInstanceProperties(
-            InstanceProperties.newBuilder()
-                              .setService(ServiceAMock.SERVICE_NAME)
-                              .setServiceInstance(ServiceAMock.SERVICE_INSTANCE_NAME)
-                              .addProperties(
-                                  KeyStringValuePair.newBuilder()
-                                                    .setKey("os_name").setValue("MacOS")
-                                                    .build())
-                              .addProperties(
-                                  KeyStringValuePair.newBuilder()
-                                                    .setKey("language").setValue("java")
-                                                    .build()
-                              )
-                              .build());
+                InstanceProperties.newBuilder()
+                        .setService(ServiceAMock.SERVICE_NAME)
+                        .setServiceInstance(ServiceAMock.SERVICE_INSTANCE_NAME)
+                        .addProperties(
+                                KeyStringValuePair.newBuilder()
+                                        .setKey("os_name").setValue("MacOS")
+                                        .build())
+                        .addProperties(
+                                KeyStringValuePair.newBuilder()
+                                        .setKey("language").setValue("java")
+                                        .build()
+                        )
+                        .build());
         managementServiceBlockingStub.reportInstanceProperties(
-            InstanceProperties.newBuilder()
-                              .setService(ServiceBMock.SERVICE_NAME)
-                              .setServiceInstance(ServiceBMock.SERVICE_INSTANCE_NAME)
-                              .addProperties(
-                                  KeyStringValuePair.newBuilder()
-                                                    .setKey("os_name").setValue("MacOS")
-                                                    .build())
-                              .addProperties(
-                                  KeyStringValuePair.newBuilder()
-                                                    .setKey("language").setValue("java")
-                                                    .build()
-                              )
-                              .build());
+                InstanceProperties.newBuilder()
+                        .setService(ServiceBMock.SERVICE_NAME)
+                        .setServiceInstance(ServiceBMock.SERVICE_INSTANCE_NAME)
+                        .addProperties(
+                                KeyStringValuePair.newBuilder()
+                                        .setKey("os_name").setValue("MacOS")
+                                        .build())
+                        .addProperties(
+                                KeyStringValuePair.newBuilder()
+                                        .setKey("language").setValue("java")
+                                        .build()
+                        )
+                        .build());
 
         while (!IS_COMPLETED) {
             TimeUnit.MILLISECONDS.sleep(500);
@@ -112,7 +120,7 @@ public class AgentDataMock {
 
     private static StreamObserver<SegmentObject> createStreamObserver(ManagedChannel channel) {
         TraceSegmentReportServiceGrpc.TraceSegmentReportServiceStub stub = TraceSegmentReportServiceGrpc.newStub(
-            channel);
+                channel);
         return stub.collect(new StreamObserver<Commands>() {
             @Override
             public void onNext(Commands downstream) {

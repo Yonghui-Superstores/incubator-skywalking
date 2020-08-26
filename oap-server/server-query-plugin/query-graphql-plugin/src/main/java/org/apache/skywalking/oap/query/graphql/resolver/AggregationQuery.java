@@ -42,13 +42,13 @@ public class AggregationQuery implements GraphQLQueryResolver {
     }
 
     public List<TopNEntity> getServiceTopN(final String name, final int topN, final Duration duration,
-                                           final Order order, final String projectId) throws IOException {
+                                           final Order order, final String projectName) throws IOException {
         TopNCondition condition = new TopNCondition();
         condition.setName(name);
         condition.setScope(Scope.Service);
         condition.setOrder(order);
         condition.setTopN(topN);
-        condition.setProjectId(projectId);
+        condition.setProjectName(projectName);
         List<TopNEntity> list = new ArrayList<>();
         query.sortMetrics(condition, duration).forEach(selectedRecord -> {
             TopNEntity entity = new TopNEntity(selectedRecord);
@@ -64,6 +64,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
         condition.setScope(Scope.ServiceInstance);
         condition.setOrder(order);
         condition.setTopN(topN);
+        condition.setProjectName(projectName);
         List<TopNEntity> list = new ArrayList<>();
         query.sortMetrics(condition, duration).forEach(selectedRecord -> {
             TopNEntity entity = new TopNEntity(selectedRecord);
@@ -82,6 +83,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
         condition.setNormal(true);
         condition.setOrder(order);
         condition.setTopN(topN);
+        condition.setProjectName(projectName);
         List<TopNEntity> list = new ArrayList<>();
         query.sortMetrics(condition, duration).forEach(selectedRecord -> {
             TopNEntity entity = new TopNEntity(selectedRecord);
@@ -97,6 +99,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
         condition.setScope(Scope.Endpoint);
         condition.setOrder(order);
         condition.setTopN(topN);
+        condition.setProjectName(projectName);
         List<TopNEntity> list = new ArrayList<>();
         query.sortMetrics(condition, duration).forEach(selectedRecord -> {
             TopNEntity entity = new TopNEntity(selectedRecord);
@@ -115,6 +118,7 @@ public class AggregationQuery implements GraphQLQueryResolver {
         condition.setNormal(true);
         condition.setOrder(order);
         condition.setTopN(topN);
+        condition.setProjectName(projectName);
         List<TopNEntity> list = new ArrayList<>();
         query.sortMetrics(condition, duration).forEach(selectedRecord -> {
             TopNEntity entity = new TopNEntity(selectedRecord);

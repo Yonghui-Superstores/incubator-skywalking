@@ -52,6 +52,7 @@ public class TraceQueryEs7DAO extends TraceQueryEsDAO {
                                        long minDuration,
                                        long maxDuration,
                                        String endpointName,
+                                       List<String> projectIds,
                                        String serviceId,
                                        String serviceInstanceId,
                                        String endpointId,

@@ -38,19 +38,7 @@ public class ProfileTraceDAO implements ITraceQueryDAO {
     }
 
     @Override
-    public TraceBrief queryBasicTraces(long startSecondTB,
-                                       long endSecondTB,
-                                       long minDuration,
-                                       long maxDuration,
-                                       String endpointName,
-                                       String serviceId,
-                                       String serviceInstanceId,
-                                       String endpointId,
-                                       String traceId,
-                                       int limit,
-                                       int from,
-                                       TraceState traceState,
-                                       QueryOrder queryOrder) throws IOException {
+    public TraceBrief queryBasicTraces(long startSecondTB, long endSecondTB, long minDuration, long maxDuration, String endpointName, List<String> projectIds, String serviceId, String serviceInstanceId, String endpointId, String traceId, int limit, int from, TraceState traceState, QueryOrder queryOrder) throws IOException {
         return null;
     }
 

@@ -139,11 +139,12 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Service> searchServices(long startTimestamp, long endTimestamp, String keyword) throws IOException {
+    public List<Service> searchServices(long startTimestamp, long endTimestamp, String keyword, String projectId) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
+        boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceTraffic.PROJECT_ID, projectId));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(ServiceTraffic.NODE_TYPE, NodeType.Normal.value()));
         if (!Strings.isNullOrEmpty(keyword)) {
             String matchCName = MatchCNameBuilder.INSTANCE.build(ServiceTraffic.NAME);

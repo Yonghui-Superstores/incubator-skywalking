@@ -60,6 +60,7 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
                                        long minDuration,
                                        long maxDuration,
                                        String endpointName,
+                                       List<String> projectIds,
                                        String serviceId,
                                        String serviceInstanceId,
                                        String endpointId,
@@ -74,6 +75,7 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
         sourceBuilder.query(boolQueryBuilder);
         List<QueryBuilder> mustQueryList = boolQueryBuilder.must();
 
+        boolQueryBuilder.must().add(QueryBuilders.termsQuery(SegmentRecord.PROJECT_ID, projectIds));
         if (startSecondTB != 0 && endSecondTB != 0) {
             mustQueryList.add(QueryBuilders.rangeQuery(SegmentRecord.TIME_BUCKET).gte(startSecondTB).lte(endSecondTB));
         }

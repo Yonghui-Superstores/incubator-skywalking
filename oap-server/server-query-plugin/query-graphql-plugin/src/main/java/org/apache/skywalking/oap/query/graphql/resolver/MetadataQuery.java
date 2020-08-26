@@ -70,7 +70,7 @@ public class MetadataQuery implements GraphQLQueryResolver {
     }
 
     public List<Service> searchServices(final Duration duration, final String keyword, final String projectId) throws IOException, ParseException {
-        return getMetadataQueryService().searchServices(duration.getStartTimestamp(), duration.getEndTimestamp(), keyword);
+        return getMetadataQueryService().searchServices(duration.getStartTimestamp(), duration.getEndTimestamp(), keyword, projectId);
     }
 
     public Service searchService(final String serviceCode) throws IOException {

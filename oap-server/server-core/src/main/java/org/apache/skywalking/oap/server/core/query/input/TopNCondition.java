@@ -35,6 +35,8 @@ public class TopNCondition {
      * Metrics name
      */
     private String name;
+
+    private String projectName;
     /**
      * See {@link Entity}
      */
@@ -52,5 +54,4 @@ public class TopNCondition {
     private Scope scope;
     private int topN;
     private Order order;
-    private String projectId;
 }

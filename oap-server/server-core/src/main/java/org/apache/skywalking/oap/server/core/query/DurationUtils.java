@@ -119,7 +119,7 @@ public enum DurationUtils {
                     break;
             }
             i++;
-            if (i > 500) {
+            if (i > 5000) {
                 throw new UnexpectedException(
                     "Duration data error, step: " + step.name() + ", start: " + startTimeBucket + ", end: " + endTimeBucket);
             }

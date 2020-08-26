@@ -24,10 +24,13 @@ import org.apache.skywalking.oap.server.core.query.type.Pagination;
 import org.apache.skywalking.oap.server.core.query.type.QueryOrder;
 import org.apache.skywalking.oap.server.core.query.type.TraceState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 public class TraceQueryCondition {
-    private String projectName;
+    private List<String> projectIds;
     private String serviceId;
     private String serviceInstanceId;
     private String traceId;
@@ -39,4 +42,8 @@ public class TraceQueryCondition {
     private TraceState traceState;
     private QueryOrder queryOrder;
     private Pagination paging;
+
+    public TraceQueryCondition() {
+        this.projectIds = new ArrayList<>();
+    }
 }

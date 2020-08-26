@@ -36,7 +36,7 @@ public class Entity {
     /**
      * <pre>
      * 1. scope=All, no name is required.
-     * 2. scope=Service, ServiceInstance and Endpoint, set neccessary serviceName/serviceInstanceName/endpointName
+     * 2. scope=Project, Service, ServiceInstance and Endpoint, set neccessary serviceName/serviceInstanceName/endpointName
      * 3. Scope=ServiceRelation, ServiceInstanceRelation and EndpointRelation
      *    serviceName/serviceInstanceName/endpointName is/are the source(s)
      *    estServiceName/destServiceInstanceName/destEndpointName is/are destination(s)
@@ -45,6 +45,7 @@ public class Entity {
      */
     private Scope scope;
 
+    private String projectName;
     private String serviceName;
     /**
      * Normal service is the service having installed agent or metrics reported directly. Unnormal service is
@@ -75,6 +76,8 @@ public class Entity {
         switch (scope) {
             case All:
                 return true;
+            case Project:
+                return Objects.nonNull(projectName);
             case Service:
                 return Objects.nonNull(serviceName) && Objects.nonNull(normal);
             case ServiceInstance:
@@ -105,6 +108,8 @@ public class Entity {
             case All:
                 // This is unnecessary. Just for making core clear.
                 return null;
+            case Project:
+                return IDManager.ProjectId.buildId(projectName);
             case Service:
                 return IDManager.ServiceID.buildId(serviceName, normal);
             case ServiceInstance:

@@ -32,7 +32,7 @@ templates:
           "type": "service",
           "children": [
             {
-              "name": "Global",
+              "name": "Project",
               "children": [
                 {
                   "width": 3,
@@ -90,12 +90,12 @@ templates:
                 },
                 {
                   "width": "6",
-                  "title": "Global Response Latency",
+                  "title": "Project Response Latency",
                   "height": "280",
-                  "entityType": "All",
+                  "entityType": "Project",
                   "independentSelector": false,
                   "metricType": "LABELED_VALUE",
-                  "metricName": "all_percentile",
+                  "metricName": "project_percentile",
                   "queryMetricType": "readLabeledMetricsValues",
                   "chartType": "ChartLine",
                   "metricLabels": "P50, P75, P90, P95, P99",
@@ -104,15 +104,15 @@ templates:
                 },
                 {
                   "width": "6",
-                  "title": "Global Heatmap",
+                  "title": "Project Heatmap",
                   "height": "280",
-                  "entityType": "All",
+                  "entityType": "Project",
                   "independentSelector": false,
                   "metricType": "HEATMAP",
                   "unit": "ms",
                   "queryMetricType": "readHeatMap",
                   "chartType": "ChartHeatmap",
-                  "metricName": "all_heatmap"
+                  "metricName": "project_heatmap"
                 }
               ]
             },

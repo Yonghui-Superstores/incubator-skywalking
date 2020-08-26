@@ -32,5 +32,4 @@ public class ApplicationStartUp extends SpringBootServletInitializer {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationStartUp.class, args);
     }
-
 }

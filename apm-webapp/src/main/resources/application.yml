@@ -55,4 +55,3 @@ sso:
   redicturl: /#/monitor/dashboard
   registerurl: http://localhost:8080/sso/callback
   clientId: lskywalking
-

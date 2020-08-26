@@ -32,7 +32,7 @@ public interface IMetadataQueryDAO extends DAO {
     List<Database> getAllDatabases() throws IOException;
 
     List<Service> searchServices(final long startTimestamp, final long endTimestamp,
-        final String keyword) throws IOException;
+        final String keyword, final String projectId) throws IOException;
 
     Service searchService(final String serviceCode) throws IOException;
 

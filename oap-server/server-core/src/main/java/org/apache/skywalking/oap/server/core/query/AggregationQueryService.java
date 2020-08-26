@@ -25,6 +25,7 @@ import org.apache.skywalking.apm.util.StringUtil;
 import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.analysis.IDManager;
 import org.apache.skywalking.oap.server.core.analysis.manual.instance.InstanceTraffic;
+import org.apache.skywalking.oap.server.core.analysis.manual.project.ProjectTraffic;
 import org.apache.skywalking.oap.server.core.query.input.Duration;
 import org.apache.skywalking.oap.server.core.query.input.TopNCondition;
 import org.apache.skywalking.oap.server.core.query.type.KeyValue;
@@ -54,16 +55,21 @@ public class AggregationQueryService implements Service {
 
     public List<SelectedRecord> sortMetrics(TopNCondition condition, Duration duration) throws IOException {
         final String valueCName = ValueColumnMetadata.INSTANCE.getValueCName(condition.getName());
-        List<KeyValue> additionalConditions = null;
+        List<KeyValue> additionalConditions = new ArrayList<>();
         if (StringUtil.isNotEmpty(condition.getParentService())) {
-            additionalConditions = new ArrayList<>(1);
             final String serviceId = IDManager.ServiceID.buildId(condition.getParentService(), condition.isNormal());
             additionalConditions.add(new KeyValue(InstanceTraffic.SERVICE_ID, serviceId));
         }
+        if(StringUtil.isNotEmpty(condition.getProjectName())) {
+            final String projectId = IDManager.ProjectId.buildId(condition.getProjectName());
+            additionalConditions.add(new KeyValue(ProjectTraffic.PROJECT_ID, projectId));
+        }
+
         final List<SelectedRecord> selectedRecords = getAggregationQueryDAO().sortMetrics(
             condition, valueCName, duration, additionalConditions);
         selectedRecords.forEach(selectedRecord -> {
             switch (condition.getScope()) {
+                case Project:
                 case Service:
                     selectedRecord.setName(IDManager.ServiceID.analysisId(selectedRecord.getId()).getName());
                     break;

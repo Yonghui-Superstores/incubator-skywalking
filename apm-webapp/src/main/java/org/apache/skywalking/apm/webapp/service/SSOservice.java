@@ -25,6 +25,7 @@ import org.apache.skywalking.apm.webapp.compont.SSOConfiguration;
 import org.apache.skywalking.apm.webapp.sso.OpenPrdFeignClient;
 import org.apache.skywalking.apm.webapp.sso.SSOFeignClient;
 import org.apache.skywalking.apm.webapp.vo.TokenInfo;
+import org.apache.skywalking.apm.webapp.vo.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,7 @@ public class SSOservice {
     @Resource
     SSOConfiguration ssoConfiguration;
 
-    public String getUserId(String code, String env) {
+    public User getUser(String code, String env) {
         java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
 /*        String clientId;
         switch (env) {
@@ -64,15 +65,20 @@ public class SSOservice {
             default:
                 clientId = "lskywalking";
         }*/
-        String encode = "Basic " + encoder.encodeToString((ssoConfiguration.getClientId() + ":" + "secret").getBytes(StandardCharsets.UTF_8));
+//        String encode = "Basic " + encoder.encodeToString((ssoConfiguration.getClientId() + ":" + "secret").getBytes(StandardCharsets.UTF_8));
+        String encode = "Basic " + encoder.encodeToString(("lskywalking" + ":" + "secret").getBytes(StandardCharsets.UTF_8));
         // 根据code获取token信息
-        TokenInfo tokenInfo = ssoFeignClient.getToken(code, ssoConfiguration.getRegisterurl(), "authorization_code", encode).getBody();
+//        TokenInfo tokenInfo = ssoFeignClient.getToken(code, ssoConfiguration.getRegisterurl(), "authorization_code", encode).getBody();
+        TokenInfo tokenInfo = ssoFeignClient.getToken(code, "http://localhost:8080/sso/callback", "authorization_code", encode).getBody();
         // 根据token拿到user
-        Object user = ssoFeignClient.getUser(tokenInfo.getToken_type() + " " + tokenInfo.getAccess_token()).getBody();
+        Object principal = ssoFeignClient.getUser(tokenInfo.getToken_type() + " " + tokenInfo.getAccess_token()).getBody();
         Gson gson = new Gson();
-        JsonElement userS = gson.toJsonTree(user);
-        String userId = userS.getAsJsonObject().getAsJsonObject("principal").get("userId").getAsString();
-        return userId;
+        JsonElement principalJson = gson.toJsonTree(principal);
+
+        User user = new User();
+        user.setUserId(principalJson.getAsJsonObject().getAsJsonObject("principal").get("userId").getAsString());
+        user.setUserName(principalJson.getAsJsonObject().getAsJsonObject("principal").get("username").getAsString());
+        return user;
     }
 
     public List<String> getProjects(String userId) {

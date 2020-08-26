@@ -35,6 +35,4 @@ public class MetricsCondition {
      * See {@link Entity}
      */
     private Entity entity;
-
-    private String projectId;
 }

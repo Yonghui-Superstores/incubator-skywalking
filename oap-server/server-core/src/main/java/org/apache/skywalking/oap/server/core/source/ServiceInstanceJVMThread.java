@@ -61,4 +61,8 @@ public class ServiceInstanceJVMThread extends Source {
     @Getter
     @Setter
     private long peakCount;
+    @Getter
+    @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
+    private String projectId;
 }

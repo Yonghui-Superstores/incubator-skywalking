@@ -39,14 +39,13 @@ import org.apache.skywalking.oap.server.core.storage.annotation.Column;
     builder = ServiceTraffic.Builder.class, processor = MetricsStreamProcessor.class)
 @MetricsExtension(supportDownSampling = false, supportUpdate = false)
 @EqualsAndHashCode(of = {
-    "name", "nodeType", "projectId"
+    "name", "nodeType"
 })
 public class ServiceTraffic extends Metrics {
     public static final String INDEX_NAME = "service_traffic";
 
     public static final String NAME = "name";
     public static final String NODE_TYPE = "node_type";
-    public static final String PROJECT_ID = "project_id";
 
     @Setter
     @Getter
@@ -57,11 +56,6 @@ public class ServiceTraffic extends Metrics {
     @Getter
     @Column(columnName = NODE_TYPE)
     private NodeType nodeType;
-
-    @Setter
-    @Getter
-    @Column(columnName = PROJECT_ID)
-    private String projectId;
 
     @Override
     public String id() {
@@ -86,7 +80,7 @@ public class ServiceTraffic extends Metrics {
     public RemoteData.Builder serialize() {
         final RemoteData.Builder builder = RemoteData.newBuilder();
         builder.addDataStrings(name);
-        builder.addDataStrings(projectId);
+        builder.addDataStrings(getProjectId());
         builder.addDataIntegers(nodeType.value());
         // Time bucket is not a part of persistent, but still is required in the first time insert.
         builder.addDataLongs(getTimeBucket());

@@ -58,4 +58,8 @@ public class ServiceInstanceCLRCPU extends Source {
     @Getter
     @Setter
     private double usePercent;
+    @Getter
+    @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
+    private String projectId;
 }

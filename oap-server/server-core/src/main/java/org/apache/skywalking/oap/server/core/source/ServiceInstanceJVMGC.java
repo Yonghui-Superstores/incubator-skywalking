@@ -61,4 +61,8 @@ public class ServiceInstanceJVMGC extends Source {
     @Getter
     @Setter
     private long count;
+    @Getter
+    @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
+    private String projectId;
 }

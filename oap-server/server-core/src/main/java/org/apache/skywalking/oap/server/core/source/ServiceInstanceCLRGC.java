@@ -67,4 +67,8 @@ public class ServiceInstanceCLRGC extends Source {
     @Getter
     @Setter
     private long heapMemory;
+    @Getter
+    @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
+    private String projectId;
 }

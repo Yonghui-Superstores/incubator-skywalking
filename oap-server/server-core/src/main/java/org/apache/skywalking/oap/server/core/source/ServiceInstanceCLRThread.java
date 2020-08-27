@@ -67,4 +67,8 @@ public class ServiceInstanceCLRThread extends Source {
     @Getter
     @Setter
     private long maxWorkerThreads;
+    @Getter
+    @Setter
+    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
+    private String projectId;
 }

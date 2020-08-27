@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -29,13 +30,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.skywalking.oap.server.core.analysis.NodeType;
 import org.apache.skywalking.oap.server.core.analysis.TimeBucket;
 import org.apache.skywalking.oap.server.core.analysis.manual.endpoint.EndpointTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.instance.InstanceTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.service.ServiceTraffic;
 import org.apache.skywalking.oap.server.core.query.enumeration.Language;
-import org.apache.skywalking.oap.server.core.query.type.*;
+import org.apache.skywalking.oap.server.core.query.type.Attribute;
+import org.apache.skywalking.oap.server.core.query.type.Database;
+import org.apache.skywalking.oap.server.core.query.type.Endpoint;
+import org.apache.skywalking.oap.server.core.query.type.Project;
+import org.apache.skywalking.oap.server.core.query.type.Service;
+import org.apache.skywalking.oap.server.core.query.type.ServiceInstance;
 import org.apache.skywalking.oap.server.core.storage.query.IMetadataQueryDAO;
 import org.apache.skywalking.oap.server.library.client.jdbc.hikaricp.JDBCHikariCPClient;
 
@@ -61,7 +68,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
                 return buildServices(resultSet);
             }
         } catch (SQLException e) {
@@ -80,7 +87,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
                 return buildServices(resultSet);
             }
         } catch (SQLException e) {
@@ -98,7 +105,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
                 List<Database> databases = new ArrayList<>();
                 while (resultSet.next()) {
                     Database database = new Database();
@@ -128,7 +135,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
                 return buildServices(resultSet);
             }
         } catch (SQLException e) {
@@ -148,7 +155,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
 
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
 
                 while (resultSet.next()) {
                     Service service = new Service();
@@ -180,7 +187,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
         List<Endpoint> endpoints = new ArrayList<>();
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
 
                 while (resultSet.next()) {
                     Endpoint endpoint = new Endpoint();
@@ -211,7 +218,7 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
         try (Connection connection = h2Client.getConnection()) {
             try (ResultSet resultSet = h2Client.executeQuery(
-                connection, sql.toString(), condition.toArray(new Object[0]))) {
+                    connection, sql.toString(), condition.toArray(new Object[0]))) {
 
                 while (resultSet.next()) {
                     ServiceInstance serviceInstance = new ServiceInstance();

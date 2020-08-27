@@ -20,7 +20,11 @@ package org.apache.skywalking.oap.server.core.analysis.manual.service;
 
 import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.analysis.Stream;
-import org.apache.skywalking.oap.server.core.analysis.metrics.*;
+import org.apache.skywalking.oap.server.core.analysis.metrics.HistogramMetrics;
+import org.apache.skywalking.oap.server.core.analysis.metrics.Metrics;
+import org.apache.skywalking.oap.server.core.analysis.metrics.MetricsMetaInfo;
+import org.apache.skywalking.oap.server.core.analysis.metrics.WithMetadata;
+import org.apache.skywalking.oap.server.core.analysis.metrics.DataTable;
 import org.apache.skywalking.oap.server.core.analysis.worker.SecondMetricsStreamProcessor;
 import org.apache.skywalking.oap.server.core.remote.grpc.proto.RemoteData;
 import org.apache.skywalking.oap.server.core.source.DefaultScopeDefine;
@@ -37,7 +41,6 @@ public class ServiceSuccessDotHeatMapMetrics extends HistogramMetrics implements
 
     public static final String ENTITY_ID = "entity_id";
     public static final String PROJECT_ID = "project_id";
-
 
     @Column(columnName = ENTITY_ID, length = 512)
     private String entityId;
@@ -68,27 +71,27 @@ public class ServiceSuccessDotHeatMapMetrics extends HistogramMetrics implements
     }
 
     public int hashCode() {
-        byte var1 = 17;
-        int var2 = 31 * var1 + this.entityId.hashCode();
-        var2 = 31 * var2 + (int)this.getTimeBucket();
-        return var2;
+        int result = 17;
+        result = 31 * result + this.entityId.hashCode();
+        result = 31 * result + (int) this.getTimeBucket();
+        return result;
     }
 
     public int remoteHashCode() {
-        byte var1 = 17;
-        int var2 = 31 * var1 + this.entityId.hashCode();
-        return var2;
+        int result = 17;
+        result = 31 * result + this.entityId.hashCode();
+        return result;
     }
 
-    public boolean equals(Object var1) {
-        if (this == var1) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
-        } else if (var1 == null) {
+        } else if (obj == null) {
             return false;
-        } else if (this.getClass() != var1.getClass()) {
+        } else if (this.getClass() != obj.getClass()) {
             return false;
         } else {
-            ServiceSuccessDotHeatMapMetrics var2 = (ServiceSuccessDotHeatMapMetrics)var1;
+            ServiceSuccessDotHeatMapMetrics var2 = (ServiceSuccessDotHeatMapMetrics) obj;
             if (!this.entityId.equals(var2.entityId)) {
                 return false;
             } else {
@@ -138,10 +141,10 @@ public class ServiceSuccessDotHeatMapMetrics extends HistogramMetrics implements
 
         public ServiceSuccessDotHeatMapMetrics map2Data(Map<String, Object> dbMap) {
             ServiceSuccessDotHeatMapMetrics metrics = new ServiceSuccessDotHeatMapMetrics();
-            metrics.setEntityId((String)dbMap.get(ENTITY_ID));
-            metrics.setProjectId((String)dbMap.get(PROJECT_ID));
-            metrics.setDataset(new DataTable((String)dbMap.get(DATASET)));
-            metrics.setTimeBucket(((Number)dbMap.get(TIME_BUCKET)).longValue());
+            metrics.setEntityId((String) dbMap.get(ENTITY_ID));
+            metrics.setProjectId((String) dbMap.get(PROJECT_ID));
+            metrics.setDataset(new DataTable((String) dbMap.get(DATASET)));
+            metrics.setTimeBucket(((Number) dbMap.get(TIME_BUCKET)).longValue());
             return metrics;
         }
     }

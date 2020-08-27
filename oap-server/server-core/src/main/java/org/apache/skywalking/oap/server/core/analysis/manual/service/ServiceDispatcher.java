@@ -25,9 +25,6 @@ import org.apache.skywalking.oap.server.library.util.BooleanUtils;
 
 import java.util.Random;
 
-/**
- * @author peng-yongsheng
- */
 public class ServiceDispatcher implements SourceDispatcher<Segment> {
 
     private static final int STEP = 50;
@@ -47,8 +44,8 @@ public class ServiceDispatcher implements SourceDispatcher<Segment> {
         ServiceSuccessDotHeatMapMetrics metrics = new ServiceSuccessDotHeatMapMetrics();
         metrics.setTimeBucket(source.getTimeBucket());
         metrics.setEntityId(String.valueOf(source.getServiceId()));
-//        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
-        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
+        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
+//        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
         SecondMetricsStreamProcessor.getInstance().in(metrics);
     }
 
@@ -56,8 +53,8 @@ public class ServiceDispatcher implements SourceDispatcher<Segment> {
         ServiceFailureDotHeatMapMetrics metrics = new ServiceFailureDotHeatMapMetrics();
         metrics.setTimeBucket(source.getTimeBucket());
         metrics.setEntityId(String.valueOf(source.getServiceId()));
-//        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
-        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
+        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
+//        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
         SecondMetricsStreamProcessor.getInstance().in(metrics);
     }
 }

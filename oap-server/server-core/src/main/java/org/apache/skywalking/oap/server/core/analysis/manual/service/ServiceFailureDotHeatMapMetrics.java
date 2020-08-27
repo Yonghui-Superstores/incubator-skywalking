@@ -20,7 +20,11 @@ package org.apache.skywalking.oap.server.core.analysis.manual.service;
 
 import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.analysis.Stream;
-import org.apache.skywalking.oap.server.core.analysis.metrics.*;
+import org.apache.skywalking.oap.server.core.analysis.metrics.DataTable;
+import org.apache.skywalking.oap.server.core.analysis.metrics.HistogramMetrics;
+import org.apache.skywalking.oap.server.core.analysis.metrics.Metrics;
+import org.apache.skywalking.oap.server.core.analysis.metrics.WithMetadata;
+import org.apache.skywalking.oap.server.core.analysis.metrics.MetricsMetaInfo;
 import org.apache.skywalking.oap.server.core.analysis.worker.SecondMetricsStreamProcessor;
 import org.apache.skywalking.oap.server.core.remote.grpc.proto.RemoteData;
 import org.apache.skywalking.oap.server.core.source.DefaultScopeDefine;
@@ -37,7 +41,6 @@ public class ServiceFailureDotHeatMapMetrics extends HistogramMetrics implements
 
     public static final String ENTITY_ID = "entity_id";
     public static final String PROJECT_ID = "project_id";
-
 
     @Column(columnName = ENTITY_ID, length = 512)
     private String entityId;
@@ -70,7 +73,7 @@ public class ServiceFailureDotHeatMapMetrics extends HistogramMetrics implements
     public int hashCode() {
         byte var1 = 17;
         int var2 = 31 * var1 + this.entityId.hashCode();
-        var2 = 31 * var2 + (int)this.getTimeBucket();
+        var2 = 31 * var2 + (int) this.getTimeBucket();
         return var2;
     }
 
@@ -88,7 +91,7 @@ public class ServiceFailureDotHeatMapMetrics extends HistogramMetrics implements
         } else if (this.getClass() != var1.getClass()) {
             return false;
         } else {
-            ServiceFailureDotHeatMapMetrics var2 = (ServiceFailureDotHeatMapMetrics)var1;
+            ServiceFailureDotHeatMapMetrics var2 = (ServiceFailureDotHeatMapMetrics) var1;
             if (!this.entityId.equals(var2.entityId)) {
                 return false;
             } else {
@@ -152,10 +155,10 @@ public class ServiceFailureDotHeatMapMetrics extends HistogramMetrics implements
 
         public ServiceFailureDotHeatMapMetrics map2Data(Map<String, Object> dbMap) {
             ServiceFailureDotHeatMapMetrics metrics = new ServiceFailureDotHeatMapMetrics();
-            metrics.setEntityId((String)dbMap.get(ENTITY_ID));
-            metrics.setProjectId((String)dbMap.get(PROJECT_ID));
-            metrics.setDataset(new DataTable((String)dbMap.get(DATASET)));
-            metrics.setTimeBucket(((Number)dbMap.get(TIME_BUCKET)).longValue());
+            metrics.setEntityId((String) dbMap.get(ENTITY_ID));
+            metrics.setProjectId((String) dbMap.get(PROJECT_ID));
+            metrics.setDataset(new DataTable((String) dbMap.get(DATASET)));
+            metrics.setTimeBucket(((Number) dbMap.get(TIME_BUCKET)).longValue());
             return metrics;
         }
     }

@@ -6,7 +6,7 @@
 	url = https://github.com/Yonghui-Superstores/skywalking-query-protocol.git
 [submodule "skywalking-ui"]
 	path = skywalking-ui
-url=https://github.com/Thislife1/skywalking-rocketbot-ui.git
+url=https://github.com/Yonghui-Superstores/skywalking-rocketbot-ui.git
 [submodule "test/e2e/e2e-protocol/src/main/proto"]
 	path = test/e2e/e2e-protocol/src/main/proto
 	url = https://github.com/apache/skywalking-data-collect-protocol.git

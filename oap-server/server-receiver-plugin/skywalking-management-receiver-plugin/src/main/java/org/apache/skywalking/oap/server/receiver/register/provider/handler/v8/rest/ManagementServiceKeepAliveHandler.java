@@ -79,7 +79,7 @@ public class ManagementServiceKeepAliveHandler extends JettyJsonHandler {
         sourceReceiver.receive(serviceMeta);
 
         Project project = new Project();
-        project.setName(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
+        project.setName(IDManager.ProjectId.getProjectName(serviceName));
         project.setTimeBucket(timeBucket);
         sourceReceiver.receive(project);
 

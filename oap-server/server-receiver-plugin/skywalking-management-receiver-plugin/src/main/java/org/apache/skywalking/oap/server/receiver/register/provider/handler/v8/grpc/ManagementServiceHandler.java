@@ -34,6 +34,7 @@ import org.apache.skywalking.oap.server.core.analysis.NodeType;
 import org.apache.skywalking.oap.server.core.analysis.TimeBucket;
 import org.apache.skywalking.oap.server.core.analysis.manual.instance.InstanceTraffic;
 import org.apache.skywalking.oap.server.core.config.NamingControl;
+import org.apache.skywalking.oap.server.core.source.Project;
 import org.apache.skywalking.oap.server.core.source.ServiceInstanceUpdate;
 import org.apache.skywalking.oap.server.core.source.ServiceMeta;
 import org.apache.skywalking.oap.server.core.source.SourceReceiver;
@@ -98,6 +99,11 @@ public class ManagementServiceHandler extends ManagementServiceGrpc.ManagementSe
         serviceMeta.setNodeType(NodeType.Normal);
         serviceMeta.setTimeBucket(timeBucket);
         sourceReceiver.receive(serviceMeta);
+
+        Project project = new Project();
+        project.setName(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
+        project.setTimeBucket(timeBucket);
+        sourceReceiver.receive(project);
 
         responseObserver.onNext(Commands.newBuilder().build());
         responseObserver.onCompleted();

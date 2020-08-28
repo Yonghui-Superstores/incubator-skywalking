@@ -20,6 +20,7 @@ package org.apache.skywalking.oap.server.core.source;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.skywalking.oap.server.core.analysis.IDManager;
 
 import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.ALL;
 
@@ -56,4 +57,9 @@ public class All extends Source {
     @Getter
     @Setter
     private RequestType type;
+
+    @Override
+    public void prepare() {
+        setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(name)));
+    }
 }

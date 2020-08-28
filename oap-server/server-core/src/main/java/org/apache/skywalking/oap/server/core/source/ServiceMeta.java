@@ -43,13 +43,8 @@ public class ServiceMeta extends Source {
     private String name;
     private NodeType nodeType;
 
-    @Getter
-    @Setter
-    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
-    private String projectId;
-
     @Override
     public void prepare() {
-        projectId = IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(name));
+        setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(name)));
     }
 }

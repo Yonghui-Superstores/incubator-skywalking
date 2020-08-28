@@ -64,13 +64,8 @@ public class Project extends Source {
     @Setter
     private RequestType type;
 
-    @Getter
-    @Setter
-    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
-    private String projectId;
-
     @Override
     public void prepare() {
-        projectId = getEntityId();
+        setProjectId(getEntityId());
     }
 }

@@ -9,6 +9,7 @@ ${metricsClassPackage}${metricsName}Metrics metrics = new ${metricsClassPackage}
     </#list>
 </#if>
 
+metrics.setProjectId(source.getProjectId());
 metrics.setTimeBucket(source.getTimeBucket());
 <#list fieldsFromSource as field>
     metrics.${field.fieldSetter}(source.${field.fieldGetter}());

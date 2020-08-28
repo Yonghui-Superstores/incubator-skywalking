@@ -28,6 +28,10 @@ public abstract class Source {
     @Setter
     private long timeBucket;
 
+    @Getter
+    @Setter
+    private String projectId;
+
     public abstract String getEntityId();
 
     /**

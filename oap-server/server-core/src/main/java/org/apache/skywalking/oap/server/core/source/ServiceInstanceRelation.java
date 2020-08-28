@@ -21,6 +21,7 @@ package org.apache.skywalking.oap.server.core.source;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.skywalking.apm.util.StringUtil;
+import org.apache.skywalking.oap.server.core.Const;
 import org.apache.skywalking.oap.server.core.analysis.IDManager;
 import org.apache.skywalking.oap.server.core.analysis.NodeType;
 
@@ -106,6 +107,7 @@ public class ServiceInstanceRelation extends Source {
 
     @Override
     public void prepare() {
+        setProjectId(IDManager.ProjectId.buildId(Const.NONE_STR));
         sourceServiceId = IDManager.ServiceID.buildId(sourceServiceName, sourceServiceNodeType);
         destServiceId = IDManager.ServiceID.buildId(destServiceName, destServiceNodeType);
         sourceServiceInstanceId = IDManager.ServiceInstanceID.buildId(sourceServiceId, sourceServiceInstanceName);

@@ -33,12 +33,16 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.DefaultImplementor;
+import org.apache.skywalking.apm.agent.core.logging.api.ILog;
+import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 
 /**
  * Configuring, initializing and holding a KafkaProducer instance for reporters.
  */
 @DefaultImplementor
 public class KafkaProducerManager implements BootService, Runnable {
+
+    private static final ILog logger = LogManager.getLogger(KafkaProducerManager.class);
 
     private KafkaProducer<String, Bytes> producer;
 
@@ -63,6 +67,7 @@ public class KafkaProducerManager implements BootService, Runnable {
                                                  entry.getValue().get();
                                                  return null;
                                              } catch (InterruptedException | ExecutionException e) {
+                                                 logger.error("Describe topics failure.", e);
                                              }
                                              return entry.getKey();
                                          })

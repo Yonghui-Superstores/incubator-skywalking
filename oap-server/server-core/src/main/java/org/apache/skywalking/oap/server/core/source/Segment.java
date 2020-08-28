@@ -72,7 +72,4 @@ public class Segment extends Source {
     @Setter
     @Getter
     private int version;
-    @Setter
-    @Getter
-    private String projectId;
 }

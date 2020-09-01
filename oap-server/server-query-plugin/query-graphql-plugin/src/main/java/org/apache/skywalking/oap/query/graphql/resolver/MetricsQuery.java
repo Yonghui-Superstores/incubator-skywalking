@@ -201,6 +201,27 @@ public class MetricsQuery implements GraphQLQueryResolver {
         return getMetricsQueryService().readHeatMap(condition, duration);
     }
 
+    public HeatMap readDots(MetricsCondition condition, Duration duration) throws IOException {
+        if (MetricsType.UNKNOWN.equals(typeOfMetrics(condition.getName())) || !condition.getEntity().isValid()) {
+            DataTable emptyData = new DataTable();
+            emptyData.put("0", 0L);
+            final String rawdata = emptyData.toStorageData();
+            final HeatMap heatMap = new HeatMap();
+            final List<PointOfTime> pointOfTimes = duration.assembleDurationPoints();
+            pointOfTimes.forEach(pointOfTime -> {
+                String id = pointOfTime.id(
+                        condition.getEntity().isValid() ? condition.getEntity().buildId() : "ILLEGAL_ENTITY_PE"
+                );
+                heatMap.buildColumn(id, rawdata, 0);
+            });
+
+            return getMetricsQueryService().dotsMerge(heatMap, duration.getGap());
+        }
+
+        HeatMap heatMap = getMetricsQueryService().readHeatMap(condition, duration);
+        return getMetricsQueryService().dotsMerge(heatMap, duration.getGap());
+    }
+
     /**
      * Read the sampled records.
      */

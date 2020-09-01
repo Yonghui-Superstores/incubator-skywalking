@@ -23,6 +23,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.skywalking.oap.server.core.query.input.Duration;
 import org.apache.skywalking.oap.server.core.query.input.MetricsCondition;
+import org.apache.skywalking.oap.server.core.query.type.Bucket;
 import org.apache.skywalking.oap.server.core.query.type.HeatMap;
 import org.apache.skywalking.oap.server.core.query.type.MetricsValues;
 import org.apache.skywalking.oap.server.core.storage.StorageModule;
@@ -81,5 +82,35 @@ public class MetricsQueryService implements Service {
     public HeatMap readHeatMap(MetricsCondition condition, Duration duration) throws IOException {
         return getMetricQueryDAO().readHeatMap(
             condition, ValueColumnMetadata.INSTANCE.getValueCName(condition.getName()), duration);
+    }
+
+    public HeatMap dotsMerge(HeatMap heatMap, int gap) {
+        HeatMap dots = new HeatMap();
+
+        heatMap.getBuckets().forEach(dots::addBucket);
+
+        int index = 0;
+        HeatMap.HeatMapColumn currentValue = null;
+
+        for (int i = 0; i < heatMap.getValues().size(); i++) {
+            int mod = i % gap;
+
+            if (mod == 0) {
+                currentValue = new HeatMap.HeatMapColumn();
+                currentValue.setId(String.valueOf(index++));
+
+                for (Bucket ignored : heatMap.getBuckets()) {
+                    currentValue.getValues().add(0L);
+                }
+
+                dots.getValues().add(currentValue);
+            }
+
+            for (int j = 0; j < currentValue.getValues().size(); j++) {
+                currentValue.getValues().set(j, currentValue.getValues().get(j) + heatMap.getValues().get(i).getValues().get(j));
+            }
+        }
+
+        return dots;
     }
 }

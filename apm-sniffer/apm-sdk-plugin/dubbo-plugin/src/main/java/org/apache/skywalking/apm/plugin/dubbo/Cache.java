@@ -16,17 +16,25 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.spring.mvc.v4.define;
+package org.apache.skywalking.apm.plugin.dubbo;
 
-import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInstanceMethodsEnhancePluginDefine;
+import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
+import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 
-public abstract class AbstractSpring4Instrumentation extends ClassInstanceMethodsEnhancePluginDefine {
-    public static final String WITHNESS_CLASSES = "org.springframework.cache.interceptor.SimpleKey";
+public class Cache {
 
-    @Override
-    protected String[] witnessClasses() {
-        return new String[] {
-            WITHNESS_CLASSES,
-        };
+    private ContextSnapshot snapshot;
+    private AbstractSpan abstractSpan;
+
+    public Cache(ContextSnapshot snapshot, AbstractSpan abstractSpan) {
+        this.abstractSpan = abstractSpan;
+    }
+
+    public AbstractSpan getAbstractSpan() {
+        return abstractSpan;
+    }
+
+    public ContextSnapshot getSnapshot() {
+        return snapshot;
     }
 }

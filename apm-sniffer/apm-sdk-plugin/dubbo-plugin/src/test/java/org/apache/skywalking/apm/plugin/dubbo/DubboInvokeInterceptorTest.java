@@ -64,7 +64,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(TracingSegmentRunner.class)
 @PrepareForTest({RpcContext.class})
-public class DubboInterceptorTest {
+public class DubboInvokeInterceptorTest {
 
     @SegmentStoragePoint
     private SegmentStorage segmentStorage;
@@ -75,7 +75,7 @@ public class DubboInterceptorTest {
     @Mock
     private EnhancedInstance enhancedInstance;
 
-    private DubboInterceptor dubboInterceptor;
+    private DubboInvokeInterceptor dubboInvokeInterceptor;
 
     @Mock
     private RpcContext rpcContext;
@@ -93,7 +93,7 @@ public class DubboInterceptorTest {
 
     @Before
     public void setUp() throws Exception {
-        dubboInterceptor = new DubboInterceptor();
+        dubboInvokeInterceptor = new DubboInvokeInterceptor();
 
         PowerMockito.mockStatic(RpcContext.class);
 
@@ -130,8 +130,8 @@ public class DubboInterceptorTest {
 
     @Test
     public void testConsumerWithAttachment() throws Throwable {
-        dubboInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
-        dubboInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
+        dubboInvokeInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
+        dubboInvokeInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
 
         assertThat(segmentStorage.getTraceSegments().size(), is(1));
         TraceSegment traceSegment = segmentStorage.getTraceSegments().get(0);
@@ -142,9 +142,9 @@ public class DubboInterceptorTest {
 
     @Test
     public void testConsumerWithException() throws Throwable {
-        dubboInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
-        dubboInterceptor.handleMethodException(enhancedInstance, null, allArguments, argumentTypes, new RuntimeException());
-        dubboInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
+        dubboInvokeInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
+        dubboInvokeInterceptor.handleMethodException(enhancedInstance, null, allArguments, argumentTypes, new RuntimeException());
+        dubboInvokeInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
         assertThat(segmentStorage.getTraceSegments().size(), is(1));
         TraceSegment traceSegment = segmentStorage.getTraceSegments().get(0);
         assertConsumerTraceSegmentInErrorCase(traceSegment);
@@ -154,8 +154,8 @@ public class DubboInterceptorTest {
     public void testConsumerWithResultHasException() throws Throwable {
         when(result.getException()).thenReturn(new RuntimeException());
 
-        dubboInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
-        dubboInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
+        dubboInvokeInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
+        dubboInvokeInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
 
         assertThat(segmentStorage.getTraceSegments().size(), is(1));
         TraceSegment traceSegment = segmentStorage.getTraceSegments().get(0);
@@ -168,8 +168,8 @@ public class DubboInterceptorTest {
         when(rpcContext.getAttachment(
             SW8CarrierItem.HEADER_NAME)).thenReturn("1-My40LjU=-MS4yLjM=-3-c2VydmljZQ==-aW5zdGFuY2U=-L2FwcA==-MTI3LjAuMC4xOjgwODA=");
 
-        dubboInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
-        dubboInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
+        dubboInvokeInterceptor.beforeMethod(enhancedInstance, null, allArguments, argumentTypes, methodInterceptResult);
+        dubboInvokeInterceptor.afterMethod(enhancedInstance, null, allArguments, argumentTypes, result);
         assertProvider();
     }
 

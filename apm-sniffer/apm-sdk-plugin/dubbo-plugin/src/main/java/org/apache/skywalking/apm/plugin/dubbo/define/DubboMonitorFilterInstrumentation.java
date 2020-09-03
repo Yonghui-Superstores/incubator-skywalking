@@ -16,7 +16,7 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.dubbo;
+package org.apache.skywalking.apm.plugin.dubbo.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -28,10 +28,10 @@ import org.apache.skywalking.apm.agent.core.plugin.match.NameMatch;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
+public class DubboMonitorFilterInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
     private static final String ENHANCE_CLASS = "com.alibaba.dubbo.monitor.support.MonitorFilter";
-    private static final String INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.dubbo.DubboInterceptor";
+    private static final String INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.dubbo.DubboInvokeInterceptor";
 
     @Override
     protected ClassMatch enhanceClass() {

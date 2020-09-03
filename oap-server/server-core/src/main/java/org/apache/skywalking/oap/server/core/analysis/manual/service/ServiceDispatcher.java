@@ -44,8 +44,8 @@ public class ServiceDispatcher implements SourceDispatcher<Segment> {
         ServiceSuccessDotHeatMapMetrics metrics = new ServiceSuccessDotHeatMapMetrics();
         metrics.setTimeBucket(source.getTimeBucket());
         metrics.setEntityId(String.valueOf(source.getServiceId()));
-//        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
-        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
+        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
+//        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
         metrics.setProjectId(source.getProjectId());
         SecondMetricsStreamProcessor.getInstance().in(metrics);
     }
@@ -54,8 +54,8 @@ public class ServiceDispatcher implements SourceDispatcher<Segment> {
         ServiceFailureDotHeatMapMetrics metrics = new ServiceFailureDotHeatMapMetrics();
         metrics.setTimeBucket(source.getTimeBucket());
         metrics.setEntityId(String.valueOf(source.getServiceId()));
-//        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
-        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
+        metrics.combine(source.getLatency(), STEP, NUM_OF_STEPS);
+//        metrics.combine(random.nextInt(10000), STEP, NUM_OF_STEPS);
         metrics.setProjectId(source.getProjectId());
         SecondMetricsStreamProcessor.getInstance().in(metrics);
     }

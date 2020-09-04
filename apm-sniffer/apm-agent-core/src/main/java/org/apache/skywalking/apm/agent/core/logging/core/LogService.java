@@ -48,4 +48,8 @@ public class LogService implements BootService, IWriter {
     public void write(String message) {
         SystemOutWriter.INSTANCE.write(message);
     }
+
+    public void flush() {
+
+    }
 }

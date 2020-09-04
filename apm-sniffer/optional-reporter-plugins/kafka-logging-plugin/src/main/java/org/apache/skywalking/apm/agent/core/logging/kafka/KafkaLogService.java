@@ -67,4 +67,9 @@ public class KafkaLogService extends LogService {
             }
         });
     }
+
+    @Override
+    public void flush() {
+        producer.flush();
+    }
 }

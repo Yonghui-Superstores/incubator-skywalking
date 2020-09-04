@@ -50,6 +50,8 @@ public class KafkaWriter implements IWriter {
                                 for (String message : outputLogs) {
                                     logService.write(message);
                                 }
+
+                                logService.flush();
                             } catch (Throwable t) {
                                 SystemOutWriter.INSTANCE.write(t.toString());
 

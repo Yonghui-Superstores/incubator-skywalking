@@ -39,6 +39,7 @@ public class PatternLoggerTest {
     @BeforeClass
     public static void initAndHoldOut() {
         Config.Agent.SERVICE_NAME = "testAppFromConfig";
+        System.setProperty("ENV", "DEV");
     }
 
     @Test
@@ -134,5 +135,4 @@ public class PatternLoggerTest {
         Assert.assertThat(lines[2], StringContains.containsString("PatternLoggerTest.testLogFormat"));
         Assert.assertEquals(strings.get(1).split(Constants.LINE_SEPARATOR).length, 1);
     }
-
 }

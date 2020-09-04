@@ -18,6 +18,34 @@
 
 package org.apache.skywalking.apm.agent.core.logging.core;
 
-public enum LogOutput {
-    FILE, CONSOLE, KAFKA
+import org.apache.skywalking.apm.agent.core.boot.BootService;
+import org.apache.skywalking.apm.agent.core.boot.DefaultImplementor;
+
+@DefaultImplementor
+public class LogService implements BootService, IWriter {
+
+    @Override
+    public void prepare() throws Throwable {
+
+    }
+
+    @Override
+    public void boot() throws Throwable {
+
+    }
+
+    @Override
+    public void onComplete() throws Throwable {
+
+    }
+
+    @Override
+    public void shutdown() throws Throwable {
+
+    }
+
+    @Override
+    public void write(String message) {
+        SystemOutWriter.INSTANCE.write(message);
+    }
 }

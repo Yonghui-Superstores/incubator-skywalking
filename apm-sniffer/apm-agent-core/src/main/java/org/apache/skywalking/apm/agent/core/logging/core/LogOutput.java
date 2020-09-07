@@ -19,5 +19,5 @@
 package org.apache.skywalking.apm.agent.core.logging.core;
 
 public enum LogOutput {
-    FILE, CONSOLE
+    FILE, CONSOLE, KAFKA
 }

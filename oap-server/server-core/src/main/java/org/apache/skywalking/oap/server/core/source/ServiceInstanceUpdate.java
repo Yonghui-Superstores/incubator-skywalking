@@ -49,8 +49,4 @@ public class ServiceInstanceUpdate extends Source {
     @Getter
     @Setter
     private JsonObject properties;
-    @Getter
-    @Setter
-    @ScopeDefaultColumn.DefinedByField(columnName = "project_id")
-    private String projectId;
 }

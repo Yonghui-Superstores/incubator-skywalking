@@ -53,6 +53,7 @@ public class NetworkAddressAliasSetup extends Source {
 
     @Override
     public void prepare() {
+        setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(representService)));
         representServiceId = IDManager.ServiceID.buildId(representService, representServiceNodeType);
         representServiceInstanceId = IDManager.ServiceInstanceID.buildId(representServiceId, representServiceInstance);
     }

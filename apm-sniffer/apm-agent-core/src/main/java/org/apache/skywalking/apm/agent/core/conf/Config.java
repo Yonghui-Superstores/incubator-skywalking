@@ -258,7 +258,7 @@ public class Config {
          *
          * @see org.apache.skywalking.apm.agent.core.logging.core.PatternLogger#DEFAULT_CONVERTER_MAP
          */
-        public static String PATTERN = "%level %timestamp %thread %class : %msg %throwable";
+        public static String PATTERN = "%timestamp|${ENV}|jszt-003|skywalking-agent|%level|%ip|%thread|%class|TID:N/A|%msg %throwable";
     }
 
     public static class Plugin {

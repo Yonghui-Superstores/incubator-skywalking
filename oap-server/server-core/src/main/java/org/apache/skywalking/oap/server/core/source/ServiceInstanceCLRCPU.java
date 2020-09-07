@@ -20,6 +20,7 @@ package org.apache.skywalking.oap.server.core.source;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.skywalking.oap.server.core.analysis.IDManager;
 
 import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.SERVICE_INSTANCE_CATALOG_NAME;
 import static org.apache.skywalking.oap.server.core.source.DefaultScopeDefine.SERVICE_INSTANCE_CLR_CPU;
@@ -58,4 +59,9 @@ public class ServiceInstanceCLRCPU extends Source {
     @Getter
     @Setter
     private double usePercent;
+
+    @Override
+    public void prepare() {
+        setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName)));
+    }
 }

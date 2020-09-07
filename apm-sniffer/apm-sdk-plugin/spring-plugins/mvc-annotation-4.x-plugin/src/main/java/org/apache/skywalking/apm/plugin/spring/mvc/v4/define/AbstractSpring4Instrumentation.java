@@ -27,7 +27,6 @@ public abstract class AbstractSpring4Instrumentation extends ClassInstanceMethod
     protected String[] witnessClasses() {
         return new String[] {
             WITHNESS_CLASSES,
-            "org.springframework.cache.interceptor.DefaultKeyGenerator"
         };
     }
 }

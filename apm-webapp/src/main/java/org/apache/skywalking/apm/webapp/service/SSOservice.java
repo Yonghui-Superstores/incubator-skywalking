@@ -65,11 +65,9 @@ public class SSOservice {
             default:
                 clientId = "lskywalking";
         }*/
-//        String encode = "Basic " + encoder.encodeToString((ssoConfiguration.getClientId() + ":" + "secret").getBytes(StandardCharsets.UTF_8));
-        String encode = "Basic " + encoder.encodeToString(("lskywalking" + ":" + "secret").getBytes(StandardCharsets.UTF_8));
+        String encode = "Basic " + encoder.encodeToString((ssoConfiguration.getClientId() + ":" + "secret").getBytes(StandardCharsets.UTF_8));
         // 根据code获取token信息
-//        TokenInfo tokenInfo = ssoFeignClient.getToken(code, ssoConfiguration.getRegisterurl(), "authorization_code", encode).getBody();
-        TokenInfo tokenInfo = ssoFeignClient.getToken(code, "http://localhost:8080/sso/callback", "authorization_code", encode).getBody();
+        TokenInfo tokenInfo = ssoFeignClient.getToken(code, ssoConfiguration.getRegisterurl(), "authorization_code", encode).getBody();
         // 根据token拿到user
         Object principal = ssoFeignClient.getUser(tokenInfo.getToken_type() + " " + tokenInfo.getAccess_token()).getBody();
         Gson gson = new Gson();

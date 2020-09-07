@@ -33,7 +33,6 @@ public class RestControllerInstrumentation extends AbstractControllerInstrumenta
     protected String[] witnessClasses() {
         return new String[] {
             WITHNESS_CLASSES,
-            "org.springframework.cache.interceptor.DefaultKeyGenerator",
             WITNESS_CLASSES_HIGH_VERSION
         };
     }

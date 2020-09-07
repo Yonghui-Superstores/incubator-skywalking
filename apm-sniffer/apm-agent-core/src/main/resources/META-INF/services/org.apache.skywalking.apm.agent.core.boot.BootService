@@ -16,6 +16,7 @@
 #
 #
 
+org.apache.skywalking.apm.agent.core.logging.core.LogService
 org.apache.skywalking.apm.agent.core.remote.TraceSegmentServiceClient
 org.apache.skywalking.apm.agent.core.context.ContextManager
 org.apache.skywalking.apm.agent.core.sampling.SamplingService

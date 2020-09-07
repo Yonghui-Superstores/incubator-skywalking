@@ -19,6 +19,7 @@
 package org.apache.skywalking.apm.agent.core.logging.core;
 
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.LiteralConverter;
+import org.apache.skywalking.apm.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +32,14 @@ public class Parser {
     private final Map<String, Class<? extends Converter>> convertMaps;
 
     enum State {
-        LITERAL_STATE, KEYWORD_STATE
+        LITERAL_STATE, KEYWORD_STATE, VARIABLE_STATE
     }
 
     public static final char ESCAPE_CHAR = '\\';
     public static final char PERCENT_CHAR = '%';
+    public static final char DOLLAR_CHAR = '$';
+    public static final char OPEN_BRACE_CHAR = '{';
+    public static final char CLOSE_BRACE_CHAR = '}';
 
     private final String pattern;
     private final int patternLength;
@@ -63,6 +67,9 @@ public class Parser {
                     break;
                 case KEYWORD_STATE:
                     handleKeywordState(c, buf, patternConverters);
+                    break;
+                case VARIABLE_STATE:
+                    handleVariableState(c, buf, patternConverters);
                     break;
                 default:
             }
@@ -113,6 +120,19 @@ public class Parser {
         }
     }
 
+    private void handleVariableState(char c, StringBuilder buf, List<Converter> patternConverters) {
+        if (Character.isJavaIdentifierPart(c)) {
+            buf.append(c);
+        } else if (c == CLOSE_BRACE_CHAR) {
+            String var = System.getenv(buf.toString());
+            buf.delete(0, buf.length());
+            if (StringUtil.isNotEmpty(var)) {
+                buf.append(var);
+            }
+            state = State.LITERAL_STATE;
+        }
+    }
+
     private void addConverterWithKeyword(StringBuilder buf, List<Converter> patternConverters) {
         String keyword = buf.toString();
         if (convertMaps.containsKey(keyword)) {
@@ -131,6 +151,10 @@ public class Parser {
             case PERCENT_CHAR:
                 addConverter(buf, patternConverters, LiteralConverter.class);
                 state = State.KEYWORD_STATE;
+                break;
+            case DOLLAR_CHAR:
+                addConverter(buf, patternConverters, LiteralConverter.class);
+                state = State.VARIABLE_STATE;
                 break;
             default:
                 buf.append(c);

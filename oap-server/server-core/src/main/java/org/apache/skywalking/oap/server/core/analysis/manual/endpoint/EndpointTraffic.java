@@ -45,7 +45,6 @@ public class EndpointTraffic extends Metrics {
 
     public static final String SERVICE_ID = "service_id";
     public static final String NAME = "name";
-    public static final String PROJECT_ID = "project_id";
 
     @Setter
     @Getter
@@ -56,11 +55,6 @@ public class EndpointTraffic extends Metrics {
     @Getter
     @Column(columnName = NAME, matchQuery = true)
     private String name = Const.EMPTY_STRING;
-
-    @Setter
-    @Getter
-    @Column(columnName = PROJECT_ID)
-    private String projectId;
 
     @Override
     public String id() {
@@ -77,7 +71,7 @@ public class EndpointTraffic extends Metrics {
 
         remoteBuilder.addDataStrings(serviceId);
         remoteBuilder.addDataStrings(Strings.isNullOrEmpty(name) ? Const.EMPTY_STRING : name);
-        remoteBuilder.addDataStrings(projectId);
+        remoteBuilder.addDataStrings(getProjectId());
         return remoteBuilder;
     }
 

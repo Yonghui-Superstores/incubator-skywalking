@@ -42,4 +42,9 @@ public class ServiceMeta extends Source {
 
     private String name;
     private NodeType nodeType;
+
+    @Override
+    public void prepare() {
+        setProjectId(IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(name)));
+    }
 }

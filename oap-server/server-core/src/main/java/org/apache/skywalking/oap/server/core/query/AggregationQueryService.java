@@ -60,7 +60,7 @@ public class AggregationQueryService implements Service {
             final String serviceId = IDManager.ServiceID.buildId(condition.getParentService(), condition.isNormal());
             additionalConditions.add(new KeyValue(InstanceTraffic.SERVICE_ID, serviceId));
         }
-        if(StringUtil.isNotEmpty(condition.getProjectName())) {
+        if (StringUtil.isNotEmpty(condition.getProjectName())) {
             final String projectId = IDManager.ProjectId.buildId(condition.getProjectName());
             additionalConditions.add(new KeyValue(ProjectTraffic.PROJECT_ID, projectId));
         }

@@ -36,11 +36,11 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInt
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 /**
- * {@link DubboInterceptor} define how to enhance class {@link com.alibaba.dubbo.monitor.support.MonitorFilter#invoke(Invoker,
+ * {@link DubboInvokeInterceptor} define how to enhance class {@link com.alibaba.dubbo.monitor.support.MonitorFilter#invoke(Invoker,
  * Invocation)}. the trace context transport to the provider side by {@link RpcContext#attachments}.but all the version
  * of dubbo framework below 2.8.3 don't support {@link RpcContext#attachments}, we support another way to support it.
  */
-public class DubboInterceptor implements InstanceMethodsAroundInterceptor {
+public class DubboInvokeInterceptor implements InstanceMethodsAroundInterceptor {
     /**
      * <h2>Consumer:</h2> The serialized trace context data will
      * inject to the {@link RpcContext#attachments} for transport to provider side.

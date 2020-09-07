@@ -31,6 +31,13 @@ public class WriterFactory {
     public static IWriter getLogWriter() {
 
         switch (Config.Logging.OUTPUT) {
+            case KAFKA:
+                if (WRITER != null) {
+                    return WRITER;
+                }
+
+                WRITER = KafkaWriter.get();
+                break;
             case FILE:
                 if (WRITER != null) {
                     return WRITER;

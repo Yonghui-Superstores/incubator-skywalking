@@ -20,6 +20,7 @@ package org.apache.skywalking.apm.agent.core.kafka;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -48,7 +49,7 @@ public class KafkaJVMMetricsSender extends JVMMetricsSender {
 
     @Override
     public void run() {
-        if (!queue.isEmpty()) {
+        if (!queue.isEmpty() && Objects.nonNull(producer)) {
             List<JVMMetric> buffer = new ArrayList<>();
             queue.drainTo(buffer);
 

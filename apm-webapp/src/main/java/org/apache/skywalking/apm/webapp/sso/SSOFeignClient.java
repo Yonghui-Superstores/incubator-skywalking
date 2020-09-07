@@ -33,7 +33,6 @@ import java.util.List;
  * @author Liu-XinYuan
  */
 @FeignClient(name = "sso", url = "http://api.itwork.yonghui.cn")
-//@FeignClient(name = "sso", url = "http://api.kfitwork.yonghui.cn")
 @Component
 public interface SSOFeignClient {
 

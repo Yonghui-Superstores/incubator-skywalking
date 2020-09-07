@@ -23,6 +23,7 @@ import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.AgentNameConverter;
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.ClassConverter;
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.DateConverter;
+import org.apache.skywalking.apm.agent.core.logging.core.coverts.IPConvert;
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.LevelConverter;
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.MessageConverter;
 import org.apache.skywalking.apm.agent.core.logging.core.coverts.ThreadConverter;
@@ -51,9 +52,10 @@ public class PatternLogger implements ILog {
         DEFAULT_CONVERTER_MAP.put("msg", MessageConverter.class);
         DEFAULT_CONVERTER_MAP.put("throwable", ThrowableConverter.class);
         DEFAULT_CONVERTER_MAP.put("class", ClassConverter.class);
+        DEFAULT_CONVERTER_MAP.put("ip", IPConvert.class);
     }
 
-    public static final String DEFAULT_PATTERN = "%level %timestamp %thread %class : %msg %throwable";
+    public static final String DEFAULT_PATTERN = "%timestamp|${ENV}|jszt-003|skywalking-agent|%level|%ip|%thread|%class|TID:N/A|%msg %throwable";
 
     private String pattern;
     private List<Converter> converters;

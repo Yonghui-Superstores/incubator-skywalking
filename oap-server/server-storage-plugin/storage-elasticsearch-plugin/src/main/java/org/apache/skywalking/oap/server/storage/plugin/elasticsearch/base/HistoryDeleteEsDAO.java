@@ -40,7 +40,7 @@ public class HistoryDeleteEsDAO extends EsDAO implements IHistoryDeleteDAO {
 
         long deadline;
         if (!model.isRecord()) {
-            if (!DownSampling.Minute.equals(model.getDownsampling())) {
+            if (!DownSampling.Minute.equals(model.getDownsampling()) && !DownSampling.Second.equals(model.getDownsampling())) {
                 /*
                  * In ElasticSearch storage, the TTL triggers the index deletion directly.
                  * As all metrics data in different down sampling rule of one day are in the same index, the deletion operation

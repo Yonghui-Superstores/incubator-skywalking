@@ -69,7 +69,10 @@ public class KafkaLogService extends LogService {
     }
 
     @Override
-    public void flush() {
+    public void flush() throws NullPointerException {
+        if (producer == null) {
+            throw new NullPointerException("KafkaProducer is being created.");
+        }
         producer.flush();
     }
 }

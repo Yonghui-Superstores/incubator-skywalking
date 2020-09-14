@@ -203,6 +203,11 @@ public class H2MetadataQueryDAO implements IMetadataQueryDAO {
     }
 
     @Override
+    public List<String> searchEndpoint(String keyword, List<String> projectId, List<String> serviceId, int limit, String endpointName) throws IOException {
+        return null;
+    }
+
+    @Override
     public List<ServiceInstance> getServiceInstances(long startTimestamp, long endTimestamp,
                                                      String serviceId) throws IOException {
         final long minuteTimeBucket = TimeBucket.getMinuteTimeBucket(startTimestamp);

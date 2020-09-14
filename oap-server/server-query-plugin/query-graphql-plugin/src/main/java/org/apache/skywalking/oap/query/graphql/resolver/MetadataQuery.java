@@ -19,11 +19,13 @@
 package org.apache.skywalking.oap.query.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.skywalking.oap.query.graphql.type.TimeInfo;
 import org.apache.skywalking.oap.server.core.CoreModule;
 import org.apache.skywalking.oap.server.core.query.MetadataQueryService;
@@ -49,8 +51,8 @@ public class MetadataQuery implements GraphQLQueryResolver {
     private MetadataQueryService getMetadataQueryService() {
         if (metadataQueryService == null) {
             this.metadataQueryService = moduleManager.find(CoreModule.NAME)
-                                                     .provider()
-                                                     .getService(MetadataQueryService.class);
+                    .provider()
+                    .getService(MetadataQueryService.class);
         }
         return metadataQueryService;
     }
@@ -89,6 +91,10 @@ public class MetadataQuery implements GraphQLQueryResolver {
 
     public List<Endpoint> searchEndpoint(final String keyword, final String serviceId, final int limit) throws IOException {
         return getMetadataQueryService().searchEndpoint(keyword, serviceId, limit);
+    }
+
+    public List<String> searchEndpointTrace(final String keyword, final List<String> projectId, final List<String> serviceId, final int limit, final String endpointName) throws IOException {
+        return getMetadataQueryService().searchEndpoint(keyword, projectId, serviceId, limit, endpointName);
     }
 
     public EndpointInfo getEndpointInfo(final String endpointId) throws IOException {

@@ -53,7 +53,7 @@ public class KafkaWriter implements IWriter {
 
                                 logService.flush();
                             } catch (Throwable t) {
-                                SystemOutWriter.INSTANCE.write(t.toString());
+                                SystemOutWriter.INSTANCE.write("Agent warng:" + t.toString());
 
                                 for (String message : outputLogs) {
                                     SystemOutWriter.INSTANCE.write(message);

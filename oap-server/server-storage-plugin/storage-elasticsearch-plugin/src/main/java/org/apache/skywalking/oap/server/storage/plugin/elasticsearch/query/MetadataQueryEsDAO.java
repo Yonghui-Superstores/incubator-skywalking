@@ -19,8 +19,10 @@
 package org.apache.skywalking.oap.server.storage.plugin.elasticsearch.query;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -208,6 +210,45 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
+    public List<String> searchEndpoint(String keyword, List<String> projectId, List<String> serviceId, int limit, final String endpointName) throws IOException {
+
+        if (projectId == null) {
+            return Lists.newArrayList();
+        }
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        projectId.forEach(e -> {
+            boolQueryBuilder.should().add(QueryBuilders.termQuery(EndpointTraffic.PROJECT_ID, e));
+        });
+        if (serviceId.size() == 1) {
+            serviceId.forEach(e -> {
+                boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, e));
+            });
+        }
+        if (endpointName != null) {
+            boolQueryBuilder.must().add(QueryBuilders.wildcardQuery(EndpointTraffic.NAME, "*" + endpointName + "*"));
+        }
+
+        if (!Strings.isNullOrEmpty(keyword)) {
+            String matchCName = MatchCNameBuilder.INSTANCE.build(EndpointTraffic.NAME);
+            boolQueryBuilder.must().add(QueryBuilders.matchQuery(matchCName, keyword));
+        }
+
+        sourceBuilder.query(boolQueryBuilder);
+        sourceBuilder.size(limit);
+
+        SearchResponse response = getClient().search(EndpointTraffic.INDEX_NAME, sourceBuilder);
+
+        List<String> endpoints = new ArrayList<>();
+        for (SearchHit searchHit : response.getHits()) {
+            Map<String, Object> sourceAsMap = searchHit.getSourceAsMap();
+            endpoints.add((String) sourceAsMap.get(EndpointTraffic.NAME));
+        }
+        return endpoints;
+    }
+
+    @Override
     public List<ServiceInstance> getServiceInstances(long startTimestamp, long endTimestamp,
                                                      String serviceId) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
@@ -217,7 +258,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         final long minuteTimeBucket = TimeBucket.getMinuteTimeBucket(startTimestamp);
 
         boolQueryBuilder.must()
-                        .add(QueryBuilders.rangeQuery(InstanceTraffic.LAST_PING_TIME_BUCKET).gte(minuteTimeBucket));
+                .add(QueryBuilders.rangeQuery(InstanceTraffic.LAST_PING_TIME_BUCKET).gte(minuteTimeBucket));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(InstanceTraffic.SERVICE_ID, serviceId));
 
         sourceBuilder.query(boolQueryBuilder);

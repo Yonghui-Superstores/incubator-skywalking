@@ -178,11 +178,24 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Endpoint> searchEndpoint(String keyword, String serviceId, int limit) throws IOException {
+    public List<Endpoint> searchEndpoint(String keyword, String serviceId, int limit, List<String> projectIds) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
+
+        if (projectIds != null) {
+            if (projectIds.size() == 0) {
+                return Lists.newArrayList();
+            }
+            projectIds.forEach(e -> {
+                boolQueryBuilder.should().add(QueryBuilders.termQuery(EndpointTraffic.PROJECT_ID, e));
+            });
+            if (!Strings.isNullOrEmpty(serviceId)) {
+                boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
+            }
+        } else {
+            boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
+        }
 
         if (!Strings.isNullOrEmpty(keyword)) {
             String matchCName = MatchCNameBuilder.INSTANCE.build(EndpointTraffic.NAME);
@@ -206,45 +219,6 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
             endpoints.add(endpoint);
         }
 
-        return endpoints;
-    }
-
-    @Override
-    public List<String> searchEndpoint(String keyword, List<String> projectId, List<String> serviceId, int limit, final String endpointName) throws IOException {
-
-        if (projectId == null) {
-            return Lists.newArrayList();
-        }
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
-
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        projectId.forEach(e -> {
-            boolQueryBuilder.should().add(QueryBuilders.termQuery(EndpointTraffic.PROJECT_ID, e));
-        });
-        if (serviceId.size() == 1) {
-            serviceId.forEach(e -> {
-                boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, e));
-            });
-        }
-        if (endpointName != null) {
-            boolQueryBuilder.must().add(QueryBuilders.wildcardQuery(EndpointTraffic.NAME, "*" + endpointName + "*"));
-        }
-
-        if (!Strings.isNullOrEmpty(keyword)) {
-            String matchCName = MatchCNameBuilder.INSTANCE.build(EndpointTraffic.NAME);
-            boolQueryBuilder.must().add(QueryBuilders.matchQuery(matchCName, keyword));
-        }
-
-        sourceBuilder.query(boolQueryBuilder);
-        sourceBuilder.size(limit);
-
-        SearchResponse response = getClient().search(EndpointTraffic.INDEX_NAME, sourceBuilder);
-
-        List<String> endpoints = new ArrayList<>();
-        for (SearchHit searchHit : response.getHits()) {
-            Map<String, Object> sourceAsMap = searchHit.getSourceAsMap();
-            endpoints.add((String) sourceAsMap.get(EndpointTraffic.NAME));
-        }
         return endpoints;
     }
 

@@ -147,7 +147,7 @@ public class MetadataQuery implements IMetadataQueryDAO {
     @Override
     public List<Endpoint> searchEndpoint(final String keyword,
                                          final String serviceId,
-                                         final int limit) throws IOException {
+                                         final int limit, final List<String> projectIds) throws IOException {
         WhereSubQueryImpl<SelectSubQueryImpl<SelectQueryImpl>, SelectQueryImpl> subQuery = select()
                 .fromSubQuery(client.getDatabase())
                 .column(ID_COLUMN)
@@ -178,11 +178,6 @@ public class MetadataQuery implements IMetadataQueryDAO {
             });
         }
         return list;
-    }
-
-    @Override
-    public List<String> searchEndpoint(String keyword, List<String> projectId, List<String> serviceId, int limit, String endpointName) throws IOException {
-        return null;
     }
 
     @Override

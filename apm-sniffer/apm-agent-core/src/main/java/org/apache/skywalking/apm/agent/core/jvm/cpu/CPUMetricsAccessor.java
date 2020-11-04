@@ -18,6 +18,8 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.cpu;
 
+import org.apache.skywalking.apm.agent.core.logging.api.ILog;
+import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.network.common.v3.CPU;
 
 /**
@@ -25,9 +27,10 @@ import org.apache.skywalking.apm.network.common.v3.CPU;
  * unit.
  */
 public abstract class CPUMetricsAccessor {
-    private long lastCPUTimeNs;
+    private double lastCPUTimeNs;
     private long lastSampleTimeNs;
     private final int cpuCoreNum;
+    ILog logger = LogManager.getLogger(CPUMetricsAccessor.class);
 
     public CPUMetricsAccessor(int cpuCoreNum) {
         this.cpuCoreNum = cpuCoreNum;
@@ -40,17 +43,13 @@ public abstract class CPUMetricsAccessor {
 
     protected abstract long getCpuTime();
 
-    public CPU getCPUMetrics() {
-        long cpuTime = this.getCpuTime();
-        long cpuCost = cpuTime - lastCPUTimeNs;
-        long now = System.nanoTime();
+    protected abstract double getCpuLoader();
 
-        try {
-            CPU.Builder cpuBuilder = CPU.newBuilder();
-            return cpuBuilder.setUsagePercent(cpuCost * 1.0d / ((now - lastSampleTimeNs) * cpuCoreNum) * 100).build();
-        } finally {
-            lastCPUTimeNs = cpuTime;
-            lastSampleTimeNs = now;
-        }
+    public CPU getCPUMetrics() {
+        double percentCpuLoad = this.getCpuLoader();
+
+        CPU.Builder cpuBuilder = CPU.newBuilder();
+        logger.info("CPUMetricsAccessor CpuLoader Number:" + (percentCpuLoad * 100));
+        return cpuBuilder.setUsagePercent(percentCpuLoad * 100).build();
     }
 }

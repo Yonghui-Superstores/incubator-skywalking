@@ -25,7 +25,7 @@ import org.apache.skywalking.apm.network.common.v3.CPU;
  * unit.
  */
 public abstract class CPUMetricsAccessor {
-    private double lastCPUTimeNs;
+    private long lastCPUTimeNs;
     private long lastSampleTimeNs;
     private final int cpuCoreNum;
 
@@ -40,12 +40,17 @@ public abstract class CPUMetricsAccessor {
 
     protected abstract long getCpuTime();
 
-    protected abstract double getCpuLoader();
-
     public CPU getCPUMetrics() {
-        double percentCpuLoad = this.getCpuLoader();
+        long cpuTime = this.getCpuTime();
+        long cpuCost = cpuTime - lastCPUTimeNs;
+        long now = System.nanoTime();
 
-        CPU.Builder cpuBuilder = CPU.newBuilder();
-        return cpuBuilder.setUsagePercent(percentCpuLoad * 100).build();
+        try {
+            CPU.Builder cpuBuilder = CPU.newBuilder();
+            return cpuBuilder.setUsagePercent(cpuCost * 1.0d / ((now - lastSampleTimeNs) * cpuCoreNum) * 100).build();
+        } finally {
+            lastCPUTimeNs = cpuTime;
+            lastSampleTimeNs = now;
+        }
     }
 }

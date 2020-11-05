@@ -34,9 +34,4 @@ public class SunCpuAccessor extends CPUMetricsAccessor {
     protected long getCpuTime() {
         return osMBean.getProcessCpuTime();
     }
-
-    @Override
-    protected double getCpuLoader() {
-        return osMBean.getSystemCpuLoad();
-    }
 }

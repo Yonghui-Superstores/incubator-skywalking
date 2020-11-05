@@ -18,8 +18,6 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.cpu;
 
-import org.apache.skywalking.apm.agent.core.logging.api.ILog;
-import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.network.common.v3.CPU;
 
 /**
@@ -30,7 +28,6 @@ public abstract class CPUMetricsAccessor {
     private double lastCPUTimeNs;
     private long lastSampleTimeNs;
     private final int cpuCoreNum;
-    ILog logger = LogManager.getLogger(CPUMetricsAccessor.class);
 
     public CPUMetricsAccessor(int cpuCoreNum) {
         this.cpuCoreNum = cpuCoreNum;
@@ -49,7 +46,6 @@ public abstract class CPUMetricsAccessor {
         double percentCpuLoad = this.getCpuLoader();
 
         CPU.Builder cpuBuilder = CPU.newBuilder();
-        logger.info("CPUMetricsAccessor CpuLoader Number:" + (percentCpuLoad * 100));
         return cpuBuilder.setUsagePercent(percentCpuLoad * 100).build();
     }
 }

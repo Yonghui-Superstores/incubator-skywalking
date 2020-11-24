@@ -40,17 +40,13 @@ public abstract class CPUMetricsAccessor {
 
     protected abstract long getCpuTime();
 
-    public CPU getCPUMetrics() {
-        long cpuTime = this.getCpuTime();
-        long cpuCost = cpuTime - lastCPUTimeNs;
-        long now = System.nanoTime();
+    protected abstract double getCpuLoader();
 
-        try {
-            CPU.Builder cpuBuilder = CPU.newBuilder();
-            return cpuBuilder.setUsagePercent(cpuCost * 1.0d / ((now - lastSampleTimeNs) * cpuCoreNum) * 100).build();
-        } finally {
-            lastCPUTimeNs = cpuTime;
-            lastSampleTimeNs = now;
-        }
+    public CPU getCPUMetrics() {
+        double percentCpuLoad = this.getCpuLoader();
+
+        CPU.Builder cpuBuilder = CPU.newBuilder();
+        return cpuBuilder.setUsagePercent(percentCpuLoad * 100).build();
+
     }
 }

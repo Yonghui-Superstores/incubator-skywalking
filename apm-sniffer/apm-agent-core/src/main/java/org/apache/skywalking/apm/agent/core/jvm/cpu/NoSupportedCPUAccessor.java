@@ -27,4 +27,10 @@ public class NoSupportedCPUAccessor extends CPUMetricsAccessor {
     protected long getCpuTime() {
         return 0;
     }
+
+    @Override
+    protected double getCpuLoader() {
+        return 0;
+    }
+
 }

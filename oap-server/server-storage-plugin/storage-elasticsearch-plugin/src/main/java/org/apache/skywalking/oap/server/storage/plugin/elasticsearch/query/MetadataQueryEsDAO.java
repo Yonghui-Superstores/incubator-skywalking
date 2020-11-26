@@ -19,8 +19,10 @@
 package org.apache.skywalking.oap.server.storage.plugin.elasticsearch.query;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,11 +178,20 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     }
 
     @Override
-    public List<Endpoint> searchEndpoint(String keyword, String serviceId, int limit) throws IOException {
+    public List<Endpoint> searchEndpoint(String keyword, String serviceId, int limit, List<String> projectIds) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
-
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
+
+        if (projectIds != null) {
+            if (projectIds.isEmpty()) {
+                return Lists.newArrayList();
+            }
+            boolQueryBuilder.must().add(QueryBuilders.termsQuery(EndpointTraffic.PROJECT_ID, projectIds));
+        }
+
+        if (!Strings.isNullOrEmpty(serviceId)) {
+            boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
+        }
 
         if (!Strings.isNullOrEmpty(keyword)) {
             String matchCName = MatchCNameBuilder.INSTANCE.build(EndpointTraffic.NAME);
@@ -217,7 +228,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         final long minuteTimeBucket = TimeBucket.getMinuteTimeBucket(startTimestamp);
 
         boolQueryBuilder.must()
-                        .add(QueryBuilders.rangeQuery(InstanceTraffic.LAST_PING_TIME_BUCKET).gte(minuteTimeBucket));
+                .add(QueryBuilders.rangeQuery(InstanceTraffic.LAST_PING_TIME_BUCKET).gte(minuteTimeBucket));
         boolQueryBuilder.must().add(QueryBuilders.termQuery(InstanceTraffic.SERVICE_ID, serviceId));
 
         sourceBuilder.query(boolQueryBuilder);

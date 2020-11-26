@@ -25,6 +25,8 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.skywalking.apm.agent.core.boot.OverrideImplementor;
 import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
+import org.apache.skywalking.apm.agent.core.logging.api.ILog;
+import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.logging.core.LogService;
 import org.apache.skywalking.apm.agent.core.logging.core.SystemOutWriter;
 
@@ -32,6 +34,8 @@ import java.nio.charset.StandardCharsets;
 
 @OverrideImplementor(LogService.class)
 public class KafkaLogService extends LogService {
+
+    private static final ILog logger = LogManager.getLogger(KafkaLogService.class);
 
     private KafkaProducer<Bytes, Bytes> producer;
     private String topic;
@@ -69,7 +73,11 @@ public class KafkaLogService extends LogService {
     }
 
     @Override
-    public void flush() {
+    public void flush() throws NullPointerException {
+        if (producer == null) {
+            logger.warn("KafkaProducer is creating");
+            return;
+        }
         producer.flush();
     }
 }

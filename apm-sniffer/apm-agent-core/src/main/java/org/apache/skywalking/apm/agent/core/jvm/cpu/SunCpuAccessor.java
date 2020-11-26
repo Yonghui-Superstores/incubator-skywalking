@@ -39,4 +39,5 @@ public class SunCpuAccessor extends CPUMetricsAccessor {
     protected double getCpuLoader() {
         return osMBean.getSystemCpuLoad();
     }
+
 }

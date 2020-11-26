@@ -32,4 +32,5 @@ public class NoSupportedCPUAccessor extends CPUMetricsAccessor {
     protected double getCpuLoader() {
         return 0;
     }
+
 }

@@ -180,20 +180,16 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
     @Override
     public List<Endpoint> searchEndpoint(String keyword, String serviceId, int limit, List<String> projectIds) throws IOException {
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource();
-
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
         if (projectIds != null) {
-            if (projectIds.size() == 0) {
+            if (projectIds.isEmpty()) {
                 return Lists.newArrayList();
             }
-            projectIds.forEach(e -> {
-                boolQueryBuilder.should().add(QueryBuilders.termQuery(EndpointTraffic.PROJECT_ID, e));
-            });
-            if (!Strings.isNullOrEmpty(serviceId)) {
-                boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
-            }
-        } else {
+            boolQueryBuilder.must().add(QueryBuilders.termsQuery(EndpointTraffic.PROJECT_ID, projectIds));
+        }
+
+        if (!Strings.isNullOrEmpty(serviceId)) {
             boolQueryBuilder.must().add(QueryBuilders.termQuery(EndpointTraffic.SERVICE_ID, serviceId));
         }
 

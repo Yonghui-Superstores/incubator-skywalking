@@ -25,22 +25,16 @@ import io.vavr.Function1;
 import io.vavr.Tuple;
 import io.vavr.Tuple3;
 import io.vavr.control.Try;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
+import org.apache.skywalking.apm.util.StringUtil;
+import org.apache.skywalking.oap.server.core.Const;
+import org.apache.skywalking.oap.server.core.analysis.IDManager;
 import org.apache.skywalking.oap.server.core.analysis.NodeType;
 import org.apache.skywalking.oap.server.core.analysis.TimeBucket;
 import org.apache.skywalking.oap.server.core.analysis.manual.endpoint.EndpointTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.instance.InstanceTraffic;
+import org.apache.skywalking.oap.server.core.analysis.manual.project.ProjectTraffic;
 import org.apache.skywalking.oap.server.core.analysis.manual.service.ServiceTraffic;
 import org.apache.skywalking.oap.server.core.analysis.meter.MeterEntity;
 import org.apache.skywalking.oap.server.core.analysis.meter.MeterSystem;
@@ -57,6 +51,17 @@ import org.apache.skywalking.oap.server.library.util.prometheus.metrics.Counter;
 import org.apache.skywalking.oap.server.library.util.prometheus.metrics.Histogram;
 import org.apache.skywalking.oap.server.library.util.prometheus.metrics.Metric;
 import org.apache.skywalking.oap.server.library.util.prometheus.metrics.Summary;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
@@ -259,10 +264,16 @@ public class PrometheusMetricConverter {
     }
 
     private void generateTraffic(MeterEntity entity) {
+        ProjectTraffic traffic = new ProjectTraffic();
+        traffic.setTimeBucket(TimeBucket.getMinuteTimeBucket(System.currentTimeMillis()));
+        traffic.setName(IDManager.ProjectId.getProjectName(entity.getServiceName()));
+        MetricsStreamProcessor.getInstance().in(traffic);
+
         ServiceTraffic s = new ServiceTraffic();
         s.setName(requireNonNull(entity.getServiceName()));
         s.setNodeType(NodeType.Normal);
         s.setTimeBucket(TimeBucket.getMinuteTimeBucket(System.currentTimeMillis()));
+        s.setProjectId(StringUtil.isEmpty(entity.projectId()) ? Const.NONE_STR : entity.projectId());
         MetricsStreamProcessor.getInstance().in(s);
         if (!Strings.isNullOrEmpty(entity.getInstanceName())) {
             InstanceTraffic instanceTraffic = new InstanceTraffic();

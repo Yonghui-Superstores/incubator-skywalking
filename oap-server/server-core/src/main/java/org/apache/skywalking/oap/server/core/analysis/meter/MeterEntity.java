@@ -65,6 +65,10 @@ public class MeterEntity {
         return IDManager.ServiceID.buildId(serviceName, true);
     }
 
+    public String projectId() {
+        return IDManager.ProjectId.buildId(IDManager.ProjectId.getProjectName(serviceName));
+    }
+
     /**
      * Create a service level meter entity.
      */

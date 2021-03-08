@@ -273,12 +273,14 @@ public class PrometheusMetricConverter {
         s.setName(requireNonNull(entity.getServiceName()));
         s.setNodeType(NodeType.Normal);
         s.setTimeBucket(TimeBucket.getMinuteTimeBucket(System.currentTimeMillis()));
-        s.setProjectId(StringUtil.isEmpty(entity.projectId()) ? Const.NONE_STR : entity.projectId());
+        String projectId = StringUtil.isEmpty(entity.projectId()) ? Const.NONE_STR : entity.projectId();
+        s.setProjectId(projectId);
         MetricsStreamProcessor.getInstance().in(s);
         if (!Strings.isNullOrEmpty(entity.getInstanceName())) {
             InstanceTraffic instanceTraffic = new InstanceTraffic();
             instanceTraffic.setName(entity.getInstanceName());
             instanceTraffic.setServiceId(entity.serviceId());
+            instanceTraffic.setProjectId(projectId);
             instanceTraffic.setTimeBucket(TimeBucket.getMinuteTimeBucket(System.currentTimeMillis()));
             instanceTraffic.setLastPingTimestamp(System.currentTimeMillis());
             MetricsStreamProcessor.getInstance().in(instanceTraffic);
@@ -287,6 +289,7 @@ public class PrometheusMetricConverter {
             EndpointTraffic endpointTraffic = new EndpointTraffic();
             endpointTraffic.setName(entity.getEndpointName());
             endpointTraffic.setServiceId(entity.serviceId());
+            endpointTraffic.setProjectId(projectId);
             endpointTraffic.setTimeBucket(TimeBucket.getMinuteTimeBucket(System.currentTimeMillis()));
             MetricsStreamProcessor.getInstance().in(endpointTraffic);
         }
